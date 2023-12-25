@@ -9,9 +9,14 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/stl3/torrodle/models"
+	"github.com/stl3/torrodle/providers/bitsearch"
+	"github.com/stl3/torrodle/providers/bt4g"
+	"github.com/stl3/torrodle/providers/btdigg"
+	"github.com/stl3/torrodle/providers/knaben"
 	"github.com/stl3/torrodle/providers/leetx"
 	"github.com/stl3/torrodle/providers/limetorrents"
-	"github.com/stl3/torrodle/providers/rarbg"
+
+	// "github.com/stl3/torrodle/providers/rarbg"
 	"github.com/stl3/torrodle/providers/sukebei"
 	"github.com/stl3/torrodle/providers/thepiratebay"
 	"github.com/stl3/torrodle/providers/torrentz"
@@ -41,19 +46,27 @@ var (
 	ThePirateBayProvider = thepiratebay.New()
 	LimeTorrentsProvider = limetorrents.New()
 	Torrentz2Provider    = torrentz.New()
-	RarbgProvider        = rarbg.New()
-	LeetxProvider        = leetx.New()
-	YifyProvider         = yify.New()
+	// RarbgProvider        = rarbg.New()
+	LeetxProvider     = leetx.New()
+	YifyProvider      = yify.New()
+	BitsearchProvider = bitsearch.New()
+	Bt4g              = bt4g.New()
+	BTDigg            = btdigg.New()
+	Knaben            = knaben.New()
 )
 
 var AllProviders = [...]models.ProviderInterface{
-	SukebeiProvider,
-	ThePirateBayProvider,
-	LimeTorrentsProvider,
-	Torrentz2Provider,
-	RarbgProvider,
-	LeetxProvider,
 	YifyProvider,
+	LeetxProvider,
+	Torrentz2Provider,
+	LimeTorrentsProvider,
+	ThePirateBayProvider,
+	SukebeiProvider,
+	BitsearchProvider,
+	Bt4g,
+	BTDigg,
+	Knaben,
+	// RarbgProvider,
 }
 
 // ListProviderResults lists all results queried from this specific provider only.
