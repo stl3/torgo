@@ -11,13 +11,14 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/sirupsen/logrus"
 
-	"github.com/tnychn/torrodle/models"
-	"github.com/tnychn/torrodle/request"
+	"github.com/stl3/torrodle/models"
+	"github.com/stl3/torrodle/request"
 )
 
 const (
 	Name = "ThePirateBay"
-	Site = "https://thepiratebay.org"
+	// Site = "https://thepiratebay.org"
+	Site = "https://prbay.top"
 )
 
 type provider struct {
@@ -29,10 +30,17 @@ func New() models.ProviderInterface {
 	provider.Name = Name
 	provider.Site = Site
 	provider.Categories = models.Categories{
+		// http://prbay.top/search/test/1/99/0
+		// http://prbay.top/search/red/1/99/0
 		All:   "/search/%v/%d/99/0",
-		Movie: "/search/%v/%d/99/200",
-		TV:    "/search/%v/%d/99/200",
-		Porn:  "/search/%v/%d/99/500",
+		Movie: "/search/%v/%d/99/201",
+		TV:    "/search/%v/%d/99/205",
+		// http://prbay.top/search/red/1/99/501
+		Porn: "/search/%v/%d/99/501",
+		// All:   "/search.php?q=%d&cat=201&page=%v&orderby=",
+		// Movie: "/search.php?q=%v&cat=201&page=%d&orderby=",
+		// TV:    "/search.php?q=%v&cat=205&page=%d&orderby=",
+		// Porn:  "/search.php?q=%v&cat=500&page=%d&orderby=",
 	}
 	return provider
 }
@@ -52,6 +60,7 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 	}
 	var sources []models.Source
 	doc, _ := goquery.NewDocumentFromReader(strings.NewReader(html))
+
 	table := doc.Find("table#searchResult").Find("tbody")
 	table.Find("tr").Each(func(i int, tr *goquery.Selection) {
 		tds := tr.Find("td")
@@ -67,7 +76,13 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 		// filesize
 		re := regexp.MustCompile(`Size\s(.*?),`)
 		text := tds.Eq(1).Find("font").Text()
-		fs := re.FindStringSubmatch(text)[1]
+		matches := re.FindStringSubmatch(text)
+
+		var fs string
+		if len(matches) > 1 {
+			fs = matches[1]
+		}
+
 		filesize, _ := humanize.ParseBytes(strings.TrimSpace(fs)) // convert human words to bytes number
 		// url
 		URL, _ := a.Attr("href")
@@ -87,6 +102,9 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 	})
 
 	logrus.Debugf("ThePirateBay: [%d] Amount of results: %d", page, len(sources))
-	*results = append(*results, sources...)
+	if len(sources) > 0 {
+		*results = append(*results, sources...)
+	}
+
 	wg.Done()
 }
