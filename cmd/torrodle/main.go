@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 	"unicode/utf8"
 
 	"github.com/dustin/go-humanize"
@@ -18,14 +19,14 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/AlecAivazis/survey.v1"
 
-	"github.com/tnychn/torrodle"
-	"github.com/tnychn/torrodle/client"
-	"github.com/tnychn/torrodle/config"
-	"github.com/tnychn/torrodle/models"
-	"github.com/tnychn/torrodle/player"
+	"github.com/stl3/torrodle"
+	"github.com/stl3/torrodle/client"
+	"github.com/stl3/torrodle/config"
+	"github.com/stl3/torrodle/models"
+	"github.com/stl3/torrodle/player"
 )
 
-const version = "1.0.4"
+const version = "0.1"
 
 var u, _ = user.Current()
 var home = u.HomeDir
@@ -37,7 +38,7 @@ var subtitlesDir string
 
 func errorPrint(arg ...interface{}) {
 	c := color.New(color.FgHiRed).Add(color.Bold)
-	_, _ = c.Print("✘ ")
+	_, _ = c.Print("ERROR: ")
 	_, _ = c.Println(arg...)
 }
 
@@ -53,26 +54,41 @@ func pickCategory() string {
 		Message: "Choose a category:",
 		Options: []string{"All", "Movie", "TV", "Anime", "Porn"},
 	}
-	_ = survey.AskOne(prompt, &category, nil)
+	err := survey.AskOne(prompt, &category, nil)
+	if err != nil {
+		// Handle the error (e.g., print a message or return a default category)
+		fmt.Println("Error selecting category:", err)
+		return "All" // Default to "All" category in case of error
+	}
 	return category
 }
 
 func pickProviders(options []string) []interface{} {
-	var chosen []string
-	prompt := &survey.MultiSelect{
-		Message: "Choose providers:",
-		Options: options,
-	}
-	_ = survey.AskOne(prompt, &chosen, nil)
-
 	var providers []interface{}
-	for _, choice := range chosen {
-		for _, provider := range torrodle.AllProviders {
-			if provider.GetName() == choice {
-				providers = append(providers, provider)
+
+	for {
+		var chosen []string
+		prompt := &survey.MultiSelect{
+			Message: "Choose providers [use ? for help]:",
+			Options: options,
+			Help:    "[Use arrows to move, space to select checkbox, type to filter, enter when done]",
+		}
+		_ = survey.AskOne(prompt, &chosen, nil)
+
+		if len(chosen) > 0 {
+			for _, choice := range chosen {
+				for _, provider := range torrodle.AllProviders {
+					if provider.GetName() == choice {
+						providers = append(providers, provider)
+					}
+				}
 			}
+			break // Exit the loop if choices are made
+		} else {
+			fmt.Println("Please select at least one provider.")
 		}
 	}
+
 	return providers
 }
 
@@ -129,17 +145,20 @@ func chooseResults(results []models.Source) string {
 	)
 	for i, result := range results {
 		title := strings.TrimSpace(result.Title)
-		isEng := utf8.RuneCountInString(title) == len(title)
-		if isEng {
-			if len(title) > 45 {
-				title = title[:42] + "..."
+		// Check if any field is non-empty
+		if result.Title != "" || result.Seeders > 0 || result.Leechers > 0 || result.FileSize > 0 {
+			isEng := utf8.RuneCountInString(title) == len(title)
+			if isEng {
+				if len(title) > 45 {
+					title = title[:42] + "..."
+				}
+			} else {
+				if utf8.RuneCountInString(title) > 25 {
+					title = string([]rune(title)[:22]) + "..."
+				}
 			}
-		} else {
-			if utf8.RuneCountInString(title) > 25 {
-				title = string([]rune(title)[:22]) + "..."
-			}
+			table.Append([]string{strconv.Itoa(i + 1), title, strconv.Itoa(result.Seeders), strconv.Itoa(result.Leechers), humanize.Bytes(uint64(result.FileSize))})
 		}
-		table.Append([]string{strconv.Itoa(i + 1), title, strconv.Itoa(result.Seeders), strconv.Itoa(result.Leechers), humanize.Bytes(uint64(result.FileSize))})
 	}
 	table.Render()
 
@@ -260,9 +279,13 @@ func getSubtitles(query string) (subtitlePath string) {
 		Message: "Need subtitles?",
 	}
 	_ = survey.AskOne(prompt, &need, nil)
-	if need == false {
+	// if need == false {
+	// 	return
+	// }
+	if !need {
 		return
 	}
+
 	// pick subtitle languages
 	langs := pickLangs()
 	c, _ := osdb.NewClient()
@@ -314,6 +337,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 	infoPrint("Streaming torrent...")
 	// create client
 	c, err := client.NewClient(dataDir, configurations.TorrentPort, configurations.HostPort)
+
 	if err != nil {
 		errorPrint(err)
 		os.Exit(1)
@@ -323,17 +347,9 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		errorPrint(err)
 		os.Exit(1)
 	}
+
 	// start client
 	c.Start()
-	// handle video playing
-	if player != nil && subtitlePath != "" {
-		// serve via HTTP
-		c.Serve()
-		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-		// open player
-		player.Start(c.URL, subtitlePath)
-		fmt.Println(color.HiYellowString("[i] Launched player"), player.Name)
-	}
 	// handle exit signals
 	interruptChannel := make(chan os.Signal, 1)
 	signal.Notify(interruptChannel,
@@ -347,18 +363,78 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			c.Close()
 			fmt.Print("\n")
 			infoPrint("Exiting...")
+			// Delete the directory
+			dirPath := filepath.Join(dataDir, c.Torrent.Name())
+			infoPrint("Deleting downloads...", filepath.Join(dataDir, c.Torrent.Name()))
+			if err := os.RemoveAll(dirPath); err != nil {
+				errorPrint("Error deleting directory:", err)
+			}
+
 			os.Exit(0)
 		}
 	}(interruptChannel)
-	// print progress
-	fmt.Println("File:", c.Torrent.Name())
+
 	if player != nil {
-		fmt.Println("Stream:", c.URL)
+		// serve via HTTP
+		c.Serve()
+
+		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+		// goroutine ticker loop to update PrintProgress
+		go func() {
+			// Delay for ticker update time. Use whatever sane values you want. I use 500-1500
+			ticker := time.NewTicker(1500 * time.Millisecond)
+			defer ticker.Stop()
+
+			for range ticker.C {
+				c.PrintProgress()
+				fmt.Print("\r")
+				os.Stdout.Sync() // Flush the output buffer to ensure immediate display
+			}
+		}()
+
+		if subtitlePath != "" {
+			// open player with subtitle
+			player.Start(c.URL, subtitlePath, c.Torrent.Name())
+			// Just for debugging:
+			// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), player.Name)
+		} else {
+			// open player without subtitle
+			player.Start(c.URL, "", c.Torrent.Name())
+			// Just for debugging:
+			// fmt.Println(color.HiYellowString("[i] Launched player without subtitle"), player.Name)
+		}
 	}
-	fmt.Println("Location:", filepath.Join(dataDir, c.Torrent.Name()))
-	for {
-		c.PrintProgress()
+	if player == nil {
+		c.Serve()
+		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+		// goroutine for the ticker loop use for PrintProgress
+		go func() {
+			ticker := time.NewTicker(1500 * time.Millisecond)
+			defer ticker.Stop()
+
+			for range ticker.C {
+				c.PrintProgress()
+				fmt.Print("\r")
+				os.Stdout.Sync() // Flush the output buffer to ensure immediate display
+			}
+		}()
+
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+		<-sig // Wait for Ctrl+C
 	}
+
+	fmt.Print("\n")
+	infoPrint("Exiting...")
+	// Delete the directory
+	dirPath := filepath.Join(dataDir, c.Torrent.Name())
+	infoPrint("Deleting downloads from: ", filepath.Join(dataDir, c.Torrent.Name()))
+	if err := os.RemoveAll(dirPath); err != nil {
+		errorPrint("Error deleting directory:", err)
+	}
+
+	os.Exit(0)
+
 }
 
 func init() {
@@ -400,33 +476,35 @@ func init() {
 		DisableLevelTruncation: false,
 	})
 	logrus.SetOutput(os.Stdout)
-	if configurations.Debug == true {
+
+	if configurations.Debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	} else {
 		logrus.SetLevel(logrus.ErrorLevel)
 	}
+
 }
 
 func main() {
-	name := color.HiYellowString("[torrodle v%s]", version)
+	name := color.HiYellowString("[torgo v%s]", version)
 	banner :=
 		`
-	_____                          ______________     
-	__  /________________________________  /__  /____ 
-	_  __/  __ \_  ___/_  ___/  __ \  __  /__  /_  _ \
-	/ /_ / /_/ /  /   _  /   / /_/ / /_/ / _  / /  __/
-	\__/ \____//_/    /_/    \____/\__,_/  /_/  \___/
-
-    ‣ You are using %v
+boop~
+,-.___,-.
+\_/_ _\_/
+  )O_O(
+ { (_) }
+  ` + "`" + `-^-' 
+    You are using %v
 `
-	heart := color.HiRedString("♥︎")
+	heart := color.HiRedString("<3")
 	bold := color.New(color.Bold)
 	// Startup
 	fmt.Printf(banner, name)
 	_, _ = bold.Print("    Made with ")
 	fmt.Print(heart)
-	_, _ = bold.Print(" by tnychn ")
-	fmt.Print("(https://github.com/tnychn/torrodle)\n\n")
+	_, _ = bold.Print(" by someone ")
+	fmt.Print("(https://github.com/stl3/torrodle)\n\n")
 	logrus.Debug(configurations)
 
 	// Stream torrent from magnet provided in command-line
@@ -516,7 +594,8 @@ func main() {
 	_, _ = boldYellow.Print("Leechers: ")
 	color.Red(strconv.Itoa(source.Leechers))
 	_, _ = boldYellow.Print("FileSize: ")
-	color.Cyan(strconv.Itoa(int(source.FileSize)))
+	humanFileSize := humanize.Bytes(uint64(source.FileSize))
+	fmt.Println(color.CyanString(humanFileSize))
 	_, _ = boldYellow.Print("Magnet: ")
 	fmt.Println(source.Magnet)
 
