@@ -14,11 +14,11 @@ import (
 // Players holds structs of all supported players.
 var Players = []Player{
 	{
-		Name:           "mpv",
-		DarwinCommand:  []string{"mpv"},
-		LinuxCommand:   []string{"mpv"},
-		WindowsCommand: []string{"mpv", "--no-terminal"}, // Default
-		// WindowsCommand:  []string{"mpv", "--profile=movie-flask", "--no-terminal"}, // Just for use with my mpv profile
+		Name:          "mpv",
+		DarwinCommand: []string{"mpv"},
+		LinuxCommand:  []string{"mpv"},
+		// WindowsCommand: []string{"mpv", "--no-terminal"}, // Default
+		WindowsCommand:  []string{"mpv", "--profile=movie-flask", "--no-terminal"}, // Just for use with my mpv profile
 		SubtitleCommand: "--sub-file=",
 		TitleCommand:    "--force-media-title=", // Shows the movie folder name as title instead of http://localhost:port
 	},
