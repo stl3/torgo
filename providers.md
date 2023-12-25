@@ -50,7 +50,7 @@ A list of all supported torrent and subtitle providers of **torrodle**.
 
 [Source] [**`torrodle/providers/torrentz`**](./providers/torrentz/torrentz.go)
  
-* **Site:** https://torrentz2.eu
+* **Site:** https://torrentz2.nz <-- switched from .eu site
  
 * **Categories (all):** Movie, TV, Anime, Porn
  
