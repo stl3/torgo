@@ -8,16 +8,18 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/tnychn/torrodle/models"
-	"github.com/tnychn/torrodle/request"
-	"github.com/tnychn/torrodle/utils"
+	"github.com/stl3/torrodle/models"
+	"github.com/stl3/torrodle/request"
+	"github.com/stl3/torrodle/utils"
 )
 
 const (
 	Name = "YIFY"
-	Site = "https://yts.am"
+	// Site = "https://yts.am"
+	Site = "https://yts.mx"
 
-	apiURL = "https://yts.am/api"
+	// apiURL = "https://yts.am/api"
+	apiURL = "https://yts.mx/api"
 )
 
 var trackers = [...]string{
@@ -44,6 +46,7 @@ func New() models.ProviderInterface {
 	provider.Categories = models.Categories{
 		All:   "/v2/list_movies.json?query_term=%v&limit=50&page=%d",
 		Movie: "/v2/list_movies.json?query_term=%v&limit=50&page=%d",
+		// Movie: "/v2/list_movies.json?query_term=%v&limit=50",
 	} // this provider can only search for movies
 	return provider
 }
