@@ -5,10 +5,7 @@
 <p align="center"><img src="demo.gif" width=70%></p>
 
 <p align="center">
-    <a href="https://github.com/tnychn/torrodle/releases"><img alt="github releases" src="https://img.shields.io/github/v/release/tnychn/torrodle"></a>
-    <a href="https://github.com/tnychn/torrodle/releases"><img alt="release date" src="https://img.shields.io/github/release-date/tnychn/torrodle"></a>
-    <a href="https://github.com/tnychn/torrodle/releases"><img alt="downloads" src="https://img.shields.io/github/downloads/tnychn/torrodle/total"></a>
-    <a href="./LICENSE.txt"><img alt="license" src="https://img.shields.io/github/license/tnychn/torrodle.svg"></a>
+     <a href="./LICENSE.txt"><img alt="license" src="https://img.shields.io/github/license/tnychn/torrodle.svg"></a>
 </p>
 
 <div align="center">
