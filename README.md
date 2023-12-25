@@ -48,7 +48,7 @@ I personally do it this way because I have mapped my gpu vram as a disk so that 
 * 🤖 Built-in torrent streaming client via HTTP (refined from [`go-peerflix`](https://github.com/Sioro-Neoku/go-peerflix))
 * 🔰 Watch the video while it is being downloaded
 * 🔎 Query multiple providers in a single search
-* 🚀 Sorted results from 7 different providers at once 
+* 🚀 Sorted results from 9 different providers at once 
 * 📄 Along with subtitles fetching for the video (using [`osdb`](https://github.com/Sioro-Neoku/go-peerflix))
 
 ## Installation
