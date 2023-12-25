@@ -10,13 +10,14 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/sirupsen/logrus"
 
-	"github.com/tnychn/torrodle/models"
-	"github.com/tnychn/torrodle/request"
+	"github.com/stl3/torrodle/models"
+	"github.com/stl3/torrodle/request"
 )
 
 const (
 	Name = "Torrentz2"
-	Site = "https://torrentz2.eu"
+	// Site = "https://torrentz2.eu"
+	Site = "https://torrentz2.nz"
 )
 
 type provider struct {
@@ -28,11 +29,11 @@ func New() models.ProviderInterface {
 	provider.Name = Name
 	provider.Site = Site
 	provider.Categories = models.Categories{
-		All:   "/search?f=%v&p=%d",
-		Movie: "/search?f=%v&p=%d",
-		TV:    "/search?f=%v&p=%d",
-		Anime: "/search?f=%v&p=%d",
-		Porn:  "/search?f=%v&p=%d",
+		All:   "/search?q=%v&page=%d",
+		Movie: "/search?q=%v&page=%d",
+		TV:    "/search?q=%v&page=%d",
+		Anime: "/search?q=%v&page=%d",
+		Porn:  "/search?q=%v&page=%d",
 	}
 	return provider
 }
