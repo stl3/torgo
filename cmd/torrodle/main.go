@@ -369,7 +369,18 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			if err := os.RemoveAll(dirPath); err != nil {
 				errorPrint("Error deleting directory:", err)
 			}
-
+			// Delete files inside subtitlesDir
+			subtitleFiles, err := filepath.Glob(filepath.Join(subtitlesDir, "*"))
+			if err != nil {
+				errorPrint("Error getting subtitle files:", err)
+			} else {
+				for _, subtitlePath := range subtitleFiles {
+					infoPrint("Deleting subtitles...", subtitlePath)
+					if err := os.Remove(subtitlePath); err != nil {
+						errorPrint("Error deleting subtitle file:", err)
+					}
+				}
+			}
 			os.Exit(0)
 		}
 	}(interruptChannel)
@@ -432,7 +443,18 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 	if err := os.RemoveAll(dirPath); err != nil {
 		errorPrint("Error deleting directory:", err)
 	}
-
+	// Delete files inside subtitlesDir
+	subtitleFiles, err := filepath.Glob(filepath.Join(subtitlesDir, "*"))
+	if err != nil {
+		errorPrint("No subtitles to delete", err)
+	} else {
+		for _, subtitlePath := range subtitleFiles {
+			infoPrint("Deleting subtitles...", subtitlePath)
+			if err := os.Remove(subtitlePath); err != nil {
+				errorPrint("Error deleting subtitle file:", err)
+			}
+		}
+	}
 	os.Exit(0)
 
 }
