@@ -8,30 +8,38 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/anacrolix/torrent"
 	"github.com/dustin/go-humanize"
+	"github.com/fatih/color"
 	"github.com/sirupsen/logrus"
 
-	"github.com/tnychn/torrodle/models"
+	"github.com/stl3/torrodle/config"
+	"github.com/stl3/torrodle/models"
 )
 
 // Client manages the torrent downloading.
 type Client struct {
-	Client       *torrent.Client
-	ClientConfig *torrent.ClientConfig
-	Torrent      *torrent.Torrent
-	Source       models.Source
-	URL          string
-	HostPort     int
+	Client        *torrent.Client
+	ClientConfig  *torrent.ClientConfig
+	Torrent       *torrent.Torrent
+	Source        models.Source
+	URL           string
+	HostPort      int
+	lastPrintTime time.Time
 }
+
+var configurations config.TorrodleConfig
 
 // NewClient initializes a new torrent client.
 func NewClient(dataDir string, torrentPort int, hostPort int) (Client, error) {
+	// func NewClient(dataDir string, torrentPort int, hostPort int, proxyURL string) (Client, error) {
 	var client Client
 
 	// Initialize Config
@@ -41,7 +49,20 @@ func NewClient(dataDir string, torrentPort int, hostPort int) (Client, error) {
 	clientConfig.NoUpload = true
 	clientConfig.Seed = false
 	clientConfig.Debug = false
+	// clientConfig.EstablishedConnsPerTorrent = 50
+	clientConfig.EstablishedConnsPerTorrent = 25
+	clientConfig.HalfOpenConnsPerTorrent = 25
+	clientConfig.TotalHalfOpenConns = 50
 	client.ClientConfig = clientConfig
+
+	clientConfig.HTTPProxy = func(req *http.Request) (*url.URL, error) {
+
+		proxyURL, err := url.Parse(configurations.Proxy)
+		if err != nil {
+			return nil, err
+		}
+		return proxyURL, nil
+	}
 
 	// Create Client
 	c, err := torrent.NewClient(clientConfig)
@@ -88,6 +109,12 @@ func (client *Client) download() {
 		endPieceIndex := (largestFile.Offset() + largestFile.Length()) * int64(t.NumPieces()) / t.Length()
 		for idx := firstPieceIndex; idx <= endPieceIndex*10/100; idx++ {
 			t.Piece(int(idx)).SetPriority(torrent.PiecePriorityNow)
+			// Check if the download is complete
+			if t.BytesCompleted() == t.Length() {
+				break // exit the loop if download is complete
+			}
+			// Sleep for a short duration before checking again
+			time.Sleep(1 * time.Second)
 		}
 	}
 }
@@ -113,13 +140,33 @@ func (client *Client) streamHandler(w http.ResponseWriter, r *http.Request) {
 func (client *Client) Serve() {
 	p := strconv.Itoa(client.HostPort)
 	client.URL = "http://localhost:" + p
+
+	// Setup logging
+	logPrefix := fmt.Sprintf("[Serve:%s] \n", client.Torrent.Name())
+	logger := log.New(logrus.StandardLogger().Writer(), logPrefix, log.LstdFlags)
+
+	// Set up HTTP server
+	server := &http.Server{
+		Addr:    ":" + p,
+		Handler: http.HandlerFunc(client.streamHandler),
+	}
+
+	// Start serving in a separate goroutine
 	go func() {
-		http.HandleFunc("/", client.streamHandler)
-		logrus.Fatalln(http.ListenAndServe(":"+p, nil))
+		// logger.Printf("Serving on http://localhost:%s\n", p)
+		err := server.ListenAndServe()
+		if err != nil && err != http.ErrServerClosed {
+			logger.Printf("Error serving: %v\n", err)
+		}
 	}()
+
+	// Add a brief delay to ensure server setup before returning
+	time.Sleep(100 * time.Millisecond)
 }
 
-// PrintProgress prints out the current download progress of the client for the CLI.
+// Add a field to store the previous bytes completed
+var previousBytesCompleted int64
+
 func (client *Client) PrintProgress() {
 	t := client.Torrent
 	if t.Info() == nil {
@@ -130,10 +177,34 @@ func (client *Client) PrintProgress() {
 	complete := humanize.Bytes(uint64(currentProgress))
 	size := humanize.Bytes(uint64(total))
 	percentage := float64(currentProgress) / float64(total) * 100
+
+	// Calculate download speed
+	currentTime := time.Now()
+	elapsedTime := currentTime.Sub(client.lastPrintTime)
+	downloadedBytes := currentProgress - previousBytesCompleted
+	downloadSpeed := float64(downloadedBytes) / elapsedTime.Seconds()
+	downloadSpeedFormatted := humanize.Bytes(uint64(downloadSpeed))
+
 	output := bufio.NewWriter(os.Stdout)
-	_, _ = fmt.Fprintf(output, "Progress: %s / %s  %.2f%%\r", complete, size, percentage)
-	// TODO: print download speed
+
+	// Choose colors for different parts of the output
+	completeColor := color.New(color.FgGreen).SprintFunc()
+	sizeColor := color.New(color.FgBlue).SprintFunc()
+	percentageColor := color.New(color.FgYellow).SprintFunc()
+	speedColor := color.New(color.FgCyan).SprintFunc()
+
+	// used \033[K at eol because previous line may extend over the current line
+	_, _ = fmt.Fprintf(output, "Progress: %s / %s  %s%%  Download Speed: %s/s\033[K",
+		// 			os.Stdout.Sync()
+		completeColor(complete),
+		sizeColor(size),
+		percentageColor(fmt.Sprintf("%.2f", percentage)),
+		speedColor(downloadSpeedFormatted))
 	_ = output.Flush()
+
+	// Update previousBytesCompleted and lastPrintTime for the next calculation
+	previousBytesCompleted = currentProgress
+	client.lastPrintTime = currentTime
 }
 
 // Close cleans up the connections of the client.
