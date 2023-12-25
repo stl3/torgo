@@ -8,7 +8,6 @@ A list of all supported torrent and subtitle providers of **torrodle**.
 
 1. [Torrents](#torrents)
     * [1337x](#1337x-)
-    * [Rarbg](#rarbg-)
     * [The Pirate Bay](#the-pirate-bay-)
     * [YIFY (YTS)](#yify-yts-)
     * [Torrentz2](#torrentz2)
@@ -31,14 +30,6 @@ A list of all supported torrent and subtitle providers of **torrodle**.
 
 * **Categories (all):** Movie, TV, Anime, Porn
  
-### Rarbg 🌟
-
-[Source] [**`torrodle/providers/rarbg`**](./providers/rarbg/rarbg.go)
- 
-* **Site:** http://rarbg.to
- 
-* **Categories:** Movie, TV, Porn
-
 ### The Pirate Bay 🌟
 
 [Source] [**`torrodle/providers/thepiratebay`**](./providers/thepiratebay/thepiratebay.go)
@@ -70,6 +61,22 @@ A list of all supported torrent and subtitle providers of **torrodle**.
 * **Site:** https://www.limetorrents.info
  
 * **Categories:** Movie, TV, Anime
+
+### Bitsearch
+
+[Source] [**`torrodle/providers/limetorrents`**](./providers/bitsearch/bitsearch.go)
+ 
+* **Site:** https://bitsearch.to
+ 
+* **Categories (all):** Movie, TV, Anime
+
+### Bt4g
+
+[Source] [**`torrodle/providers/limetorrents`**](./providers/bt4g/bt4g.go)
+ 
+* **Site:** https://bt4gprx.com
+ 
+* **Categories (all):** Movie, TV, Anime
 
 ### Sukebei
 
