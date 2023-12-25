@@ -1,4 +1,4 @@
-<h1 align="center">torrodle</h1>
+<h1 align="center">torgo</h1>
 
 <p align="center"><strong><i>A mighty all-in-one magnet scraper & streamer</i></strong></p>
 
@@ -20,7 +20,7 @@
 
 ---
 
-**torrodle** is a command-line program which searches and gathers magnet links of movies, tv shows, animes and porn videos from a variety of [providers](providers.md).
+**torgo** is a command-line program which searches and gathers magnet links of movies, tv shows, animes and porn videos from a variety of [providers](providers.md).
 It then streams the torrent via HTTP (along with its subtitles) and plays it with a user preferred video player (such as *vlc* and *mpv*).
 Currently I am only getting this to be in a working state. 
 
