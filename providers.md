@@ -34,7 +34,7 @@ A list of all supported torrent and subtitle providers of **torrodle**.
 
 [Source] [**`torrodle/providers/thepiratebay`**](./providers/thepiratebay/thepiratebay.go)
 
-* **Site:** https://thepiratebay.org
+* **Site:** https://prbay.top <- main thepiratebay.org uses javascript
 
 * **Categories:** Movie, TV, Porn
  
