@@ -60,7 +60,7 @@ Download the latest stable release of the binary at [releases](https://github.co
 
 Make sure you have **Go 1.12+** installed on your machine.
 
-`$ go get github.com/tnychn/torrodle/cmd/...`
+`$ go get github.com/stl3/torrodle/cmd/...`
 
 ### Build From Source
 
