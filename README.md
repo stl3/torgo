@@ -102,11 +102,5 @@ This project is inspired by [@Fabio Spampinato](https://github.com/fabiospampina
 
 Torrent streaming technique adapted from [@Sioro Neoku](https://github.com/Sioro-Neoku)'s [go-peerflix](https://github.com/Sioro-Neoku/go-peerflix).
 
----
-
-<div align="center">
-    Original repo [now archived since April 2023]:
-    <sub><strong>Made with ♥︎ by tnychn</strong></sub>
-    <br>
-    <sub><strong>MIT © 2019 Tony Chan</strong></sub>
-</div>
+Original repo [now archived since April 2023]: Made with ♥︎ by tnychn MIT © 2019 Tony Chan 
+[@tnychn](https://github.com/tnychn)'s [torrodle](https://github.com/tnychn/torrodle).
