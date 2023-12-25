@@ -39,7 +39,6 @@ var configurations config.TorrodleConfig
 
 // NewClient initializes a new torrent client.
 func NewClient(dataDir string, torrentPort int, hostPort int) (Client, error) {
-	// func NewClient(dataDir string, torrentPort int, hostPort int, proxyURL string) (Client, error) {
 	var client Client
 
 	// Initialize Config
@@ -49,7 +48,6 @@ func NewClient(dataDir string, torrentPort int, hostPort int) (Client, error) {
 	clientConfig.NoUpload = true
 	clientConfig.Seed = false
 	clientConfig.Debug = false
-	// clientConfig.EstablishedConnsPerTorrent = 50
 	clientConfig.EstablishedConnsPerTorrent = 25
 	clientConfig.HalfOpenConnsPerTorrent = 25
 	clientConfig.TotalHalfOpenConns = 50
