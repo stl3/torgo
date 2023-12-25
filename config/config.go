@@ -3,7 +3,8 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
+	"path/filepath"
 )
 
 type TorrodleConfig struct {
@@ -11,34 +12,60 @@ type TorrodleConfig struct {
 	ResultsLimit int    `json:"ResultsLimit"`
 	TorrentPort  int    `json:"TorrentPort"`
 	HostPort     int    `json:"HostPort"`
+	Proxy        string `json:"Proxy"`
 	Debug        bool   `json:"Debug"`
 }
 
+// This function is for debug purposes
+// It shows config parameters used in ~/.torrodle.json
 func (t TorrodleConfig) String() string {
 	return fmt.Sprintf(
-		`TorrentDir: %v | ResultsLimit: %d | TorrentPort: %d | HostPort: %d | Debug: %v`,
+		`\nTorrentDir: %v | ResultsLimit: %d | TorrentPort: %d | HostPort: %d | Debug: %v`,
 		t.DataDir, t.ResultsLimit, t.TorrentPort, t.HostPort, t.Debug,
 	)
 }
 
+// Just for future reference
+// OS PATHS
+// Config Paths
+// Linux
+// ${XDG_CONFIG_HOME:-${HOME}/.config}/example/config
+// MacOS
+// ${HOME}/Library/Application Support/example/config
+// Termux
+// $HOME/.config/example/config
+// Windows
+// %APPDATA%\example\config
+// %APPDATA%\.config\example\config
+
+// Temp File Paths
+// Linux/macOS/Termux
+// $TMPDIR/torgo
+// Windows - %TEMP%/torgo
+
 func InitConfig(path string) error {
 	config := TorrodleConfig{
-		DataDir:      "",
+		DataDir:      getTempDir(),
 		ResultsLimit: 100,
-		TorrentPort:  9999,
-		HostPort:     8080,
+		TorrentPort:  10800,
+		HostPort:     8789,
 	}
 	data, _ := json.MarshalIndent(config, "", "\t")
-	err := ioutil.WriteFile(path, data, 0644)
+	err := os.WriteFile(path, data, 0644)
 	return err
 }
 
 func LoadConfig(path string) (TorrodleConfig, error) {
 	var config TorrodleConfig
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return config, err
 	}
 	err = json.Unmarshal(data, &config)
 	return config, err
+}
+
+func getTempDir() string {
+	tempDir := os.TempDir()
+	return filepath.Join(tempDir, "torgo")
 }
