@@ -105,7 +105,7 @@ Torrent streaming technique adapted from [@Sioro Neoku](https://github.com/Sioro
 ---
 
 <div align="center">
-    Original repo:
+    Original repo [now archived since April 2023]:
     <sub><strong>Made with ♥︎ by tnychn</strong></sub>
     <br>
     <sub><strong>MIT © 2019 Tony Chan</strong></sub>
