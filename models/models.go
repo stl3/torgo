@@ -1,6 +1,9 @@
-/* Reference: https://stackoverflow.com/questions/26027350/go-interface-fields
+/*
+	Reference: https://stackoverflow.com/questions/26027350/go-interface-fields
+
 - In order to specify fields that would be required on anything that implements `ProviderInterface`, a struct type `Provider` is used.
-- This allows us to access methods and even fields of an interface.*/
+- This allows us to access methods and even fields of an interface.
+*/
 package models
 
 import (
@@ -10,7 +13,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/tnychn/torrodle/utils"
+	"github.com/stl3/torrodle/utils"
 )
 
 // ProviderInterface is an interface that exposes all the methods a `Provider` struct type has.
@@ -91,11 +94,12 @@ type CategoryURL string
 
 // Categories is a collection of CategoryURL types.
 type Categories struct {
-	All   CategoryURL
-	Movie CategoryURL
-	TV    CategoryURL
-	Anime CategoryURL
-	Porn  CategoryURL
+	All           CategoryURL
+	Movie         CategoryURL
+	TV            CategoryURL
+	Anime         CategoryURL
+	Porn          CategoryURL
+	Documentaries CategoryURL
 }
 
 // Source provides informational fields for a torrent source.
