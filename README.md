@@ -101,6 +101,9 @@ For API usage, see [`API.md`](API.md).
 "TorrentPort": 56666,
 "HostPort": 8080,
 "Proxy": "https://example_proxy_address:8008",
+"EstablishedConnsPerTorrent": 25,
+"HalfOpenConnsPerTorrent": 25,
+"TotalHalfOpenConns": 50,
 "Debug": false
 ```
 Change `DataDir` if you want a custom path for where it downloads files
