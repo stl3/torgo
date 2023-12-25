@@ -67,7 +67,7 @@ Make sure you have **Go 1.12+** installed on your machine.
 Make sure you have **Go 1.12+** installed on your machine.
 
 ```shell script
-$ git clone github.com/tnychn/torrodle.git
+$ git clone github.com/stl3/torrodle.git
 $ cd torrodle
 $ go build cmd/torrodle/main.go
 ```
@@ -105,6 +105,7 @@ Torrent streaming technique adapted from [@Sioro Neoku](https://github.com/Sioro
 ---
 
 <div align="center">
+    Original repo:
     <sub><strong>Made with ♥︎ by tnychn</strong></sub>
     <br>
     <sub><strong>MIT © 2019 Tony Chan</strong></sub>
