@@ -13,6 +13,9 @@ type TorrodleConfig struct {
 	TorrentPort  int    `json:"TorrentPort"`
 	HostPort     int    `json:"HostPort"`
 	Proxy        string `json:"Proxy"`
+	ECPT         int    `json:"EstablishedConnsPerTorrent"`
+	HOCPT        int    `json:"HalfOpenConnsPerTorrent"`
+	THOC         int    `json:"TotalHalfOpenConns"`
 	Debug        bool   `json:"Debug"`
 }
 
@@ -20,7 +23,7 @@ type TorrodleConfig struct {
 // It shows config parameters used in ~/.torrodle.json
 func (t TorrodleConfig) String() string {
 	return fmt.Sprintf(
-		`\nTorrentDir: %v | ResultsLimit: %d | TorrentPort: %d | HostPort: %d | Debug: %v`,
+		`TorrentDir: %v | ResultsLimit: %d | TorrentPort: %d | HostPort: %d | Debug: %v`,
 		t.DataDir, t.ResultsLimit, t.TorrentPort, t.HostPort, t.Debug,
 	)
 }
@@ -49,6 +52,9 @@ func InitConfig(path string) error {
 		ResultsLimit: 100,
 		TorrentPort:  10800,
 		HostPort:     8789,
+		ECPT:         25,
+		HOCPT:        25,
+		THOC:         50,
 	}
 	data, _ := json.MarshalIndent(config, "", "\t")
 	err := os.WriteFile(path, data, 0644)
