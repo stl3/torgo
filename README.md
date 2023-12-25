@@ -54,7 +54,7 @@ It then streams the torrent via HTTP (along with its subtitles) and plays it wit
 
 ### Binary
 
-Download the latest stable release of the binary at [releases](https://github.com/tnychn/torrodle/releases).
+Download the latest stable release of the binary at [releases](https://github.com/stl3/torrodle/releases).
 
 ### Go Get
 
