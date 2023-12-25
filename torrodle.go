@@ -8,25 +8,29 @@ import (
 	"github.com/fatih/color"
 	"github.com/sirupsen/logrus"
 
-	"github.com/tnychn/torrodle/models"
-	"github.com/tnychn/torrodle/providers/leetx"
-	"github.com/tnychn/torrodle/providers/limetorrents"
-	"github.com/tnychn/torrodle/providers/rarbg"
-	"github.com/tnychn/torrodle/providers/sukebei"
-	"github.com/tnychn/torrodle/providers/thepiratebay"
-	"github.com/tnychn/torrodle/providers/torrentz"
-	"github.com/tnychn/torrodle/providers/yify"
+	"github.com/stl3/torrodle/models"
+	"github.com/stl3/torrodle/providers/bitsearch"
+	"github.com/stl3/torrodle/providers/bt4g"
+	"github.com/stl3/torrodle/providers/leetx"
+	"github.com/stl3/torrodle/providers/limetorrents"
+
+	// "github.com/stl3/torrodle/providers/rarbg"
+	"github.com/stl3/torrodle/providers/sukebei"
+	"github.com/stl3/torrodle/providers/thepiratebay"
+	"github.com/stl3/torrodle/providers/torrentz"
+	"github.com/stl3/torrodle/providers/yify"
 )
 
 type Category string
 type SortBy string
 
 const (
-	CategoryAll   Category = "ALL"
-	CategoryMovie Category = "MOVIE"
-	CategoryTV    Category = "TV"
-	CategoryAnime Category = "ANIME"
-	CategoryPorn  Category = "PORN"
+	CategoryAll           Category = "ALL"
+	CategoryMovie         Category = "MOVIE"
+	CategoryTV            Category = "TV"
+	CategoryAnime         Category = "ANIME"
+	CategoryPorn          Category = "PORN"
+	CategoryDocumentaries Category = "DOCUMENTARIES"
 
 	SortByDefault  SortBy = "default"
 	SortBySeeders  SortBy = "seeders"
@@ -40,19 +44,23 @@ var (
 	ThePirateBayProvider = thepiratebay.New()
 	LimeTorrentsProvider = limetorrents.New()
 	Torrentz2Provider    = torrentz.New()
-	RarbgProvider        = rarbg.New()
-	LeetxProvider        = leetx.New()
-	YifyProvider         = yify.New()
+	// RarbgProvider        = rarbg.New()
+	LeetxProvider     = leetx.New()
+	YifyProvider      = yify.New()
+	BitsearchProvider = bitsearch.New()
+	Bt4g              = bt4g.New()
 )
 
 var AllProviders = [...]models.ProviderInterface{
-	SukebeiProvider,
-	ThePirateBayProvider,
-	LimeTorrentsProvider,
-	Torrentz2Provider,
-	RarbgProvider,
-	LeetxProvider,
 	YifyProvider,
+	LeetxProvider,
+	Torrentz2Provider,
+	LimeTorrentsProvider,
+	ThePirateBayProvider,
+	SukebeiProvider,
+	BitsearchProvider,
+	Bt4g,
+	// RarbgProvider,
 }
 
 // ListProviderResults lists all results queried from this specific provider only.
