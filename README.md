@@ -92,6 +92,22 @@ For command-line (CLI) usage, see [`CLI.md`](CLI.md).
 
 For API usage, see [`API.md`](API.md).
 
+## Configuration file
+~/.torrodle.json
+
+```
+"DataDir": "E:/exampledir",
+"ResultsLimit": 150,
+"TorrentPort": 56666,
+"HostPort": 8080,
+"Proxy": "https://example_proxy_address:8008",
+"Debug": false
+```
+Change `DataDir` if you want a custom path for where it downloads files
+Change `TorrentPort` to the port you open/forwarded to use with torrents
+Change `HostPort` to the port you want to host the file from
+Change `Proxy` to whatever proxy you want to use ([anacrolic/torrent](https://pkg.go.dev/github.com/anacrolix/torrent?utm_source=godoc#ClientConfig.HTTPProxy) - seems to use this only for fetching metainfo and webtorrent seeds but not for the transport of down/up traffic itself
+
 ## Contributing
 
 If you have any ideas on how to improve this project or if you think there is a lack of features,
