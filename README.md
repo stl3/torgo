@@ -26,6 +26,8 @@
 **torrodle** is a command-line program which searches and gathers magnet links of movies, tv shows, animes and porn videos from a variety of [providers](providers.md).
 It then streams the torrent via HTTP (along with its subtitles) and plays it with a user preferred video player (such as *vlc* and *mpv*).
 
+<sub>Note: The original Torrodle repo has been archived since April 2023 and has not been updated in a while, I liked the project (thanks for inspiring me tnychn!) so I just wanted to get it in a working state again.
+
 > If you don't know what BitTorrent is, you shouldn't be using **torrodle**.
 > There are some copyrighted content which might be illegal downloading them in your country.
 
@@ -98,9 +100,11 @@ feel free to open an issue, or even better, open a pull request. All contributio
 
 ## Credit
 
+Original repo [now archived since April 2023]: Made with ♥︎ by tnychn MIT © 2019 Tony Chan 
+[@tnychn](https://github.com/tnychn)'s [torrodle](https://github.com/tnychn/torrodle).
+
 This project is inspired by [@Fabio Spampinato](https://github.com/fabiospampinato)'s [cliflix](https://github.com/fabiospampinato/cliflix).
 
 Torrent streaming technique adapted from [@Sioro Neoku](https://github.com/Sioro-Neoku)'s [go-peerflix](https://github.com/Sioro-Neoku/go-peerflix).
 
-Original repo [now archived since April 2023]: Made with ♥︎ by tnychn MIT © 2019 Tony Chan 
-[@tnychn](https://github.com/tnychn)'s [torrodle](https://github.com/tnychn/torrodle).
+
