@@ -2,7 +2,7 @@
 
 <p align="center"><strong><i>A mighty all-in-one magnet scraper & streamer</i></strong></p>
 
-<p align="center"><img src="demo.gif" width=70%></p>
+<p align="center"><img src="demo.gif" width=100%></p>
 
 <p align="center">
      <a href="./LICENSE.txt"><img alt="license" src="https://img.shields.io/github/license/tnychn/torrodle.svg"></a>
