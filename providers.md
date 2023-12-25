@@ -59,6 +59,7 @@ A list of all supported torrent and subtitle providers of **torrodle**.
 [Source] [**`torrodle/providers/limetorrents`**](./providers/limetorrents/limetorrents.go)
  
 * **Site:** https://www.limetorrents.info
+* **Site:** https://www.limetorrents.lol
  
 * **Categories:** Movie, TV, Anime
 
