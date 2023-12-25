@@ -597,7 +597,8 @@ boop~
 	humanFileSize := humanize.Bytes(uint64(source.FileSize))
 	fmt.Println(color.CyanString(humanFileSize))
 	_, _ = boldYellow.Print("Magnet: ")
-	fmt.Println(source.Magnet)
+	truncatedMagnet := truncateMagnet(source.Magnet, 60) // Adjust the length as needed
+	fmt.Println(truncatedMagnet)
 
 	// Player
 	playerChoice := pickPlayer()
@@ -617,4 +618,11 @@ boop~
 
 	// Start playing video...
 	startClient(p, source, subtitlePath)
+}
+
+func truncateMagnet(magnet string, maxLength int) string {
+	if len(magnet) > maxLength {
+		return magnet[:maxLength]
+	}
+	return magnet
 }
