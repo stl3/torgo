@@ -12,6 +12,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/user"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -35,6 +37,9 @@ type Client struct {
 	lastPrintTime time.Time
 }
 
+var u, _ = user.Current()
+var home = u.HomeDir
+var configFile = filepath.Join(home, ".torrodle.json")
 var configurations config.TorrodleConfig
 
 // NewClient initializes a new torrent client.
@@ -48,9 +53,9 @@ func NewClient(dataDir string, torrentPort int, hostPort int) (Client, error) {
 	clientConfig.NoUpload = true
 	clientConfig.Seed = false
 	clientConfig.Debug = false
-	clientConfig.EstablishedConnsPerTorrent = 25
-	clientConfig.HalfOpenConnsPerTorrent = 25
-	clientConfig.TotalHalfOpenConns = 50
+	clientConfig.EstablishedConnsPerTorrent = configurations.ECPT
+	clientConfig.HalfOpenConnsPerTorrent = configurations.HOCPT
+	clientConfig.TotalHalfOpenConns = configurations.THOC
 	client.ClientConfig = clientConfig
 
 	clientConfig.HTTPProxy = func(req *http.Request) (*url.URL, error) {
@@ -239,4 +244,36 @@ func NewFileReader(f *torrent.File) (SeekableContent, error) {
 	_, err := reader.Seek(f.Offset(), io.SeekStart)
 
 	return &FileEntry{File: f, Reader: reader}, err
+}
+
+func init() {
+	// var err error
+
+	loadedConfig, err := config.LoadConfig(configFile)
+	if err != nil {
+		// handle error
+		fmt.Printf("Error initializing config (%v): %v\n", configFile, err)
+	}
+	configurations = loadedConfig
+
+	// if _, err := os.Stat(configFile); os.IsNotExist(err) {
+	// 	err = config.InitConfig(configFile)
+	// 	if err != nil {
+	// 		fmt.Printf("Error initializing config (%v): %v\n", configFile, err)
+	// 		os.Exit(1)
+	// 	}
+	// }
+
+	// configurations, err = config.LoadConfig(configFile)
+	// if err != nil {
+	// 	fmt.Println("Error loading config:", err)
+	// 	os.Exit(1)
+	// }
+
+	// if configurations.Debug {
+	// 	logrus.SetLevel(logrus.DebugLevel)
+	// } else {
+	// 	logrus.SetLevel(logrus.ErrorLevel)
+	// }
+
 }
