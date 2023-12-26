@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 )
 
 // Players holds structs of all supported players.
@@ -127,6 +128,8 @@ func GetPlayer(name string) *Player {
 
 // startAndroidMPV launches mpv on Android using the specific intent.
 func (player *Player) startAndroidMPV(url string) {
+
+	time.Sleep(7 * time.Second)
 	cmd := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
 	// urlWithQuotes := "\"" + url + "\""
 
