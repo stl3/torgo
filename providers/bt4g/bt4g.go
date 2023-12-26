@@ -9,6 +9,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/dustin/go-humanize"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/net/html"
 
 	"github.com/stl3/torrodle/models"
 	"github.com/stl3/torrodle/request"
@@ -59,6 +60,17 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 	resultsContainer.Each(func(_ int, result *goquery.Selection) {
 		// Extract information from each search result item
 		title := result.Find("h5 a").Text()
+		if containsHTMLEncodedEntities(title) {
+			decodedTitle, err := decodeHTMLText(title)
+			if err != nil {
+				fmt.Println("Error decoding HTML text:", err)
+				// return
+				decodedTitle = title
+			}
+			fmt.Println("Decoded Title:", decodedTitle)
+		} else {
+			fmt.Println("Title:", title)
+		}
 		URL, _ := result.Find("h5 a").Attr("href")
 
 		// Extract other relevant information
@@ -88,4 +100,30 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 	logrus.Debugf("Bt4g: [%d] Amount of results: %d", page, len(sources))
 	*results = append(*results, sources...)
 	wg.Done()
+}
+
+// Checks if the text contains HTML-encoded entities
+func containsHTMLEncodedEntities(text string) bool {
+	return strings.ContainsAny(text, "&<>'\"")
+}
+
+// Decodes HTML-encoded text
+func decodeHTMLText(text string) (string, error) {
+	var decodedText string
+	tokenizer := html.NewTokenizer(strings.NewReader(text))
+
+	for {
+		tokenType := tokenizer.Next()
+		switch tokenType {
+		case html.ErrorToken:
+			err := tokenizer.Err()
+			if err != nil {
+				return text, err // Return the original text and the decoding error
+			}
+			return decodedText, nil // Return the decoded text
+		case html.TextToken:
+			token := tokenizer.Token()
+			decodedText += token.Data
+		}
+	}
 }
