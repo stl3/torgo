@@ -127,7 +127,10 @@ func GetPlayer(name string) *Player {
 
 // startAndroidMPV launches mpv on Android using the specific intent.
 func (player *Player) startAndroidMPV(url string) {
-	cmd := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
+	// cmd := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
+	urlWithQuotes := "\"" + url + "\""
+
+	cmd := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", urlWithQuotes, "-n", "is.xyz.mpv/.MPVActivity")
 	player.started = true
 	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd.Args)
 	if err := cmd.Start(); err != nil {
