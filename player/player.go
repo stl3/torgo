@@ -18,7 +18,7 @@ var Players = []Player{
 		Name:           "mpv",
 		DarwinCommand:  []string{"mpv"},
 		LinuxCommand:   []string{"mpv"},
-		AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-n", "is.xyz.mpv/.MPVActivity"},
+		AndroidCommand: []string{"nohup", "am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-n", "is.xyz.mpv/.MPVActivity"},
 		// AndroidCommand: []string{"mpv"},
 		// WindowsCommand: []string{"mpv", "--no-resume-playback", "--no-terminal"}, // Default
 		WindowsCommand:  []string{"mpv", "--profile=movie-flask", "--no-resume-playback", "--no-terminal"}, // Just for use with my mpv profile
@@ -130,7 +130,7 @@ func GetPlayer(name string) *Player {
 func (player *Player) startAndroidMPV(url string) {
 
 	time.Sleep(7 * time.Second)
-	cmd := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
+	cmd := exec.Command(player.AndroidCommand[0], "am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
 	// urlWithQuotes := "\"" + url + "\""
 
 	// cmd := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", urlWithQuotes, "-n", "is.xyz.mpv/.MPVActivity")
