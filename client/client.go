@@ -35,6 +35,8 @@ type Client struct {
 	URL           string
 	HostPort      int
 	lastPrintTime time.Time
+	// signal to indicate download completion
+	downloadComplete chan struct{}
 }
 
 var u, _ = user.Current()
@@ -42,8 +44,7 @@ var home = u.HomeDir
 var configFile = filepath.Join(home, ".torrodle.json")
 var configurations config.TorrodleConfig
 
-// NewClient initializes a new torrent client.
-func NewClient(dataDir string, torrentPort int, hostPort int) (Client, error) {
+func NewClient(dataDir string, torrentPort int, hostPort int) (*Client, error) {
 	var client Client
 
 	// Initialize Config
@@ -59,7 +60,6 @@ func NewClient(dataDir string, torrentPort int, hostPort int) (Client, error) {
 	client.ClientConfig = clientConfig
 
 	clientConfig.HTTPProxy = func(req *http.Request) (*url.URL, error) {
-
 		proxyURL, err := url.Parse(configurations.Proxy)
 		if err != nil {
 			return nil, err
@@ -70,12 +70,16 @@ func NewClient(dataDir string, torrentPort int, hostPort int) (Client, error) {
 	// Create Client
 	c, err := torrent.NewClient(clientConfig)
 	if err != nil {
-		return client, err
+		return nil, err
 	}
 	client.Client = c
 	client.HostPort = hostPort
 
-	return client, err
+	// Create channel for signaling download completion
+	client.downloadComplete = make(chan struct{})
+
+	// return a pointer to the client instance
+	return &client, nil
 }
 
 // SetSource sets the source (magnet uri) which the client is based on.
@@ -111,10 +115,16 @@ func (client *Client) download() {
 		firstPieceIndex := largestFile.Offset() * int64(t.NumPieces()) / t.Length()
 		endPieceIndex := (largestFile.Offset() + largestFile.Length()) * int64(t.NumPieces()) / t.Length()
 		for idx := firstPieceIndex; idx <= endPieceIndex*10/100; idx++ {
-			t.Piece(int(idx)).SetPriority(torrent.PiecePriorityNow)
-			// Check if the download is complete
+
 			if t.BytesCompleted() == t.Length() {
-				break // exit the loop if download is complete
+				// Signal download completion only if the channel is still open
+				if client.downloadComplete != nil {
+					close(client.downloadComplete)
+					client.downloadComplete = nil // set to nil to avoid closing it again
+				}
+				// Print the final progress information before exiting
+				client.PrintProgress()
+				return // exit the loop if download is complete
 			}
 			// Sleep for a short duration before checking again
 			time.Sleep(1 * time.Second)
@@ -126,6 +136,16 @@ func (client *Client) download() {
 func (client *Client) Start() {
 	<-client.Torrent.GotInfo() // blocks until it got the info
 	go client.download()       // download file
+}
+
+// Stop is a new method to stop the client and associated resources
+func (client *Client) Stop() {
+	// Perform cleanup operations here
+	// Close the client, release resources, etc.
+	client.Torrent.Drop()
+	client.Client.Close()
+
+	// Add any other cleanup steps as needed
 }
 
 func (client *Client) streamHandler(w http.ResponseWriter, r *http.Request) {
@@ -161,6 +181,10 @@ func (client *Client) Serve() {
 		if err != nil && err != http.ErrServerClosed {
 			logger.Printf("Error serving: %v\n", err)
 		}
+		<-client.downloadComplete
+
+		// Stop the client when the download is complete
+		client.Stop()
 	}()
 
 	// Add a brief delay to ensure server setup before returning
@@ -172,6 +196,7 @@ var previousBytesCompleted int64
 
 func (client *Client) PrintProgress() {
 	t := client.Torrent
+	// Do not run PrintProgress anymore when download completes
 	if t.Info() == nil {
 		return
 	}
@@ -255,25 +280,5 @@ func init() {
 		fmt.Printf("Error initializing config (%v): %v\n", configFile, err)
 	}
 	configurations = loadedConfig
-
-	// if _, err := os.Stat(configFile); os.IsNotExist(err) {
-	// 	err = config.InitConfig(configFile)
-	// 	if err != nil {
-	// 		fmt.Printf("Error initializing config (%v): %v\n", configFile, err)
-	// 		os.Exit(1)
-	// 	}
-	// }
-
-	// configurations, err = config.LoadConfig(configFile)
-	// if err != nil {
-	// 	fmt.Println("Error loading config:", err)
-	// 	os.Exit(1)
-	// }
-
-	// if configurations.Debug {
-	// 	logrus.SetLevel(logrus.DebugLevel)
-	// } else {
-	// 	logrus.SetLevel(logrus.ErrorLevel)
-	// }
 
 }
