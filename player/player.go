@@ -86,12 +86,18 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	if runtime.GOOS == "android" {
 		command = []string{"nohup", "am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity", ">/dev/null", "2>&1", "&"}
 	}
-	if subtitlePath != "" {
-		command = append(command, player.SubtitleCommand+subtitlePath)
-	}
-	if title != "" {
+	// if subtitlePath != "" {
+	// 	command = append(command, player.SubtitleCommand+subtitlePath)
+	// }
+	if subtitlePath != "" && runtime.GOOS != "android" {
 		command = append(command, player.TitleCommand+title)
 	}
+	if title != "" && runtime.GOOS != "android" {
+		command = append(command, player.TitleCommand+title)
+	}
+	// if title != "" {
+	// 	command = append(command, player.TitleCommand+title)
+	// }
 
 	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", command)
 	// logrus.Debugf("command: %v\n", command)
