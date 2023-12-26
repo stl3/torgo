@@ -8,6 +8,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/dustin/go-humanize"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/net/html"
 
 	"github.com/stl3/torrodle/models"
 	"github.com/stl3/torrodle/request"
@@ -65,6 +66,17 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 	resultsContainer.Each(func(_ int, result *goquery.Selection) {
 		// Extract information from each search result item
 		title := result.Find("div.torrent_name a").Text()
+		if containsHTMLEncodedEntities(title) {
+			decodedTitle, err := decodeHTMLText(title)
+			if err != nil {
+				logrus.Errorln("Error decoding HTML text:", err)
+				// return
+				decodedTitle = title
+			}
+			logrus.Infof("Decoded Title: %s", decodedTitle)
+		} else {
+			logrus.Infof("Title: %s", title)
+		}
 		URL, _ := result.Find("div.torrent_name a").Attr("href")
 		filesizeStr := result.Find("span.torrent_size").Text()
 		filesize, _ := humanize.ParseBytes(strings.TrimSpace(filesizeStr))
@@ -88,4 +100,30 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 	logrus.Debugf("BTDigg: [%d] Amount of results: %d", page, len(sources))
 	*results = append(*results, sources...)
 	wg.Done()
+}
+
+// Checks if the text contains HTML-encoded entities
+func containsHTMLEncodedEntities(text string) bool {
+	return strings.ContainsAny(text, "&<>'\"")
+}
+
+// Decodes HTML-encoded text
+func decodeHTMLText(text string) (string, error) {
+	var decodedText string
+	tokenizer := html.NewTokenizer(strings.NewReader(text))
+
+	for {
+		tokenType := tokenizer.Next()
+		switch tokenType {
+		case html.ErrorToken:
+			err := tokenizer.Err()
+			if err != nil {
+				return text, err // Return the original text and the decoding error
+			}
+			return decodedText, nil // Return the decoded text
+		case html.TextToken:
+			token := tokenizer.Token()
+			decodedText += token.Data
+		}
+	}
 }
