@@ -14,9 +14,10 @@ import (
 // Players holds structs of all supported players.
 var Players = []Player{
 	{
-		Name:          "mpv",
-		DarwinCommand: []string{"mpv"},
-		LinuxCommand:  []string{"mpv"},
+		Name:           "mpv",
+		DarwinCommand:  []string{"mpv"},
+		LinuxCommand:   []string{"mpv"},
+		AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-n", "is.xyz.mpv/.MPVActivity"},
 		// AndroidCommand: []string{"mpv"},
 		// WindowsCommand: []string{"mpv", "--no-resume-playback", "--no-terminal"}, // Default
 		WindowsCommand:  []string{"mpv", "--profile=movie-flask", "--no-resume-playback", "--no-terminal"}, // Just for use with my mpv profile
