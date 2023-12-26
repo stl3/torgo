@@ -12,6 +12,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/oz/osdb v0.0.0-20221214175751-f169057712ec
 	github.com/sirupsen/logrus v1.9.3
+	golang.org/x/net v0.19.0
 	golang.org/x/time v0.5.0
 	gopkg.in/AlecAivazis/survey.v1 v1.8.8
 )
@@ -86,7 +87,6 @@ require (
 	go.opentelemetry.io/otel/trace v1.21.0 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848 // indirect
-	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/term v0.15.0 // indirect
