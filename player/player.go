@@ -17,6 +17,7 @@ var Players = []Player{
 		Name:          "mpv",
 		DarwinCommand: []string{"mpv"},
 		LinuxCommand:  []string{"mpv"},
+		// AndroidCommand:  []string{"nohup", "am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity", ">/dev/null", "2>&1", "&"},
 		// AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-n", "is.xyz.mpv/.MPVActivity", "-d", "$episode"},
 		// WindowsCommand: []string{"mpv", "--no-resume-playback", "--no-terminal"}, // Default
 		WindowsCommand:  []string{"mpv", "--profile=movie-flask", "--no-resume-playback", "--no-terminal"}, // Just for use with my mpv profile
@@ -24,10 +25,10 @@ var Players = []Player{
 		TitleCommand:    "--force-media-title=", // Shows the movie folder name as title instead of http://localhost:port
 	},
 	{
-		Name:           "vlc",
-		DarwinCommand:  []string{"/Applications/VLC.app/Contents/MacOS/VLC"},
-		LinuxCommand:   []string{"vlc"},
-		AndroidCommand: []string{"vlc"},
+		Name:          "vlc",
+		DarwinCommand: []string{"/Applications/VLC.app/Contents/MacOS/VLC"},
+		LinuxCommand:  []string{"vlc"},
+		// AndroidCommand: []string{"vlc"},
 		// WindowsCommand:  []string{"%ProgramFiles%\\VideoLAN\\VLC\\vlc.exe"},
 		WindowsCommand:  []string{"vlc.exe"}, // vlc player should be in users env path in case installed in non-default path
 		SubtitleCommand: "--sub-file=",
@@ -72,22 +73,26 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	case "windows":
 		command = player.WindowsCommand
 		// case "android":
-		// 	command = player.AndroidCommand
-		// Add additional Android-specific command
-		// command = append(command, "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
+		// 	// command = player.AndroidCommand
+		// 	// Add additional Android-specific command
+		// 	command = append(nohup am start --user 0 -a android.intent.action.VIEW -d url -n is.xyz.mpv/.MPVActivity >/dev/null 2>&1 &)
 	}
 
 	// Append the video URL to the command for non-Android cases
-	// if runtime.GOOS != "android" {
-	// 	command = append(command, url)
-	// }
-	command = append(command, url)
+	if runtime.GOOS != "android" {
+		command = append(command, url)
+	}
+	// command = append(command, url)
+	if runtime.GOOS == "android" {
+		command = []string{"nohup", "am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity", ">/dev/null", "2>&1", "&"}
+	}
 	if subtitlePath != "" {
 		command = append(command, player.SubtitleCommand+subtitlePath)
 	}
-	// if title != "" {
-	// 	command = append(command, player.TitleCommand+title)
-	// }
+	if title != "" {
+		command = append(command, player.TitleCommand+title)
+	}
+
 	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", command)
 	// logrus.Debugf("command: %v\n", command)
 	cmd := exec.Command(command[0], command[1:]...)
