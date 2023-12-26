@@ -17,8 +17,7 @@ var Players = []Player{
 		Name:          "mpv",
 		DarwinCommand: []string{"mpv"},
 		LinuxCommand:  []string{"mpv"},
-		// AndroidCommand:  []string{"nohup", "am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity", ">/dev/null", "2>&1", "&"},
-		// AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-n", "is.xyz.mpv/.MPVActivity", "-d", "$episode"},
+		// AndroidCommand: []string{"mpv"},
 		// WindowsCommand: []string{"mpv", "--no-resume-playback", "--no-terminal"}, // Default
 		WindowsCommand:  []string{"mpv", "--profile=movie-flask", "--no-resume-playback", "--no-terminal"}, // Just for use with my mpv profile
 		SubtitleCommand: "--sub-file=",
@@ -34,15 +33,6 @@ var Players = []Player{
 		SubtitleCommand: "--sub-file=",
 		TitleCommand:    "--meta-title=", //
 	},
-	// {
-	// 	Name: "kmp",
-	// 	// DarwinCommand: []string{"/Applications/VLC.app/Contents/MacOS/VLC"},
-	// 	// LinuxCommand:  []string{"vlc"},
-	// 	// WindowsCommand:  []string{"%ProgramFiles%\\VideoLAN\\VLC\\vlc.exe"},
-	// 	WindowsCommand:  []string{"Kmplayer.exe"},
-	// 	SubtitleCommand: "--sub-file=",
-	// 	// TitleCommand:    "--title=",
-	// },
 }
 
 // Player manages the execiution of a media player.
@@ -72,10 +62,27 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		command = player.LinuxCommand
 	case "windows":
 		command = player.WindowsCommand
-		// case "android":
-		// 	// command = player.AndroidCommand
-		// 	// Add additional Android-specific command
-		// 	command = append(nohup am start --user 0 -a android.intent.action.VIEW -d url -n is.xyz.mpv/.MPVActivity >/dev/null 2>&1 &)
+	case "android":
+		command = player.AndroidCommand
+		// For Android, we use a special command to launch mpv
+		cmd := exec.Command(command[0], "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
+		log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd.Args)
+		if err := cmd.Start(); err != nil {
+			log.Printf("Error starting player: %v\n", err)
+			return
+		}
+		// Wait for the player process to complete
+		if err := cmd.Wait(); err != nil {
+			exitErr, ok := err.(*exec.ExitError)
+			if ok {
+				log.Printf("Player exited with non-zero status: %v\n", exitErr.ExitCode())
+			} else {
+				log.Printf("Error waiting for player: %v\n", err)
+			}
+		}
+		return
+	default:
+		command = player.WindowsCommand // Default to Windows command for unknown OS
 	}
 
 	// Append the video URL to the command for non-Android cases
@@ -83,11 +90,11 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		command = append(command, url)
 	}
 	// command = append(command, url)
-	if runtime.GOOS == "android" {
-		command = []string{"nohup", "am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity", ">/dev/null", "2>&1", "&"}
-	}
 	// if subtitlePath != "" {
 	// 	command = append(command, player.SubtitleCommand+subtitlePath)
+	// }
+	// if title != "" {
+	// 	command = append(command, player.TitleCommand+title)
 	// }
 	if subtitlePath != "" && runtime.GOOS != "android" {
 		command = append(command, player.TitleCommand+title)
@@ -95,16 +102,11 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	if title != "" && runtime.GOOS != "android" {
 		command = append(command, player.TitleCommand+title)
 	}
-	// if title != "" {
-	// 	command = append(command, player.TitleCommand+title)
-	// }
 
 	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", command)
 	// logrus.Debugf("command: %v\n", command)
+
 	cmd := exec.Command(command[0], command[1:]...)
-	// cmd.Stdout = os.Stdout // show player output to console
-	// cmd.Stdout = os.NewFile(0, os.DevNull)
-	// cmd.Stderr = os.Stderr
 
 	player.started = true
 
