@@ -18,9 +18,6 @@ var Players = []Player{
 		DarwinCommand: []string{"mpv"},
 		LinuxCommand:  []string{"mpv"},
 		// AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-n", "is.xyz.mpv/.MPVActivity", "-d", "$episode"},
-		// AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-n", "is.xyz.mpv/.MPVActivity"},
-		AndroidCommand: []string{"mpv-url"},
-		// command = []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", "$episode", "-n", "is.xyz.mpv/.MPVActivity"}
 		// WindowsCommand: []string{"mpv", "--no-resume-playback", "--no-terminal"}, // Default
 		WindowsCommand:  []string{"mpv", "--profile=movie-flask", "--no-resume-playback", "--no-terminal"}, // Just for use with my mpv profile
 		SubtitleCommand: "--sub-file=",
@@ -74,8 +71,8 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		command = player.LinuxCommand
 	case "windows":
 		command = player.WindowsCommand
-	case "android":
-		command = player.AndroidCommand
+		// case "android":
+		// 	command = player.AndroidCommand
 		// Add additional Android-specific command
 		// command = append(command, "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
 	}
