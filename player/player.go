@@ -63,23 +63,8 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	case "windows":
 		command = player.WindowsCommand
 	case "android":
-		command = player.AndroidCommand
-		// For Android, we use a special command to launch mpv
-		cmd := exec.Command(command[0], "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
-		log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd.Args)
-		if err := cmd.Start(); err != nil {
-			log.Printf("Error starting player: %v\n", err)
-			return
-		}
-		// Wait for the player process to complete
-		if err := cmd.Wait(); err != nil {
-			exitErr, ok := err.(*exec.ExitError)
-			if ok {
-				log.Printf("Player exited with non-zero status: %v\n", exitErr.ExitCode())
-			} else {
-				log.Printf("Error waiting for player: %v\n", err)
-			}
-		}
+		// Handle Android case separately for mpv
+		player.startAndroidMPV(url)
 		return
 	default:
 		command = player.WindowsCommand // Default to Windows command for unknown OS
@@ -137,4 +122,23 @@ func GetPlayer(name string) *Player {
 		}
 	}
 	return nil
+}
+
+// startAndroidMPV launches mpv on Android using the specific intent.
+func (player *Player) startAndroidMPV(url string) {
+	cmd := exec.Command(player.AndroidCommand[0], "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
+	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd.Args)
+	if err := cmd.Start(); err != nil {
+		log.Printf("Error starting player: %v\n", err)
+		return
+	}
+	// Wait for the player process to complete
+	if err := cmd.Wait(); err != nil {
+		exitErr, ok := err.(*exec.ExitError)
+		if ok {
+			log.Printf("Player exited with non-zero status: %v\n", exitErr.ExitCode())
+		} else {
+			log.Printf("Error waiting for player: %v\n", err)
+		}
+	}
 }
