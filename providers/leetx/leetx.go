@@ -13,6 +13,7 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/dustin/go-humanize"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/net/html"
 	"golang.org/x/time/rate"
 
 	"github.com/stl3/torrodle/models"
@@ -63,7 +64,9 @@ func (provider *provider) extractor(surl string, page int, results *[]models.Sou
 		return
 	},
 		retry.RetryIf(func(err error) bool {
-			return err.Error() == http.StatusText(503)
+			// return err.Error() == http.StatusText(503)
+			return err.Error() == http.StatusText(http.StatusServiceUnavailable)
+
 		}),
 		retry.Attempts(3),
 	)
@@ -79,6 +82,17 @@ func (provider *provider) extractor(surl string, page int, results *[]models.Sou
 	table.Find("tr").Each(func(i int, tr *goquery.Selection) {
 		// title
 		title := tr.Find("td.coll-1.name").Text()
+		if containsHTMLEncodedEntities(title) {
+			decodedTitle, err := decodeHTMLText(title)
+			if err != nil {
+				logrus.Errorln("Error decoding HTML text:", err)
+				// return
+				decodedTitle = title
+			}
+			logrus.Infof("Decoded Title: %s", decodedTitle)
+		} else {
+			logrus.Infof("Title: %s", title)
+		}
 		// seeders
 		s := tr.Find("td.coll-2.seeds").Text()
 		seeders, _ := strconv.Atoi(strings.TrimSpace(s))
@@ -135,4 +149,30 @@ func (provider *provider) extractor(surl string, page int, results *[]models.Sou
 	}
 	group.Wait()
 	wg.Done()
+}
+
+// Checks if the text contains HTML-encoded entities
+func containsHTMLEncodedEntities(text string) bool {
+	return strings.ContainsAny(text, "&<>'\"")
+}
+
+// Decodes HTML-encoded text
+func decodeHTMLText(text string) (string, error) {
+	var decodedText string
+	tokenizer := html.NewTokenizer(strings.NewReader(text))
+
+	for {
+		tokenType := tokenizer.Next()
+		switch tokenType {
+		case html.ErrorToken:
+			err := tokenizer.Err()
+			if err != nil {
+				return text, err // Return the original text and the decoding error
+			}
+			return decodedText, nil // Return the decoded text
+		case html.TextToken:
+			token := tokenizer.Token()
+			decodedText += token.Data
+		}
+	}
 }
