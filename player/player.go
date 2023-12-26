@@ -14,18 +14,20 @@ import (
 // Players holds structs of all supported players.
 var Players = []Player{
 	{
-		Name:          "mpv",
-		DarwinCommand: []string{"mpv"},
-		LinuxCommand:  []string{"mpv"},
-		WindowsCommand: []string{"mpv", "--no-terminal"}, // Default
-		// WindowsCommand:  []string{"mpv", "--profile=movie-flask", "--no-terminal"}, // Just for use with my mpv profile
+		Name:           "mpv",
+		DarwinCommand:  []string{"mpv"},
+		LinuxCommand:   []string{"mpv"},
+		AndroidCommand: []string{"mpv"},
+		// WindowsCommand: []string{"mpv", "--no-resume-playback", "--no-terminal"}, // Default
+		WindowsCommand:  []string{"mpv", "--profile=movie-flask", "--no-resume-playback", "--no-terminal"}, // Just for use with my mpv profile
 		SubtitleCommand: "--sub-file=",
 		TitleCommand:    "--force-media-title=", // Shows the movie folder name as title instead of http://localhost:port
 	},
 	{
-		Name:          "vlc",
-		DarwinCommand: []string{"/Applications/VLC.app/Contents/MacOS/VLC"},
-		LinuxCommand:  []string{"vlc"},
+		Name:           "vlc",
+		DarwinCommand:  []string{"/Applications/VLC.app/Contents/MacOS/VLC"},
+		LinuxCommand:   []string{"vlc"},
+		AndroidCommand: []string{"vlc"},
 		// WindowsCommand:  []string{"%ProgramFiles%\\VideoLAN\\VLC\\vlc.exe"},
 		WindowsCommand:  []string{"vlc.exe"}, // vlc player should be in users env path in case installed in non-default path
 		SubtitleCommand: "--sub-file=",
@@ -48,6 +50,7 @@ type Player struct {
 	DarwinCommand   []string
 	LinuxCommand    []string
 	WindowsCommand  []string
+	AndroidCommand  []string
 	SubtitleCommand string
 	TitleCommand    string
 	started         bool
@@ -68,6 +71,8 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		command = player.LinuxCommand
 	case "windows":
 		command = player.WindowsCommand
+	case "android":
+		command = player.AndroidCommand
 	}
 	command = append(command, url)
 	if subtitlePath != "" {
