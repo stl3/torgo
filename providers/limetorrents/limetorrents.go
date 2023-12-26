@@ -2,7 +2,6 @@ package limetorrents
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -54,7 +53,8 @@ func New() models.ProviderInterface {
 	} else {
 		// Both sites are down, you can handle this case accordingly
 		// panic("Both LimeTorrents sites are down")
-		log.Fatal("Both LimeTorrents sites are down")
+		// log.Fatal("Both LimeTorrents sites are down")
+		Site = DefaultSite
 	}
 
 	provider := &provider{}
