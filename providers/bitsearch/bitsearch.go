@@ -9,6 +9,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/dustin/go-humanize"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/net/html"
 
 	"github.com/stl3/torrodle/models"
 	"github.com/stl3/torrodle/request"
@@ -64,41 +65,34 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 	resultsContainer.Each(func(_ int, result *goquery.Selection) {
 		// Extract information from each search result item
 		title := result.Find("h5.title a").Text()
+		// Output the decoded title if needed
+		if containsHTMLEncodedEntities(title) {
+			decodedTitle, err := decodeHTMLText(title)
+			if err != nil {
+				fmt.Println("Error decoding HTML text:", err)
+				// return
+				decodedTitle = title
+			}
+			fmt.Println("Decoded Title:", decodedTitle)
+		} else {
+			fmt.Println("Title:", title)
+		}
+
 		URL, _ := result.Find("h5.title a").Attr("href")
 		// Extract other relevant information
 		filesizeStr := result.Find("div.stats div:nth-child(2)").Text()
-		// filesize, _ := humanize.ParseBytes(strings.TrimSpace(filesizeStr))
-		// sizeStr := result.Find("div.stats div:contains('Size')").Text()
-		// sizeStr = strings.TrimSpace(strings.TrimPrefix(sizeStr, "Size"))
 		filesize, err := humanize.ParseBytes(filesizeStr)
-		// if err != nil {
-		// 	// Handle the error, e.g., print or log it
-		// 	fmt.Println("Error parsing size:", err)
-		// } else {
-		// 	// Now 'size' contains the size in bytes
-		// 	fmt.Println("Size in bytes:", filesize)
-		// }
-
 		seedersStr := result.Find("div.stats div:nth-child(3) font").Text()
-		// seedersStr := result.Find("div.stats div:contains('Seeder') font").Text()
-		// seedersStr := result.Find("div.w3-col.s12.mt-1 > li:nth-child(2) > div.info.px-3.pt-2.pb-3 > div > div > div > div:nth-child(4)").Text()
 		seeders, _ := strconv.Atoi(seedersStr)
-
 		leechersStr := result.Find("div.stats div:nth-child(4) font").Text()
-		// leechersStr := result.Find("div.stats div:contains('Leecher') font").Text()
-		// leechersStr := result.Find("body > main > div.container.mt-2 > div > div.w3-col.s12.mt-1 > li:nth-child(2) > div.info.px-3.pt-2.pb-3 > div > div > div > div:nth-child(4)").Text()
-		// leechersStr := result.Find("body > main > div.container.mt-2 > div > div.w3-col.s12.mt-1 > li:nth-child(2) > div.info.px-3.pt-2.pb-3 > div > div > div > div:nth-child(4)").Text()
 		leechers, _ := strconv.Atoi(leechersStr)
-		// Update leechers extraction to consider the font color
-		// leechersStr := result.Find("div.stats div:contains('Leecher') font").Text()
-		// leechers, _ := strconv.Atoi(leechersStr)
 
 		if err != nil {
 			// Print the leechers string for debugging
 			fmt.Println("Error converting leechersStr to int:", err)
 			fmt.Println("Leechers string:", leechersStr)
 		}
-		fmt.Println("Leechers count:", leechers)
+		// fmt.Println("Leechers count:", leechers)
 		magnet, _ := result.Find("div.links a.dl-magnet").Attr("href")
 
 		source := models.Source{
@@ -116,4 +110,30 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 	logrus.Debugf("Bitsearch: [%d] Amount of results: %d", page, len(sources))
 	*results = append(*results, sources...)
 	wg.Done()
+}
+
+// Checks if the text contains HTML-encoded entities
+func containsHTMLEncodedEntities(text string) bool {
+	return strings.ContainsAny(text, "&<>'\"")
+}
+
+// Decodes HTML-encoded text
+func decodeHTMLText(text string) (string, error) {
+	var decodedText string
+	tokenizer := html.NewTokenizer(strings.NewReader(text))
+
+	for {
+		tokenType := tokenizer.Next()
+		switch tokenType {
+		case html.ErrorToken:
+			err := tokenizer.Err()
+			if err != nil {
+				return text, err // Return the original text and the decoding error
+			}
+			return decodedText, nil // Return the decoded text
+		case html.TextToken:
+			token := tokenizer.Token()
+			decodedText += token.Data
+		}
+	}
 }
