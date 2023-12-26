@@ -63,13 +63,13 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 		if containsHTMLEncodedEntities(title) {
 			decodedTitle, err := decodeHTMLText(title)
 			if err != nil {
-				fmt.Println("Error decoding HTML text:", err)
+				logrus.Errorln("Error decoding HTML text:", err)
 				// return
 				decodedTitle = title
 			}
-			fmt.Println("Decoded Title:", decodedTitle)
+			logrus.Infof("Decoded Title: %s", decodedTitle)
 		} else {
-			fmt.Println("Title:", title)
+			logrus.Infof("Title: %s", title)
 		}
 		URL, _ := result.Find("h5 a").Attr("href")
 
