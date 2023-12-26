@@ -88,9 +88,9 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	if subtitlePath != "" {
 		command = append(command, player.SubtitleCommand+subtitlePath)
 	}
-	if title != "" {
-		command = append(command, player.TitleCommand+title)
-	}
+	// if title != "" {
+	// 	command = append(command, player.TitleCommand+title)
+	// }
 	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", command)
 	// logrus.Debugf("command: %v\n", command)
 	cmd := exec.Command(command[0], command[1:]...)
