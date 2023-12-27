@@ -14,10 +14,11 @@ import (
 // Players holds structs of all supported players.
 var Players = []Player{
 	{
-		Name:           "mpv",
-		DarwinCommand:  []string{"mpv"},
-		LinuxCommand:   []string{"mpv"},
-		AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-n", "is.xyz.mpv/.MPVActivity"},
+		Name:          "mpv",
+		DarwinCommand: []string{"mpv"},
+		LinuxCommand:  []string{"mpv"},
+		// AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-n", "is.xyz.mpv/.MPVActivity"},
+		AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
 		// AndroidCommand: []string{"mpv"},
 		// WindowsCommand: []string{"mpv", "--no-resume-playback", "--no-terminal"}, // Default
 		WindowsCommand:  []string{"mpv", "--profile=movie-flask", "--no-resume-playback", "--no-terminal"}, // Just for use with my mpv profile
@@ -69,8 +70,9 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		command = player.WindowsCommand
 	case "android":
 		// Handle Android case separately for mpv
-		player.startAndroidMPV(url)
-		// return
+		command = player.AndroidCommand
+		// // player.startAndroidMPV(url)
+		// // return
 		// default:
 		// 	command = player.WindowsCommand // Default to Windows command for unknown OS
 	}
@@ -78,6 +80,8 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	// Append the video URL to the command for non-Android cases
 	if runtime.GOOS != "android" {
 		command = append(command, url)
+	} else {
+		command = append(command, url, "-n", "is.xyz.mpv/.MPVActivity")
 	}
 	// command = append(command, url)
 	// if subtitlePath != "" {
@@ -134,29 +138,29 @@ func (player *Player) startAndroidMPV(url string) {
 
 	// time.Sleep(7 * time.Second)
 	// cmd0 := exec.Command("mpv-go", url)
-	cmd0 := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
-	err := cmd0.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-	// cmd := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
+	// // cmd0 := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
+	// // err := cmd0.Run()
+	// // if err != nil {
+	// // 	log.Fatal(err)
+	// // }
+	cmd := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
 	// // urlWithQuotes := "\"" + url + "\""
 
 	// // cmd := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", urlWithQuotes, "-n", "is.xyz.mpv/.MPVActivity")
-	// player.started = true
-	// log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd.Args)
-	// if err := cmd.Start(); err != nil {
-	// 	log.Printf("Error starting player: %v\n", err)
-	// 	return
-	// }
-	// // Wait for the player process to complete
-	// if err := cmd.Wait(); err != nil {
-	// 	exitErr, ok := err.(*exec.ExitError)
-	// 	if ok {
-	// 		log.Printf("Player exited with non-zero status: %v\n", exitErr.ExitCode())
-	// 	} else {
-	// 		log.Printf("Error waiting for player: %v\n", err)
-	// 	}
-	// }
+	player.started = true
+	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd.Args)
+	if err := cmd.Start(); err != nil {
+		log.Printf("Error starting player: %v\n", err)
+		return
+	}
+	// Wait for the player process to complete
+	if err := cmd.Wait(); err != nil {
+		exitErr, ok := err.(*exec.ExitError)
+		if ok {
+			log.Printf("Player exited with non-zero status: %v\n", exitErr.ExitCode())
+		} else {
+			log.Printf("Error waiting for player: %v\n", err)
+		}
+	}
 	player.started = false
 }
