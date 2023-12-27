@@ -35,6 +35,10 @@ var Players = []Player{
 		SubtitleCommand: "--sub-file=",
 		TitleCommand:    "--meta-title=", //
 	},
+	{
+		Name:           "KMPlayer",
+		WindowsCommand: []string{"KMPlayer.exe"}, // Do people use this?
+	},
 }
 
 // Player manages the execiution of a media player.
