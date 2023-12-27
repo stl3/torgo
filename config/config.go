@@ -52,7 +52,7 @@ func InitConfig(path string) error {
 		ResultsLimit: 100,
 		TorrentPort:  10800,
 		HostPort:     8789,
-		ECPT:         25,
+		ECPT:         45,
 		HOCPT:        25,
 		THOC:         50,
 	}
