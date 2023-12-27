@@ -3,6 +3,7 @@ package limetorrents
 import (
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -42,7 +43,7 @@ func checkSiteAvailability(siteURL string) bool {
 }
 
 func New() models.ProviderInterface {
-	var Site string
+	// var Site string
 
 	if checkSiteAvailability(DefaultSite) {
 		Site = DefaultSite
@@ -86,23 +87,11 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 
 	var sources []models.Source
 	doc, _ := goquery.NewDocumentFromReader(strings.NewReader(html))
-	table := doc.Find("table.table2")
-	table.Find(`tr[bgcolor="#F4F4F4"]`).Each(func(_ int, tr *goquery.Selection) {
-		// title and url
-		var magnet, title, URL string
-		tr.Find("div.tt-name").Find("a").Each(func(i int, a *goquery.Selection) {
-			cls, _ := a.Attr("class")
-			if cls == "csprite_dl14" {
-				torrent, _ := a.Attr("href")
-				torrent = strings.Replace(torrent, "http://itorrents.org/torrent/", "", 1)
-				torrentFile := strings.Split(torrent, "?")[0]
-				hash := strings.TrimSuffix(torrentFile, ".torrent")
-				magnet = fmt.Sprintf("magnet:?xt=urn:btih:%v", hash)
-			} else {
-				title = strings.TrimSpace(a.Text())
-				URL, _ = a.Attr("href")
-			}
-		})
+	resultsContainer := doc.Find("table.table2 tbody tr")
+
+	resultsContainer.Each(func(_ int, result *goquery.Selection) {
+		titleContainer := result.Find("td.tdleft div.tt-name a:last-child")
+		title := titleContainer.Text()
 		if containsHTMLEncodedEntities(title) {
 			decodedTitle, err := decodeHTMLText(title)
 			if err != nil {
@@ -114,20 +103,32 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 		} else {
 			logrus.Infof("Title: %s", title)
 		}
-		// filesize
-		filesize, _ := humanize.ParseBytes(strings.TrimSpace(tr.Find("td.tdnormal").Eq(1).Text())) // convert human words to bytes number
-		// seeders
-		s := tr.Find("td.tdseed").Text()
-		seeders, _ := strconv.Atoi(strings.Replace(s, ",", "", -1))
-		// leechers
-		l := tr.Find("td.tdleech").Text()
-		leechers, _ := strconv.Atoi(strings.Replace(l, ",", "", -1))
-		// ---
-		if title == "" || URL == "" || seeders == 0 {
+		URL, _ := result.Find("td.tdleft > div.tt-name > a:nth-child(2)").Attr("href")
+		filesizeStr := result.Find("td.tdnormal:nth-child(3)").Text()
+		// filesize, err := humanize.ParseBytes(filesizeStr)
+		filesize, _ := humanize.ParseBytes(filesizeStr)
+		seedersStr := result.Find("td.tdseed").Text()
+		seeders, _ := strconv.Atoi(seedersStr)
+		leechersStr := result.Find("td.tdleech").Text()
+		leechers, _ := strconv.Atoi(leechersStr)
+
+		// if err != nil {
+		// 	// Handle error if conversion fails
+		// 	// fmt.Println("Error converting filesizeStr to bytes:", err)
+		// 	fmt.Println("Filesize string:", filesizeStr)
+		// }
+		magnetURL, _ := result.Find("td.tdleft > div.tt-name > a.csprite_dl14").Attr("href")
+		re := regexp.MustCompile(`torrent/([^/.]+)\.torrent`)
+		matches := re.FindStringSubmatch(magnetURL)
+		if len(matches) < 2 {
+			// fmt.Println("Error extracting hash from URL")
 			return
 		}
+		hash := matches[1]
+		magnet := fmt.Sprintf("magnet:?xt=urn:btih:%s", hash)
+
 		source := models.Source{
-			From:     "LimeTorrents",
+			From:     "Limetorrents",
 			Title:    title,
 			URL:      Site + URL,
 			Seeders:  seeders,
