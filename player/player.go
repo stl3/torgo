@@ -133,7 +133,7 @@ func GetPlayer(name string) *Player {
 func (player *Player) startAndroidMPV(url string) {
 
 	// time.Sleep(7 * time.Second)
-	cmd0 := exec.Command("mpv", url)
+	cmd0 := exec.Command("mpv-go", url)
 	err := cmd0.Run()
 	if err != nil {
 		log.Fatal(err)
