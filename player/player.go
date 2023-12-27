@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
-	"time"
 )
 
 // Players holds structs of all supported players.
@@ -71,9 +70,9 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	case "android":
 		// Handle Android case separately for mpv
 		player.startAndroidMPV(url)
-		return
-	default:
-		command = player.WindowsCommand // Default to Windows command for unknown OS
+		// return
+		// default:
+		// 	command = player.WindowsCommand // Default to Windows command for unknown OS
 	}
 
 	// Append the video URL to the command for non-Android cases
@@ -133,7 +132,12 @@ func GetPlayer(name string) *Player {
 // startAndroidMPV launches mpv on Android using the specific intent.
 func (player *Player) startAndroidMPV(url string) {
 
-	time.Sleep(7 * time.Second)
+	// time.Sleep(7 * time.Second)
+	cmd0 := exec.Command("mpv", url)
+	err := cmd0.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
 	cmd := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
 	// urlWithQuotes := "\"" + url + "\""
 
