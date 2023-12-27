@@ -94,8 +94,21 @@ func pickProviders(options []string) []interface{} {
 
 func inputQuery() string {
 	query := ""
-	prompt := &survey.Input{Message: "Search Torrents:"}
+	// prompt := &survey.Input{Message: "Search Torrents:"}
+	prompt := &survey.Input{
+		Message: "Valid searches:\n" +
+			"- Avatar the Way of Water\n" +
+			"- (if no results use)=> Avatar.the.Way.of.Water\n" +
+			"- Do the same for TV Shows.\n" +
+			"- tv.show.s01e01\n" +
+			"- movie.name.2023\n" +
+			"Search Torrents:",
+	}
 	_ = survey.AskOne(prompt, &query, nil)
+
+	// // Properly encode the search query
+	// query = url.QueryEscape(query)
+	fmt.Println(query)
 	return query
 }
 
@@ -574,6 +587,9 @@ boop~
 	}
 	query := inputQuery()
 	query = strings.TrimSpace(query)
+	// Replace spaces with dots
+	// query = strings.ReplaceAll(query, " ", ".")
+
 	if query == "" {
 		errorPrint("Operation aborted")
 		return
