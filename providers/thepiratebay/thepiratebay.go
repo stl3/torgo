@@ -20,6 +20,7 @@ const (
 	Name = "ThePirateBay"
 	// Site = "https://thepiratebay.org"
 	Site = "https://prbay.top"
+	// Site = "https://thepiratebay7.com/"
 )
 
 type provider struct {
@@ -31,23 +32,27 @@ func New() models.ProviderInterface {
 	provider.Name = Name
 	provider.Site = Site
 	provider.Categories = models.Categories{
-		// http://prbay.top/search/test/1/99/0
-		// http://prbay.top/search/red/1/99/0
 		All:   "/search/%v/%d/99/0",
 		Movie: "/search/%v/%d/99/201",
 		TV:    "/search/%v/%d/99/205",
-		// http://prbay.top/search/red/1/99/501
-		Porn: "/search/%v/%d/99/501",
-		// All:   "/search.php?q=%d&cat=201&page=%v&orderby=",
-		// Movie: "/search.php?q=%v&cat=201&page=%d&orderby=",
-		// TV:    "/search.php?q=%v&cat=205&page=%d&orderby=",
-		// Porn:  "/search.php?q=%v&cat=500&page=%d&orderby=",
+		Porn:  "/search/%v/%d/99/501",
 	}
 	return provider
 }
 
+// func (provider *provider) Search(query string, count int, categoryURL models.CategoryURL) ([]models.Source, error) {
+// 	results, err := provider.Query(query, categoryURL, count, 30, 0, extractor)
+// 	return results, err
+// }
+
+// pbay doesn't seem to like queries with spaces, but will gladly accept them
+// in places of the spaces - they will still return results that have spaces
+// or dots.
 func (provider *provider) Search(query string, count int, categoryURL models.CategoryURL) ([]models.Source, error) {
-	results, err := provider.Query(query, categoryURL, count, 30, 0, extractor)
+	// Replace spaces with dots
+	encodedQuery := strings.ReplaceAll(query, " ", ".")
+	// encodedQuery := url.QueryEscape(query)
+	results, err := provider.Query(encodedQuery, categoryURL, count, 30, 0, extractor)
 	return results, err
 }
 
@@ -61,7 +66,6 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 	}
 	var sources []models.Source
 	doc, _ := goquery.NewDocumentFromReader(strings.NewReader(html))
-
 	table := doc.Find("table#searchResult").Find("tbody")
 	table.Find("tr").Each(func(i int, tr *goquery.Selection) {
 		tds := tr.Find("td")
@@ -102,9 +106,10 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 		magnet, _ := tds.Eq(1).Find(`a[title="Download this torrent using magnet"]`).Attr("href")
 		// ---
 		source := models.Source{
-			From:     "ThePirateBay",
-			Title:    strings.TrimSpace(title),
-			URL:      Site + URL,
+			From:  "ThePirateBay",
+			Title: strings.TrimSpace(title),
+			// URL:      Site + URL,
+			URL:      URL,
 			Seeders:  seeders,
 			Leechers: leechers,
 			FileSize: int64(filesize),
