@@ -9,6 +9,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/dustin/go-humanize"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/net/html"
 
 	"github.com/stl3/torrodle/models"
 	"github.com/stl3/torrodle/request"
@@ -53,31 +54,39 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 	}
 	var sources []models.Source
 	doc, _ := goquery.NewDocumentFromReader(strings.NewReader(html))
-	div := doc.Find("div.results")
-	div.Find("dl").Each(func(i int, s *goquery.Selection) {
-		// title
-		title := s.Find("dt").Find("a").Text()
 
-		spans := s.Find("dd").Find("span")
-		// filesize
-		filesize, _ := humanize.ParseBytes(strings.TrimSpace(spans.Eq(2).Text()))
-		// seeders
-		seeders, _ := strconv.Atoi(spans.Eq(3).Text())
-		// leechers
-		leechers, _ := strconv.Atoi(spans.Eq(4).Text())
-		// url
-		URL, _ := s.Find("dt").Find("a").Attr("href")
-		// magnet
-		hash := strings.TrimLeft(URL, "/")
-		magnet := fmt.Sprintf("magnet:?xt=urn:btih:%v", hash)
+	resultsContainer := doc.Find("div.results dl")
 
-		if title == "" || URL == "" || seeders == 0 {
-			return
+	resultsContainer.Each(func(_ int, result *goquery.Selection) {
+		// Extract information from each search result item
+		title := result.Find("dt a").Text()
+		if containsHTMLEncodedEntities(title) {
+			decodedTitle, err := decodeHTMLText(title)
+			if err != nil {
+				logrus.Errorln("Error decoding HTML text:", err)
+				// return
+				decodedTitle = title
+			}
+			logrus.Infof("Decoded Title: %s", decodedTitle)
+		} else {
+			logrus.Infof("Title: %s", title)
 		}
-		// ---
+		URL, _ := result.Find("dt a").Attr("href")
+
+		filesizeStr := result.Find("dd span:nth-child(3)").Text()
+		filesize, _ := humanize.ParseBytes(filesizeStr)
+
+		seedersStr := result.Find("dd span:nth-child(4)").Text()
+		seeders, _ := strconv.Atoi(seedersStr)
+
+		leechersStr := result.Find("dd span:nth-child(5)").Text()
+		leechers, _ := strconv.Atoi(leechersStr)
+
+		magnet, _ := result.Find("dd a i.fa-magnet").Parent().Attr("href")
+
 		source := models.Source{
-			From:     "Torrentz2",
-			Title:    strings.TrimSpace(title),
+			From:     "Bitsearch",
+			Title:    title,
 			URL:      Site + URL,
 			Seeders:  seeders,
 			Leechers: leechers,
@@ -86,7 +95,35 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 		}
 		sources = append(sources, source)
 	})
+
 	logrus.Debugf("Torrentz2: [%d] Amount of results: %d", page, len(sources))
 	*results = append(*results, sources...)
 	wg.Done()
+}
+
+// Checks if the text contains HTML-encoded entities
+func containsHTMLEncodedEntities(text string) bool {
+	return strings.ContainsAny(text, "&<>'\"")
+}
+
+// Decodes HTML-encoded text
+func decodeHTMLText(text string) (string, error) {
+	var decodedText string
+	tokenizer := html.NewTokenizer(strings.NewReader(text))
+
+	for {
+		tokenType := tokenizer.Next()
+		switch tokenType {
+		case html.ErrorToken:
+			err := tokenizer.Err()
+			if err != nil {
+				return text, err // Return the original text and the decoding error
+			}
+			// return decodedText, nil // Return the decoded text
+			return html.UnescapeString(decodedText), nil // Use UnescapeString on the decoded text
+		case html.TextToken:
+			token := tokenizer.Token()
+			decodedText += token.Data
+		}
+	}
 }
