@@ -26,7 +26,7 @@ import (
 	"github.com/stl3/torrodle/player"
 )
 
-const version = "0.1"
+const version = "0.1-beta"
 
 var u, _ = user.Current()
 var home = u.HomeDir
@@ -156,23 +156,50 @@ func chooseResults(results []models.Source) string {
 		tablewriter.Colors{tablewriter.FgHiRedColor},
 		tablewriter.Colors{tablewriter.FgHiCyanColor},
 	)
+	// for i, result := range results {
+	// 	title := strings.TrimSpace(result.Title)
+	// 	// Check if any field is non-empty
+	// 	if result.Title != "" || result.Seeders > 0 || result.Leechers > 0 || result.FileSize > 0 {
+	// 		isEng := utf8.RuneCountInString(title) == len(title)
+	// 		if isEng {
+	// 			if len(title) > 45 {
+	// 				title = title[:42] + "..."
+	// 			}
+	// 		} else {
+	// 			if utf8.RuneCountInString(title) > 25 {
+	// 				title = string([]rune(title)[:22]) + "..."
+	// 			}
+	// 		}
+	// 		table.Append([]string{strconv.Itoa(i + 1), title, strconv.Itoa(result.Seeders), strconv.Itoa(result.Leechers), humanize.Bytes(uint64(result.FileSize))})
+	// 	}
+	// }
 	for i, result := range results {
 		title := strings.TrimSpace(result.Title)
-		// Check if any field is non-empty
+
 		if result.Title != "" || result.Seeders > 0 || result.Leechers > 0 || result.FileSize > 0 {
 			isEng := utf8.RuneCountInString(title) == len(title)
+
+			// Adjusted truncation limits for titles
 			if isEng {
-				if len(title) > 45 {
-					title = title[:42] + "..."
+				if len(title) > 65 { // Increase the limit for English titles
+					title = title[:55] + "..."
 				}
 			} else {
-				if utf8.RuneCountInString(title) > 25 {
-					title = string([]rune(title)[:22]) + "..."
+				if utf8.RuneCountInString(title) > 45 { // Increase the limit for non-English titles
+					title = string([]rune(title)[:42]) + "..."
 				}
 			}
-			table.Append([]string{strconv.Itoa(i + 1), title, strconv.Itoa(result.Seeders), strconv.Itoa(result.Leechers), humanize.Bytes(uint64(result.FileSize))})
+
+			table.Append([]string{
+				strconv.Itoa(i + 1),
+				title,
+				strconv.Itoa(result.Seeders),
+				strconv.Itoa(result.Leechers),
+				humanize.Bytes(uint64(result.FileSize)),
+			})
 		}
 	}
+
 	table.Render()
 
 	// Prompt choice
