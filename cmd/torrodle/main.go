@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
 	"os/user"
 	"path/filepath"
@@ -458,6 +459,13 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 	if player == nil {
 		c.Serve()
 		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+		/////////////////
+		cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
+		///////////////
 		// goroutine for the ticker loop use for PrintProgress
 		go func() {
 			ticker := time.NewTicker(1500 * time.Millisecond)
