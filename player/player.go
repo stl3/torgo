@@ -18,7 +18,7 @@ var Players = []Player{
 		DarwinCommand: []string{"mpv"},
 		LinuxCommand:  []string{"mpv"},
 		// AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-n", "is.xyz.mpv/.MPVActivity"},
-		AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
+		AndroidCommand: []string{"nohup", "am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
 		// AndroidCommand: []string{"mpv"},
 		// WindowsCommand: []string{"mpv", "--no-resume-playback", "--no-terminal"}, // Default
 		WindowsCommand:  []string{"mpv", "--profile=movie-flask", "--no-resume-playback", "--no-terminal"}, // Just for use with my mpv profile
@@ -81,7 +81,7 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	if runtime.GOOS != "android" {
 		command = append(command, url)
 	} else {
-		command = append(command, url, "-n", "is.xyz.mpv/.MPVActivity")
+		command = append(command, url, "-n", "is.xyz.mpv/.MPVActivity", ">/dev/null", "2>&1", "&")
 	}
 	// command = append(command, url)
 	// if subtitlePath != "" {
