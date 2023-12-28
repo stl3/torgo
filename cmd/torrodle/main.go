@@ -132,7 +132,10 @@ func pickPlayer() string {
 	for _, p := range player.Players {
 		options = append(options, p.Name)
 	}
-	fmt.Println("Select None for standalone/mpv-android/vlc-android options")
+	// fmt.Println("Select None for standalone/mpv-android/vlc-android options")
+	fmt.Println(color.YellowString("Select None for standalone/mpv-android/vlc-android options"))
+	// fmt.Println(color.GreenString("Select None for standalone/mpv-android/vlc-android options"))
+
 	prompt := &survey.Select{
 		Message: "Player:",
 		Options: options,
