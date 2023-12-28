@@ -76,7 +76,7 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 
 	// // // // Append the video URL to the command for non-Android cases
 	// // // // if runtime.GOOS != "android" {
-	// // // command = append(command, url)
+	command = append(command, url)
 	// // // // command = append(command, url+`/`)
 
 	// // // // } else {
