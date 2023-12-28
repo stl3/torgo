@@ -16,22 +16,22 @@ import (
 // Players holds structs of all supported players.
 var Players = []Player{
 	{
-		Name:           "mpv",
-		DarwinCommand:  []string{"mpv"},
-		LinuxCommand:   []string{"mpv"},
-		AndroidCommand: []string{},
-		// // AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
+		Name:          "mpv",
+		DarwinCommand: []string{"mpv"},
+		LinuxCommand:  []string{"mpv"},
+		// AndroidCommand: []string{},
+		AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
 		// WindowsCommand: []string{"mpv", "--no-resume-playback", "--no-terminal"}, // Default
 		WindowsCommand:  []string{"mpv", "--profile=movie-flask", "--no-resume-playback", "--no-terminal"}, // Just for use with my mpv profile
 		SubtitleCommand: "--sub-file=",
 		TitleCommand:    "--force-media-title=", // Shows the movie folder name as title instead of http://localhost:port
 	},
 	{
-		Name:           "vlc",
-		DarwinCommand:  []string{"/Applications/VLC.app/Contents/MacOS/VLC"},
-		LinuxCommand:   []string{"vlc"},
-		AndroidCommand: []string{},
-		// // AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
+		Name:          "vlc",
+		DarwinCommand: []string{"/Applications/VLC.app/Contents/MacOS/VLC"},
+		LinuxCommand:  []string{"vlc"},
+		// AndroidCommand: []string{},
+		AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
 		// WindowsCommand:  []string{"%ProgramFiles%\\VideoLAN\\VLC\\vlc.exe"},
 		WindowsCommand:  []string{"vlc.exe"}, // vlc player should be in users env path in case installed in non-default path
 		SubtitleCommand: "--sub-file=",
@@ -72,7 +72,7 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	case "windows":
 		command = player.WindowsCommand
 	case "android":
-		// command = player.AndroidCommand
+		command = player.AndroidCommand
 		// // player.startAndroidMPV(url)
 		// mpv_android(url)
 		// player.started = true
@@ -84,13 +84,13 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	// command = append(command, url+`/`)
 
 	// } else {
-	if player.Name == "mpv" && runtime.GOOS != "android" {
+	if player.Name == "mpv" && runtime.GOOS == "android" {
 		// Do something based on the condition
 		fmt.Println("Using mpv")
 		// time.Sleep(3 * time.Second)
 		command = append(command, "-n", "is.xyz.mpv/.MPVActivity")
 		// } else if player.Type == vlc {
-	} else if player.Name == "vlc" && runtime.GOOS != "android" {
+	} else if player.Name == "vlc" && runtime.GOOS == "android" {
 		// Do something else
 		fmt.Println("Using VLC")
 		// time.Sleep(3 * time.Second)
@@ -109,25 +109,25 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 
 	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", command)
 	// logrus.Debugf("command: %v\n", command)
-	if runtime.GOOS != "android" {
-		cmd := exec.Command(command[0], command[1:]...)
-		time.Sleep(6 * time.Second)
-		player.started = true
 
-		if err := cmd.Start(); err != nil {
-			log.Printf("Error starting player: %v\n", err)
-			return
-		}
-		// Wait for the player process to complete
-		if err := cmd.Wait(); err != nil {
-			exitErr, ok := err.(*exec.ExitError)
-			if ok {
-				log.Printf("Player exited with non-zero status: %v\n", exitErr.ExitCode())
-			} else {
-				log.Printf("Error waiting for player: %v\n", err)
-			}
+	cmd := exec.Command(command[0], command[1:]...)
+	time.Sleep(6 * time.Second)
+	player.started = true
+
+	if err := cmd.Start(); err != nil {
+		log.Printf("Error starting player: %v\n", err)
+		return
+	}
+	// Wait for the player process to complete
+	if err := cmd.Wait(); err != nil {
+		exitErr, ok := err.(*exec.ExitError)
+		if ok {
+			log.Printf("Player exited with non-zero status: %v\n", exitErr.ExitCode())
+		} else {
+			log.Printf("Error waiting for player: %v\n", err)
 		}
 	}
+
 	// Reset the started flag to allow for subsequent calls
 	player.started = false
 
