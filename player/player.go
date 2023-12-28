@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 )
 
 // // PlayerType represents the type of media player.
@@ -99,11 +100,13 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		if player.Name == "mpv" {
 			// Do something based on the condition
 			fmt.Println("Using mpv")
+			time.Sleep(7 * time.Second)
 			command = append(command, url, "-n", "is.xyz.mpv/.MPVActivity")
 			// } else if player.Type == vlc {
 		} else if player.Name == "vlc" {
 			// Do something else
 			fmt.Println("Using VLC")
+			time.Sleep(7 * time.Second)
 			command = append(command, url, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
 			// Add more commands or actions as needed
 		}
@@ -168,34 +171,34 @@ func GetPlayer(name string) *Player {
 	return nil
 }
 
-// startAndroidMPV launches mpv on Android using the specific intent.
-func (player *Player) startAndroidMPV(url string) {
+// // startAndroidMPV launches mpv on Android using the specific intent.
+// func (player *Player) startAndroidMPV(url string) {
 
-	// time.Sleep(7 * time.Second)
-	// cmd0 := exec.Command("mpv-go", url)
-	// // cmd0 := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
-	// // err := cmd0.Run()
-	// // if err != nil {
-	// // 	log.Fatal(err)
-	// // }
-	cmd := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
-	// // urlWithQuotes := "\"" + url + "\""
+// 	// time.Sleep(7 * time.Second)
+// 	// cmd0 := exec.Command("mpv-go", url)
+// 	// // cmd0 := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
+// 	// // err := cmd0.Run()
+// 	// // if err != nil {
+// 	// // 	log.Fatal(err)
+// 	// // }
+// 	cmd := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
+// 	// // urlWithQuotes := "\"" + url + "\""
 
-	// // cmd := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", urlWithQuotes, "-n", "is.xyz.mpv/.MPVActivity")
-	player.started = true
-	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd.Args)
-	if err := cmd.Start(); err != nil {
-		log.Printf("Error starting player: %v\n", err)
-		return
-	}
-	// Wait for the player process to complete
-	if err := cmd.Wait(); err != nil {
-		exitErr, ok := err.(*exec.ExitError)
-		if ok {
-			log.Printf("Player exited with non-zero status: %v\n", exitErr.ExitCode())
-		} else {
-			log.Printf("Error waiting for player: %v\n", err)
-		}
-	}
-	player.started = false
-}
+// 	// // cmd := exec.Command(player.AndroidCommand[0], "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", urlWithQuotes, "-n", "is.xyz.mpv/.MPVActivity")
+// 	player.started = true
+// 	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd.Args)
+// 	if err := cmd.Start(); err != nil {
+// 		log.Printf("Error starting player: %v\n", err)
+// 		return
+// 	}
+// 	// Wait for the player process to complete
+// 	if err := cmd.Wait(); err != nil {
+// 		exitErr, ok := err.(*exec.ExitError)
+// 		if ok {
+// 			log.Printf("Player exited with non-zero status: %v\n", exitErr.ExitCode())
+// 		} else {
+// 			log.Printf("Error waiting for player: %v\n", err)
+// 		}
+// 	}
+// 	player.started = false
+// }
