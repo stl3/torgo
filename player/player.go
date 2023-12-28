@@ -11,6 +11,15 @@ import (
 	"strings"
 )
 
+// PlayerType represents the type of media player.
+type PlayerType int
+
+const (
+	Mpv PlayerType = iota
+	Vlc
+	// Add more player types as needed
+)
+
 // Players holds structs of all supported players.
 var Players = []Player{
 	{
@@ -26,10 +35,10 @@ var Players = []Player{
 		TitleCommand:    "--force-media-title=", // Shows the movie folder name as title instead of http://localhost:port
 	},
 	{
-		Name:          "vlc",
-		DarwinCommand: []string{"/Applications/VLC.app/Contents/MacOS/VLC"},
-		LinuxCommand:  []string{"vlc"},
-		// AndroidCommand: []string{"vlc"},
+		Name:           "vlc",
+		DarwinCommand:  []string{"/Applications/VLC.app/Contents/MacOS/VLC"},
+		LinuxCommand:   []string{"vlc"},
+		AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
 		// WindowsCommand:  []string{"%ProgramFiles%\\VideoLAN\\VLC\\vlc.exe"},
 		WindowsCommand:  []string{"vlc.exe"}, // vlc player should be in users env path in case installed in non-default path
 		SubtitleCommand: "--sub-file=",
@@ -41,9 +50,10 @@ var Players = []Player{
 	},
 }
 
-// Player manages the execiution of a media player.
+// Player manages the execution of a media player.
 type Player struct {
 	Name            string
+	Type            PlayerType // New field to indicate the player type
 	DarwinCommand   []string
 	LinuxCommand    []string
 	WindowsCommand  []string
@@ -81,7 +91,25 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	if runtime.GOOS != "android" {
 		command = append(command, url)
 	} else {
-		command = append(command, url, "-n", "is.xyz.mpv/.MPVActivity", ">/dev/null", "2>&1", "&")
+
+		if player.Type == Mpv {
+			// Do something based on the condition
+			command = append(command, url, "-n", "is.xyz.mpv/.MPVActivity")
+		} else if player.Type == Vlc {
+			// Do something else
+			command = append(command, url, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
+			// Add more commands or actions as needed
+		}
+
+		// // Add additional conditions specific to the "android" case
+		// if player.Type == Mpv: {
+		// 	// Do something based on the condition
+		// 	command = append(command, url, "-n", "is.xyz.mpv/.MPVActivity") //, ">/dev/null", "2>&1", "&")
+		// } else if player.Type == Vlc {
+		// 	// Do something else
+		// 	command = append(command, url, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity") //, ">/dev/null", "2>&1", "&")command = append(command, "--another-option")
+		// 	// org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity -e "title" "${allanime_title}Episode ${ep_no}"
+		// }
 	}
 	// command = append(command, url)
 	// if subtitlePath != "" {
