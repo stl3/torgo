@@ -16,20 +16,20 @@ import (
 // Players holds structs of all supported players.
 var Players = []Player{
 	{
-		Name:           "mpv",
-		DarwinCommand:  []string{"mpv"},
-		LinuxCommand:   []string{"mpv"},
-		AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
+		Name:          "mpv",
+		DarwinCommand: []string{"mpv"},
+		LinuxCommand:  []string{"mpv"},
+		// // AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
 		// WindowsCommand: []string{"mpv", "--no-resume-playback", "--no-terminal"}, // Default
 		WindowsCommand:  []string{"mpv", "--profile=movie-flask", "--no-resume-playback", "--no-terminal"}, // Just for use with my mpv profile
 		SubtitleCommand: "--sub-file=",
 		TitleCommand:    "--force-media-title=", // Shows the movie folder name as title instead of http://localhost:port
 	},
 	{
-		Name:           "vlc",
-		DarwinCommand:  []string{"/Applications/VLC.app/Contents/MacOS/VLC"},
-		LinuxCommand:   []string{"vlc"},
-		AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
+		Name:          "vlc",
+		DarwinCommand: []string{"/Applications/VLC.app/Contents/MacOS/VLC"},
+		LinuxCommand:  []string{"vlc"},
+		// // AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
 		// WindowsCommand:  []string{"%ProgramFiles%\\VideoLAN\\VLC\\vlc.exe"},
 		WindowsCommand:  []string{"vlc.exe"}, // vlc player should be in users env path in case installed in non-default path
 		SubtitleCommand: "--sub-file=",
@@ -70,9 +70,9 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	case "windows":
 		command = player.WindowsCommand
 	case "android":
-		// Handle Android case separately for mpv
-		command = player.AndroidCommand
+		// // 	command = player.AndroidCommand
 		// // player.startAndroidMPV(url)
+		mpv_android(url)
 		// // return
 	}
 
@@ -96,12 +96,12 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	}
 	// }
 
-	// if subtitlePath != "" && runtime.GOOS != "android" {
-	if subtitlePath != "" {
+	if subtitlePath != "" && runtime.GOOS != "android" {
+		// if subtitlePath != "" {
 		command = append(command, player.TitleCommand+title)
 	}
-	// if title != "" && runtime.GOOS != "android" {
-	if title != "" {
+	if title != "" && runtime.GOOS != "android" {
+		// if title != "" {
 		command = append(command, player.TitleCommand+title)
 	}
 
@@ -139,6 +139,14 @@ func GetPlayer(name string) *Player {
 		}
 	}
 	return nil
+}
+
+func mpv_android(url string) {
+	cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
 }
 
 // // startAndroidMPV launches mpv on Android using the specific intent.
