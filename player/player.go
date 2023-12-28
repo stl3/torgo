@@ -5,7 +5,7 @@ We did some modifications on it in order to let it fit into 'torrodle'
 package player
 
 import (
-	"fmt"
+	//"fmt"
 	"log"
 	"os/exec"
 	"runtime"
