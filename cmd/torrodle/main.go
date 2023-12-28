@@ -126,7 +126,6 @@ func pickSortBy() string {
 }
 
 func pickPlayer() string {
-	// options := []string{"None"}
 	options := []string{"None"}
 	// options := []string{"None", "mpv-android", "vlc-android"}
 	playerChoice := ""
@@ -462,29 +461,35 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 	}
 
 	if player == nil {
-		// Prompt user for player choice
-		fmt.Println("Choose player:")
-		fmt.Println("1. Standalone Server")
-		fmt.Println("2. mpv-android")
-		fmt.Println("3. vlc-android")
+		// Define the survey questions
+		var qs = []*survey.Question{
+			{
+				Name: "choice",
+				Prompt: &survey.Select{
+					Message: "Choose player:",
+					Options: []string{"Standalone Server", "mpv-android", "vlc-android"},
+				},
+			},
+		}
 
-		var choice int
-		fmt.Print("Enter your choice (1/2/3): ")
-		_, err := fmt.Scan(&choice)
+		// Ask the user for their choice
+		answers := struct {
+			Choice string
+		}{}
+		err := survey.Ask(qs, &answers)
 		if err != nil {
 			fmt.Println("Error reading choice:", err)
 			return
 		}
 
-		switch choice {
-		case 1:
-			// Standalone Server
+		// Process the user's choice
+		switch answers.Choice {
+		case "Standalone Server":
 			c.Serve()
 			fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-		case 2:
+		case "mpv-android":
 			c.Serve()
 			fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-			// mpv-android
 			if runtime.GOOS == "android" {
 				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
 				err := cmd.Run()
@@ -492,10 +497,9 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 					fmt.Println("Error:", err)
 				}
 			}
-		case 3:
+		case "vlc-android":
 			c.Serve()
 			fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-			// vlc-android
 			if runtime.GOOS == "android" {
 				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
 				err := cmd.Run()
@@ -506,7 +510,8 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		default:
 			fmt.Println("Invalid choice. Please enter 1, 2, or 3.")
 		}
-		// goroutine for the ticker loop use for PrintProgress
+
+		// Goroutine for the ticker loop used for PrintProgress
 		go func() {
 			ticker := time.NewTicker(1500 * time.Millisecond)
 			defer ticker.Stop()
