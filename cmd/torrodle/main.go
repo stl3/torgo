@@ -475,27 +475,27 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		<-sig // Wait for Ctrl+C
 	}
 
-	fmt.Print("\n")
-	infoPrint("Exiting...")
-	// Delete the directory
-	dirPath := filepath.Join(dataDir, c.Torrent.Name())
-	infoPrint("Deleting downloads from: ", filepath.Join(dataDir, c.Torrent.Name()))
-	if err := os.RemoveAll(dirPath); err != nil {
-		errorPrint("Error deleting directory:", err)
-	}
-	// Delete files inside subtitlesDir
-	subtitleFiles, err := filepath.Glob(filepath.Join(subtitlesDir, "*"))
-	if err != nil {
-		errorPrint("No subtitles to delete", err)
-	} else {
-		for _, subtitlePath := range subtitleFiles {
-			infoPrint("Deleting subtitles...", subtitlePath)
-			if err := os.Remove(subtitlePath); err != nil {
-				errorPrint("Error deleting subtitle file:", err)
-			}
-		}
-	}
-	os.Exit(0)
+	// fmt.Print("\n")
+	// infoPrint("Exiting...")
+	// // Delete the directory
+	// dirPath := filepath.Join(dataDir, c.Torrent.Name())
+	// infoPrint("Deleting downloads from: ", filepath.Join(dataDir, c.Torrent.Name()))
+	// if err := os.RemoveAll(dirPath); err != nil {
+	// 	errorPrint("Error deleting directory:", err)
+	// }
+	// // Delete files inside subtitlesDir
+	// subtitleFiles, err := filepath.Glob(filepath.Join(subtitlesDir, "*"))
+	// if err != nil {
+	// 	errorPrint("No subtitles to delete", err)
+	// } else {
+	// 	for _, subtitlePath := range subtitleFiles {
+	// 		infoPrint("Deleting subtitles...", subtitlePath)
+	// 		if err := os.Remove(subtitlePath); err != nil {
+	// 			errorPrint("Error deleting subtitle file:", err)
+	// 		}
+	// 	}
+	// }
+	// os.Exit(0)
 
 }
 
