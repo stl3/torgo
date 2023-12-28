@@ -16,12 +16,10 @@ import (
 // Players holds structs of all supported players.
 var Players = []Player{
 	{
-		Name:          "mpv",
-		DarwinCommand: []string{"mpv"},
-		LinuxCommand:  []string{"mpv"},
-		// AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-n", "is.xyz.mpv/.MPVActivity"},
-		AndroidCommand: []string{"nohup", "am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
-		// AndroidCommand: []string{"mpv"},
+		Name:           "mpv",
+		DarwinCommand:  []string{"mpv"},
+		LinuxCommand:   []string{"mpv"},
+		AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
 		// WindowsCommand: []string{"mpv", "--no-resume-playback", "--no-terminal"}, // Default
 		WindowsCommand:  []string{"mpv", "--profile=movie-flask", "--no-resume-playback", "--no-terminal"}, // Just for use with my mpv profile
 		SubtitleCommand: "--sub-file=",
@@ -80,7 +78,9 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 
 	// Append the video URL to the command for non-Android cases
 	// if runtime.GOOS != "android" {
-	command = append(command, url)
+	// command = append(command, url)
+	command = append(command, `"`+url+`"`)
+
 	// } else {
 	if player.Name == "mpv" {
 		// Do something based on the condition
