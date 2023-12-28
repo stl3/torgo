@@ -2,6 +2,7 @@ package magnetdl
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"sync"
@@ -56,99 +57,11 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 
 	var sources []models.Source
 	doc, _ := goquery.NewDocumentFromReader(strings.NewReader(html))
-	// 	resultsContainer := doc.Find("tbody tr")
-
-	// 	resultsContainer.Each(func(_ int, result *goquery.Selection) {
-	// 		title := result.Find("td.text-wrap a").AttrOr("title", "")
-	// 		if containsHTMLEncodedEntities(title) {
-	// 			decodedTitle, err := decodeHTMLText(title)
-	// 			if err != nil {
-	// 				logrus.Errorln("Error decoding HTML text:", err)
-	// 				// return
-	// 				decodedTitle = title
-	// 			}
-	// 			logrus.Infof("Decoded Title: %s", decodedTitle)
-	// 		} else {
-	// 			logrus.Infof("Title: %s", title)
-	// 		}
-	// 		URL, _ := result.Find("td.text-wrap a").Attr("href")
-	// 		filesizeStr := result.Find("td:nth-child(3)").Text()
-	// 		filesize, _ := humanize.ParseBytes(strings.TrimSpace(filesizeStr))
-	// 		seedersStr := result.Find("td").Eq(4).Text()
-	// 		seeders, _ := strconv.Atoi(seedersStr)
-	// 		leechersStr := result.Find("td").Eq(5).Text()
-	// 		leechers, _ := strconv.Atoi(leechersStr)
-
-	// 		source := models.Source{
-	// 			From:     "MagnetDL",
-	// 			Title:    title,
-	// 			URL:      Site + URL,
-	// 			Seeders:  seeders,
-	// 			Leechers: leechers,
-	// 			FileSize: int64(filesize),
-	// 		}
-	// 		sources = append(sources, source)
-	// 	})
-
-	// 	logrus.Debugf("MagnetDL: [%d] Amount of results: %d", page, len(sources))
-	// 	*results = append(*results, sources...)
-	// 	wg.Done()
-	// }
-
-	// // resultsContainer := doc.Find("#content > div.fill-table > table > tbody tr")
-
-	// // resultsContainer.Each(func(_ int, result *goquery.Selection) {
-	// // 	// Parsing title
-	// // 	title := result.Find("td.n a").AttrOr("title", "")
-	// // 	if containsHTMLEncodedEntities(title) {
-	// // 		decodedTitle, err := decodeHTMLText(title)
-	// // 		if err != nil {
-	// // 			logrus.Errorln("Error decoding HTML text:", err)
-	// // 			// return
-	// // 			decodedTitle = title
-	// // 		}
-	// // 		logrus.Infof("Decoded Title: %s", decodedTitle)
-	// // 	} else {
-	// // 		logrus.Infof("Title: %s", title)
-	// // 	}
-	// // 	// Parsing URL
-	// // 	URL, _ := result.Find("td.n a").Attr("href")
-
-	// // 	// Parsing size
-	// // 	filesizeStr := result.Find("td:nth-child(6)").Text()
-	// // 	filesize, _ := humanize.ParseBytes(strings.TrimSpace(filesizeStr))
-
-	// // 	// Parsing seeders
-	// // 	seedersStr := result.Find("td.s").Text()
-	// // 	seeders, _ := strconv.Atoi(seedersStr)
-
-	// // 	// Parsing leechers
-	// // 	leechersStr := result.Find("td.l").Text()
-	// // 	leechers, _ := strconv.Atoi(leechersStr)
-
-	// // 	// Parsing magnet link
-	// // 	magnet, _ := result.Find("td.m a").Attr("href")
-
-	// // 	source := models.Source{
-	// // 		From:     "MagnetDL",
-	// // 		Title:    title,
-	// // 		URL:      Site + URL,
-	// // 		Seeders:  seeders,
-	// // 		Leechers: leechers,
-	// // 		FileSize: int64(filesize),
-	// // 		Magnet:   magnet,
-	// // 	}
-	// // 	sources = append(sources, source)
-	// // })
-
-	// resultsContainer := doc.Find("#content > div.fill-table > table > tbody")
-	// resultsContainer := doc.Find("table#download > tbody")
-	resultsContainer := doc.Find("#content > div.fill-table > table")
-
+	resultsContainer := doc.Find("#content > div.fill-table > table > tbody > tr")
 	resultsContainer.Each(func(_ int, result *goquery.Selection) {
 		// Extract information from each search result item
-		// title := result.Find("tr:nth-child(1) > td.n > a").Text()
-		title := result.Find("#content > div.fill-table > table > tbody > tr:nth-child(1) > td.n > a").Text()
+		title := result.Find("td.n a").Text()
+
 		if containsHTMLEncodedEntities(title) {
 			decodedTitle, err := decodeHTMLText(title)
 			if err != nil {
@@ -160,16 +73,17 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 		} else {
 			logrus.Infof("Title: %s", title)
 		}
-		URL, _ := result.Find("#content > div.fill-table > table > tbody > tr:nth-child(1) > td.n > a").Attr("href")
-		sizeStr := result.Find("#content > div.fill-table > table > tbody > tr:nth-child(1) > td:nth-child(6)").Text()
+
+		URL, _ := result.Find("td.n a").Attr("href")
+		sizeStr := result.Find("td:nth-child(6)").Text()
 		size, err := humanize.ParseBytes(sizeStr)
-		seeders, _ := strconv.Atoi(result.Find("#content > div.fill-table > table > tbody > tr:nth-child(1) > td.s").Text())
-		leechers, _ := strconv.Atoi(result.Find("#content > div.fill-table > table > tbody > tr:nth-child(1) > td.l").Text())
-		magnet, _ := result.Find("#content > div.fill-table > table > tbody > tr:nth-child(1) > td.m > a").Attr("href")
+		seeders, _ := strconv.Atoi(result.Find("td.s").Text())
+		leechers, _ := strconv.Atoi(result.Find("td.l").Text())
+		magnet, _ := result.Find("td.m a").Attr("href")
 
 		if err != nil {
-			fmt.Println("Error converting sizeStr to int:", err)
-			fmt.Println("Size string:", sizeStr)
+			log.Println("Error converting sizeStr to int:", err)
+			log.Println("Size string:", sizeStr)
 		}
 
 		source := models.Source{
