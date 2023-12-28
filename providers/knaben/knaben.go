@@ -56,10 +56,46 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 
 	var sources []models.Source
 	doc, _ := goquery.NewDocumentFromReader(strings.NewReader(html))
-	resultsContainer := doc.Find("tbody tr")
+	// // resultsContainer := doc.Find("tbody tr")
 
+	// // resultsContainer.Each(func(_ int, result *goquery.Selection) {
+	// // 	title := result.Find("td.text-wrap a").AttrOr("title", "")
+	// // 	if containsHTMLEncodedEntities(title) {
+	// // 		decodedTitle, err := decodeHTMLText(title)
+	// // 		if err != nil {
+	// // 			logrus.Errorln("Error decoding HTML text:", err)
+	// // 			// return
+	// // 			decodedTitle = title
+	// // 		}
+	// // 		logrus.Infof("Decoded Title: %s", decodedTitle)
+	// // 	} else {
+	// // 		logrus.Infof("Title: %s", title)
+	// // 	}
+	// // 	URL, _ := result.Find("td.text-wrap.w-100 > a").Attr("href")
+	// // 	filesizeStr := result.Find("td:nth-child(3)").Text()
+	// // 	filesize, _ := humanize.ParseBytes(strings.TrimSpace(filesizeStr))
+	// // 	seedersStr := result.Find("td").Eq(4).Text()
+	// // 	seeders, _ := strconv.Atoi(seedersStr)
+	// // 	leechersStr := result.Find("td").Eq(5).Text()
+	// // 	leechers, _ := strconv.Atoi(leechersStr)
+
+	// // 	source := models.Source{
+	// // 		From:     "knaben",
+	// // 		Title:    title,
+	// // 		URL:      Site + URL,
+	// // 		Seeders:  seeders,
+	// // 		Leechers: leechers,
+	// // 		FileSize: int64(filesize),
+	// // 	}
+	// // 	sources = append(sources, source)
+	// // })
+
+	resultsContainer := doc.Find("tbody > tr")
 	resultsContainer.Each(func(_ int, result *goquery.Selection) {
-		title := result.Find("td.text-wrap a").AttrOr("title", "")
+		// Extract information from each search result item
+		// category := result.Find("td.d-last-child a").Text()
+		// subcategory := result.Find("td.d-last-child x").Text()
+		title := result.Find("td.text-wrap a").Text()
 		if containsHTMLEncodedEntities(title) {
 			decodedTitle, err := decodeHTMLText(title)
 			if err != nil {
@@ -71,21 +107,52 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 		} else {
 			logrus.Infof("Title: %s", title)
 		}
-		URL, _ := result.Find("td.text-wrap a").Attr("href")
+		// url, _ := result.Find("td.text-wrap a").Attr("href")
+		// Extract the encoded URL
+		// url, _ := result.Find("tr:nth-child(2) > td.text-wrap.w-100 > a").Attr("href")
+		// url, err := url.QueryUnescape(encodedURL)
+		// if err != nil {
+		// 	log.Println("Error decoding URL:", err)
+		// 	url = encodedURL
+		// }
+		// urlElement := result.Find("td.text-wrap.w-100 > a")
+		// encodedURL, _ := urlElement.Attr("knabensource")
+		// url, _ := url.QueryUnescape(encodedURL)
+		// if exists {
+		// 	decodedURL, err := url.QueryUnescape(encodedURL)
+		// 	if err != nil {
+		// 		log.Println("Error decoding URL:", err)
+		// 		decodedURL = encodedURL
+		// 	}
+
+		// Now, `decodedURL` contains the properly decoded URL.
+		// 	log.Println("Decoded URL:", decodedURL)
+		// } else {
+		// 	log.Println("URL not found")
+		// }
+		// sizeStr := result.Find("td[title^='Bytes']").Text()
+		// size, err := humanize.ParseBytes(sizeStr)
 		filesizeStr := result.Find("td:nth-child(3)").Text()
 		filesize, _ := humanize.ParseBytes(strings.TrimSpace(filesizeStr))
-		seedersStr := result.Find("td").Eq(4).Text()
-		seeders, _ := strconv.Atoi(seedersStr)
-		leechersStr := result.Find("td").Eq(5).Text()
-		leechers, _ := strconv.Atoi(leechersStr)
+		// date := result.Find("td[title^='20']").Text()
+		seeders, _ := strconv.Atoi(result.Find("td:nth-last-child(3)").Text())
+		leechers, _ := strconv.Atoi(result.Find("td:nth-last-child(2)").Text())
+		magnet, _ := result.Find("td.text-wrap a").Attr("href")
+
+		// if err != nil {
+		// 	// log.Println("Error converting sizeStr to int:", err)
+		// 	log.Println("Size string:", filesizeStr)
+		// }
 
 		source := models.Source{
 			From:     "knaben",
 			Title:    title,
-			URL:      Site + URL,
+			URL:      surl,
 			Seeders:  seeders,
 			Leechers: leechers,
 			FileSize: int64(filesize),
+			Magnet:   magnet,
+			// You may add other fields like category, subcategory, date as needed
 		}
 		sources = append(sources, source)
 	})
