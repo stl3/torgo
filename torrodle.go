@@ -15,6 +15,7 @@ import (
 	"github.com/stl3/torrodle/providers/knaben"
 	"github.com/stl3/torrodle/providers/leetx"
 	"github.com/stl3/torrodle/providers/limetorrents"
+	"github.com/stl3/torrodle/providers/magnetdl"
 
 	// "github.com/stl3/torrodle/providers/rarbg"
 	"github.com/stl3/torrodle/providers/sukebei"
@@ -53,6 +54,7 @@ var (
 	Bt4g              = bt4g.New()
 	BTDigg            = btdigg.New()
 	Knaben            = knaben.New()
+	MagnetDL          = magnetdl.New()
 )
 
 var AllProviders = [...]models.ProviderInterface{
@@ -66,6 +68,7 @@ var AllProviders = [...]models.ProviderInterface{
 	Bt4g,
 	BTDigg,
 	Knaben,
+	MagnetDL,
 	// RarbgProvider,
 }
 
