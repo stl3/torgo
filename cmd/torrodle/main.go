@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"os/signal"
 	"os/user"
 	"path/filepath"
@@ -126,6 +125,7 @@ func pickSortBy() string {
 
 func pickPlayer() string {
 	options := []string{"None"}
+	// options := []string{"None", "mpv-android", "vlc-android"}
 	playerChoice := ""
 	for _, p := range player.Players {
 		options = append(options, p.Name)
@@ -459,13 +459,6 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 	if player == nil {
 		c.Serve()
 		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-		/////////////////
-		cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
-		err := cmd.Run()
-		if err != nil {
-			fmt.Println("Error:", err)
-		}
-		///////////////
 		// goroutine for the ticker loop use for PrintProgress
 		go func() {
 			ticker := time.NewTicker(1500 * time.Millisecond)
@@ -482,6 +475,17 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 		<-sig // Wait for Ctrl+C
 	}
+	//else if playerChoice == "mpv-android" {}
+
+	// } else if player == "mpv-android" {
+	/////////////////
+	//// This test lets mpv work
+	// cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
+	// err := cmd.Run()
+	// if err != nil {
+	// 	fmt.Println("Error:", err)
+	// }
+	///////////////
 
 	fmt.Print("\n")
 	infoPrint("Exiting...")
