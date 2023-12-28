@@ -13,15 +13,6 @@ import (
 	"time"
 )
 
-// // PlayerType represents the type of media player.
-// type PlayerType int
-
-// const (
-// 	mpv PlayerType = iota
-// 	vlc
-// 	// Add more player types as needed
-// )
-
 // Players holds structs of all supported players.
 var Players = []Player{
 	{
@@ -85,51 +76,26 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		command = player.AndroidCommand
 		// // player.startAndroidMPV(url)
 		// // return
-		// default:
-		// 	command = player.WindowsCommand // Default to Windows command for unknown OS
 	}
 
 	// Append the video URL to the command for non-Android cases
-	if runtime.GOOS != "android" {
-		command = append(command, url)
-	} else {
-
-		// if player.Type == mpv {
-		// if strings(player.Name, name)  == Mpv {
-
-		if player.Name == "mpv" {
-			// Do something based on the condition
-			fmt.Println("Using mpv")
-			time.Sleep(3 * time.Second)
-			command = append(command, url, "-n", "is.xyz.mpv/.MPVActivity")
-			return
-			// } else if player.Type == vlc {
-		} else if player.Name == "vlc" {
-			// Do something else
-			fmt.Println("Using VLC")
-			time.Sleep(3 * time.Second)
-			command = append(command, url, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
-			return
-			// Add more commands or actions as needed
-		}
-
-		// // Add additional conditions specific to the "android" case
-		// if player.Type == Mpv: {
-		// 	// Do something based on the condition
-		// 	command = append(command, url, "-n", "is.xyz.mpv/.MPVActivity") //, ">/dev/null", "2>&1", "&")
-		// } else if player.Type == Vlc {
-		// 	// Do something else
-		// 	command = append(command, url, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity") //, ">/dev/null", "2>&1", "&")command = append(command, "--another-option")
-		// 	// org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity -e "title" "${allanime_title}Episode ${ep_no}"
-		// }
+	// if runtime.GOOS != "android" {
+	command = append(command, url)
+	// } else {
+	if player.Name == "mpv" {
+		// Do something based on the condition
+		fmt.Println("Using mpv")
+		time.Sleep(3 * time.Second)
+		command = append(command, "-n", "is.xyz.mpv/.MPVActivity")
+		// } else if player.Type == vlc {
+	} else if player.Name == "vlc" {
+		// Do something else
+		fmt.Println("Using VLC")
+		time.Sleep(3 * time.Second)
+		command = append(command, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
 	}
-	// command = append(command, url)
-	// if subtitlePath != "" {
-	// 	command = append(command, player.SubtitleCommand+subtitlePath)
 	// }
-	// if title != "" {
-	// 	command = append(command, player.TitleCommand+title)
-	// }
+
 	if subtitlePath != "" && runtime.GOOS != "android" {
 		command = append(command, player.TitleCommand+title)
 	}
