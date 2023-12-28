@@ -6,11 +6,9 @@ package player
 
 import (
 	"fmt"
-	"log"
 	"os/exec"
 	"runtime"
 	"strings"
-	"time"
 )
 
 // Players holds structs of all supported players.
@@ -73,58 +71,58 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		// // 	command = player.AndroidCommand
 		// // player.startAndroidMPV(url)
 		mpv_android(url)
-		//return
+		player.started = true
 	}
 
-	// Append the video URL to the command for non-Android cases
-	// if runtime.GOOS != "android" {
-	command = append(command, url)
-	// command = append(command, url+`/`)
+	// // // // Append the video URL to the command for non-Android cases
+	// // // // if runtime.GOOS != "android" {
+	// // // command = append(command, url)
+	// // // // command = append(command, url+`/`)
 
-	// } else {
-	if player.Name == "mpv" && runtime.GOOS != "android" {
-		// Do something based on the condition
-		fmt.Println("Using mpv")
-		// time.Sleep(3 * time.Second)
-		command = append(command, "-n", "is.xyz.mpv/.MPVActivity")
-		// } else if player.Type == vlc {
-	} else if player.Name == "vlc" && runtime.GOOS != "android" {
-		// Do something else
-		fmt.Println("Using VLC")
-		// time.Sleep(3 * time.Second)
-		command = append(command, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
-	}
-	// }
+	// // // // } else {
+	// // // if player.Name == "mpv" && runtime.GOOS != "android" {
+	// // // 	// Do something based on the condition
+	// // // 	fmt.Println("Using mpv")
+	// // // 	// time.Sleep(3 * time.Second)
+	// // // 	command = append(command, "-n", "is.xyz.mpv/.MPVActivity")
+	// // // 	// } else if player.Type == vlc {
+	// // // } else if player.Name == "vlc" && runtime.GOOS != "android" {
+	// // // 	// Do something else
+	// // // 	fmt.Println("Using VLC")
+	// // // 	// time.Sleep(3 * time.Second)
+	// // // 	command = append(command, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
+	// // // }
+	// // // // }
 
-	if subtitlePath != "" && runtime.GOOS != "android" {
-		// if subtitlePath != "" {
-		command = append(command, player.TitleCommand+title)
-	}
-	if title != "" && runtime.GOOS != "android" {
-		// if title != "" {
-		command = append(command, player.TitleCommand+title)
-	}
+	// // // if subtitlePath != "" && runtime.GOOS != "android" {
+	// // // 	// if subtitlePath != "" {
+	// // // 	command = append(command, player.TitleCommand+title)
+	// // // }
+	// // // if title != "" && runtime.GOOS != "android" {
+	// // // 	// if title != "" {
+	// // // 	command = append(command, player.TitleCommand+title)
+	// // // }
 
-	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", command)
-	// logrus.Debugf("command: %v\n", command)
+	// // // log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", command)
+	// // // // logrus.Debugf("command: %v\n", command)
 
-	cmd := exec.Command(command[0], command[1:]...)
-	time.Sleep(6 * time.Second)
-	player.started = true
+	// // // cmd := exec.Command(command[0], command[1:]...)
+	// // // time.Sleep(6 * time.Second)
+	// // // player.started = true
 
-	if err := cmd.Start(); err != nil {
-		log.Printf("Error starting player: %v\n", err)
-		return
-	}
-	// Wait for the player process to complete
-	if err := cmd.Wait(); err != nil {
-		exitErr, ok := err.(*exec.ExitError)
-		if ok {
-			log.Printf("Player exited with non-zero status: %v\n", exitErr.ExitCode())
-		} else {
-			log.Printf("Error waiting for player: %v\n", err)
-		}
-	}
+	// // // if err := cmd.Start(); err != nil {
+	// // // 	log.Printf("Error starting player: %v\n", err)
+	// // // 	return
+	// // // }
+	// // // // Wait for the player process to complete
+	// // // if err := cmd.Wait(); err != nil {
+	// // // 	exitErr, ok := err.(*exec.ExitError)
+	// // // 	if ok {
+	// // // 		log.Printf("Player exited with non-zero status: %v\n", exitErr.ExitCode())
+	// // // 	} else {
+	// // // 		log.Printf("Error waiting for player: %v\n", err)
+	// // // 	}
+	// // // }
 
 	// Reset the started flag to allow for subsequent calls
 	player.started = false
