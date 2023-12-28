@@ -5,20 +5,21 @@ We did some modifications on it in order to let it fit into 'torrodle'
 package player
 
 import (
+	"fmt"
 	"log"
 	"os/exec"
 	"runtime"
 	"strings"
 )
 
-// PlayerType represents the type of media player.
-type PlayerType int
+// // PlayerType represents the type of media player.
+// type PlayerType int
 
-const (
-	Mpv PlayerType = iota
-	Vlc
-	// Add more player types as needed
-)
+// const (
+// 	mpv PlayerType = iota
+// 	vlc
+// 	// Add more player types as needed
+// )
 
 // Players holds structs of all supported players.
 var Players = []Player{
@@ -52,8 +53,8 @@ var Players = []Player{
 
 // Player manages the execution of a media player.
 type Player struct {
-	Name            string
-	Type            PlayerType // New field to indicate the player type
+	Name string
+	// Type            PlayerType // New field to indicate the player type
 	DarwinCommand   []string
 	LinuxCommand    []string
 	WindowsCommand  []string
@@ -92,11 +93,17 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		command = append(command, url)
 	} else {
 
-		if player.Type == Mpv {
+		// if player.Type == mpv {
+		// if strings(player.Name, name)  == Mpv {
+
+		if player.Name == "mpv" {
 			// Do something based on the condition
+			fmt.Println("Using mpv")
 			command = append(command, url, "-n", "is.xyz.mpv/.MPVActivity")
-		} else if player.Type == Vlc {
+			// } else if player.Type == vlc {
+		} else if player.Name == "vlc" {
 			// Do something else
+			fmt.Println("Using VLC")
 			command = append(command, url, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
 			// Add more commands or actions as needed
 		}
