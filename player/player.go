@@ -5,6 +5,7 @@ We did some modifications on it in order to let it fit into 'torrodle'
 package player
 
 import (
+	"fmt"
 	"log"
 	"os/exec"
 	"runtime"
@@ -19,7 +20,7 @@ var Players = []Player{
 		DarwinCommand: []string{"mpv"},
 		LinuxCommand:  []string{"mpv"},
 		// AndroidCommand: []string{},
-		// AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
+		AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
 		// WindowsCommand: []string{"mpv", "--no-resume-playback", "--no-terminal"}, // Default
 		WindowsCommand:  []string{"mpv", "--profile=movie-flask", "--no-resume-playback", "--no-terminal"}, // Just for use with my mpv profile
 		SubtitleCommand: "--sub-file=",
@@ -30,7 +31,7 @@ var Players = []Player{
 		DarwinCommand: []string{"/Applications/VLC.app/Contents/MacOS/VLC"},
 		LinuxCommand:  []string{"vlc"},
 		// AndroidCommand: []string{},
-		// AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
+		AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
 		// WindowsCommand:  []string{"%ProgramFiles%\\VideoLAN\\VLC\\vlc.exe"},
 		WindowsCommand:  []string{"vlc.exe"}, // vlc player should be in users env path in case installed in non-default path
 		SubtitleCommand: "--sub-file=",
@@ -70,8 +71,8 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		command = player.LinuxCommand
 	case "windows":
 		command = player.WindowsCommand
-		// case "android":
-		// 	command = player.AndroidCommand
+	case "android":
+		command = player.AndroidCommand
 		// // player.startAndroidMPV(url)
 		// mpv_android(url)
 		// player.started = true
@@ -80,18 +81,18 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	// Append the video URL to the command for non-Android cases
 	command = append(command, url)
 
-	// // if player.Name == "mpv" && runtime.GOOS == "android" {
-	// // 	// Do something based on the condition
-	// // 	fmt.Println("Using mpv")
-	// // 	// time.Sleep(3 * time.Second)
-	// // 	command = append(command, "-n", "is.xyz.mpv/.MPVActivity")
-	// // 	// } else if player.Type == vlc {
-	// // } else if player.Name == "vlc" && runtime.GOOS == "android" {
-	// // 	// Do something else
-	// // 	fmt.Println("Using VLC")
-	// // 	// time.Sleep(3 * time.Second)
-	// // 	command = append(command, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
-	// // }
+	if player.Name == "mpv" && runtime.GOOS == "android" {
+		// Do something based on the condition
+		fmt.Println("Using mpv")
+		// time.Sleep(3 * time.Second)
+		command = append(command, "-n", "is.xyz.mpv/.MPVActivity")
+		// } else if player.Type == vlc {
+	} else if player.Name == "vlc" && runtime.GOOS == "android" {
+		// Do something else
+		fmt.Println("Using VLC")
+		// time.Sleep(3 * time.Second)
+		command = append(command, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
+	}
 
 	if subtitlePath != "" && runtime.GOOS != "android" {
 		// if subtitlePath != "" {
