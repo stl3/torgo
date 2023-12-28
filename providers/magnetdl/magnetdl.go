@@ -32,7 +32,10 @@ func New() models.ProviderInterface {
 	provider.Name = Name
 	provider.Site = Site
 	provider.Categories = models.Categories{
-		All: "/s/%v/%d/",
+		All:   "/s/%v/%d/",
+		Movie: "/s/%v/%d/",
+		TV:    "/s/%v/%d/",
+		Porn:  "/s/%v/%d/",
 		// Movie: "/search/%v/3000000/%d/seeders",
 		// TV:    "/search/%v/2000000/%d/seeders",
 		// Porn:  "/search/%v/5000000/%d/seeders",
