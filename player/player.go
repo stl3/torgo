@@ -97,18 +97,38 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		// if player.Type == mpv {
 		// if strings(player.Name, name)  == Mpv {
 
+		// // // if player.Name == "mpv" {
+		// // // 	// Do something based on the condition
+		// // // 	fmt.Println("Using mpv")
+		// // // 	time.Sleep(7 * time.Second)
+		// // // 	command = append(command, url, "-n", "is.xyz.mpv/.MPVActivity")
+		// // // 	// } else if player.Type == vlc {
+		// // // } else if player.Name == "vlc" {
+		// // // 	// Do something else
+		// // // 	fmt.Println("Using VLC")
+		// // // 	time.Sleep(7 * time.Second)
+		// // // 	command = append(command, url, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
+		// // // 	// Add more commands or actions as needed
+		// // // }
+
 		if player.Name == "mpv" {
-			// Do something based on the condition
 			fmt.Println("Using mpv")
 			time.Sleep(7 * time.Second)
-			command = append(command, url, "-n", "is.xyz.mpv/.MPVActivity")
-			// } else if player.Type == vlc {
+			command = append(command, "mpv", url, "-n", "is.xyz.mpv/.MPVActivity")
 		} else if player.Name == "vlc" {
-			// Do something else
 			fmt.Println("Using VLC")
 			time.Sleep(7 * time.Second)
-			command = append(command, url, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
-			// Add more commands or actions as needed
+			command = append(command, "vlc", url, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
+		}
+
+		// Run the command in a subprocess
+		cmd := exec.Command(command[0], command[1:]...)
+		// cmd.Stdout = os.Stdout
+		// cmd.Stderr = os.Stderr
+
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println("Error running command:", err)
 		}
 
 		// // Add additional conditions specific to the "android" case
