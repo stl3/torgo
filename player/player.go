@@ -85,13 +85,13 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	if player.Name == "mpv" {
 		// Do something based on the condition
 		fmt.Println("Using mpv")
-		time.Sleep(3 * time.Second)
+		// time.Sleep(3 * time.Second)
 		command = append(command, "-n", "is.xyz.mpv/.MPVActivity")
 		// } else if player.Type == vlc {
 	} else if player.Name == "vlc" {
 		// Do something else
 		fmt.Println("Using VLC")
-		time.Sleep(3 * time.Second)
+		// time.Sleep(3 * time.Second)
 		command = append(command, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
 	}
 	// }
@@ -107,7 +107,7 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	// logrus.Debugf("command: %v\n", command)
 
 	cmd := exec.Command(command[0], command[1:]...)
-
+	time.Sleep(6 * time.Second)
 	player.started = true
 
 	if err := cmd.Start(); err != nil {
