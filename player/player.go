@@ -72,10 +72,10 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	case "windows":
 		command = player.WindowsCommand
 	case "android":
-		// // 	command = player.AndroidCommand
+		command = player.AndroidCommand
 		// // player.startAndroidMPV(url)
-		mpv_android(url)
-		player.started = true
+		// mpv_android(url)
+		// player.started = true
 	}
 
 	// Append the video URL to the command for non-Android cases
@@ -143,13 +143,13 @@ func GetPlayer(name string) *Player {
 	return nil
 }
 
-func mpv_android(url string) {
-	cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
-	err := cmd.Run()
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-}
+// func mpv_android(url string) {
+// 	cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", url, "-n", "is.xyz.mpv/.MPVActivity")
+// 	err := cmd.Run()
+// 	if err != nil {
+// 		fmt.Println("Error:", err)
+// 	}
+// }
 
 // // startAndroidMPV launches mpv on Android using the specific intent.
 // func (player *Player) startAndroidMPV(url string) {
