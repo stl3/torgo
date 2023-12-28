@@ -3,12 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/signal"
 	"os/user"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 	"unicode/utf8"
 
@@ -390,40 +388,40 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 
 	// start client
 	c.Start()
-	// handle exit signals
-	interruptChannel := make(chan os.Signal, 1)
-	signal.Notify(interruptChannel,
-		os.Interrupt,
-		syscall.SIGHUP,
-		syscall.SIGINT,
-		syscall.SIGTERM,
-		syscall.SIGQUIT)
-	go func(interruptChannel chan os.Signal) {
-		for range interruptChannel {
-			c.Close()
-			fmt.Print("\n")
-			infoPrint("Exiting...")
-			// Delete the directory
-			dirPath := filepath.Join(dataDir, c.Torrent.Name())
-			infoPrint("Deleting downloads...", filepath.Join(dataDir, c.Torrent.Name()))
-			if err := os.RemoveAll(dirPath); err != nil {
-				errorPrint("Error deleting directory:", err)
-			}
-			// Delete files inside subtitlesDir
-			subtitleFiles, err := filepath.Glob(filepath.Join(subtitlesDir, "*"))
-			if err != nil {
-				errorPrint("Error getting subtitle files:", err)
-			} else {
-				for _, subtitlePath := range subtitleFiles {
-					infoPrint("Deleting subtitles...", subtitlePath)
-					if err := os.Remove(subtitlePath); err != nil {
-						errorPrint("Error deleting subtitle file:", err)
-					}
-				}
-			}
-			os.Exit(0)
-		}
-	}(interruptChannel)
+	// // handle exit signals
+	// interruptChannel := make(chan os.Signal, 1)
+	// signal.Notify(interruptChannel,
+	// 	os.Interrupt,
+	// 	syscall.SIGHUP,
+	// 	syscall.SIGINT,
+	// 	syscall.SIGTERM,
+	// 	syscall.SIGQUIT)
+	// go func(interruptChannel chan os.Signal) {
+	// 	for range interruptChannel {
+	// 		c.Close()
+	// 		fmt.Print("\n")
+	// 		infoPrint("Exiting...")
+	// 		// Delete the directory
+	// 		dirPath := filepath.Join(dataDir, c.Torrent.Name())
+	// 		infoPrint("Deleting downloads...", filepath.Join(dataDir, c.Torrent.Name()))
+	// 		if err := os.RemoveAll(dirPath); err != nil {
+	// 			errorPrint("Error deleting directory:", err)
+	// 		}
+	// 		// Delete files inside subtitlesDir
+	// 		subtitleFiles, err := filepath.Glob(filepath.Join(subtitlesDir, "*"))
+	// 		if err != nil {
+	// 			errorPrint("Error getting subtitle files:", err)
+	// 		} else {
+	// 			for _, subtitlePath := range subtitleFiles {
+	// 				infoPrint("Deleting subtitles...", subtitlePath)
+	// 				if err := os.Remove(subtitlePath); err != nil {
+	// 					errorPrint("Error deleting subtitle file:", err)
+	// 				}
+	// 			}
+	// 		}
+	// 		os.Exit(0)
+	// 	}
+	// }(interruptChannel)
 
 	if player != nil {
 		// serve via HTTP
@@ -470,32 +468,32 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			}
 		}()
 
-		sig := make(chan os.Signal, 1)
-		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-		<-sig // Wait for Ctrl+C
+		// sig := make(chan os.Signal, 1)
+		// signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+		// <-sig // Wait for Ctrl+C
 	}
 
-	fmt.Print("\n")
-	infoPrint("Exiting...")
-	// Delete the directory
-	dirPath := filepath.Join(dataDir, c.Torrent.Name())
-	infoPrint("Deleting downloads from: ", filepath.Join(dataDir, c.Torrent.Name()))
-	if err := os.RemoveAll(dirPath); err != nil {
-		errorPrint("Error deleting directory:", err)
-	}
-	// Delete files inside subtitlesDir
-	subtitleFiles, err := filepath.Glob(filepath.Join(subtitlesDir, "*"))
-	if err != nil {
-		errorPrint("No subtitles to delete", err)
-	} else {
-		for _, subtitlePath := range subtitleFiles {
-			infoPrint("Deleting subtitles...", subtitlePath)
-			if err := os.Remove(subtitlePath); err != nil {
-				errorPrint("Error deleting subtitle file:", err)
-			}
-		}
-	}
-	os.Exit(0)
+	// fmt.Print("\n")
+	// infoPrint("Exiting...")
+	// // Delete the directory
+	// dirPath := filepath.Join(dataDir, c.Torrent.Name())
+	// infoPrint("Deleting downloads from: ", filepath.Join(dataDir, c.Torrent.Name()))
+	// if err := os.RemoveAll(dirPath); err != nil {
+	// 	errorPrint("Error deleting directory:", err)
+	// }
+	// // Delete files inside subtitlesDir
+	// subtitleFiles, err := filepath.Glob(filepath.Join(subtitlesDir, "*"))
+	// if err != nil {
+	// 	errorPrint("No subtitles to delete", err)
+	// } else {
+	// 	for _, subtitlePath := range subtitleFiles {
+	// 		infoPrint("Deleting subtitles...", subtitlePath)
+	// 		if err := os.Remove(subtitlePath); err != nil {
+	// 			errorPrint("Error deleting subtitle file:", err)
+	// 		}
+	// 	}
+	// }
+	// os.Exit(0)
 
 }
 
