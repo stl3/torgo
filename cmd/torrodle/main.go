@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
 	"os/user"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"syscall"
@@ -474,6 +476,20 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		sig := make(chan os.Signal, 1)
 		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 		<-sig // Wait for Ctrl+C
+	}
+	if player != nil && player.Name == "mpv" && runtime.GOOS == "android" {
+		cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
+	}
+	if player != nil && player.Name == "vlc" && runtime.GOOS == "android" {
+		cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
 	}
 	//else if playerChoice == "mpv-android" {}
 
