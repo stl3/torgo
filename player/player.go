@@ -78,17 +78,17 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 
 	// Append the video URL to the command for non-Android cases
 	// if runtime.GOOS != "android" {
-	// command = append(command, url)
-	command = append(command, url+`/`)
+	command = append(command, url)
+	// command = append(command, url+`/`)
 
 	// } else {
-	if player.Name == "mpv" {
+	if player.Name == "mpv" && runtime.GOOS != "android" {
 		// Do something based on the condition
 		fmt.Println("Using mpv")
 		// time.Sleep(3 * time.Second)
 		command = append(command, "-n", "is.xyz.mpv/.MPVActivity")
 		// } else if player.Type == vlc {
-	} else if player.Name == "vlc" {
+	} else if player.Name == "vlc" && runtime.GOOS != "android" {
 		// Do something else
 		fmt.Println("Using VLC")
 		// time.Sleep(3 * time.Second)
@@ -96,10 +96,12 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	}
 	// }
 
-	if subtitlePath != "" && runtime.GOOS != "android" {
+	// if subtitlePath != "" && runtime.GOOS != "android" {
+	if subtitlePath != "" {
 		command = append(command, player.TitleCommand+title)
 	}
-	if title != "" && runtime.GOOS != "android" {
+	// if title != "" && runtime.GOOS != "android" {
+	if title != "" {
 		command = append(command, player.TitleCommand+title)
 	}
 
