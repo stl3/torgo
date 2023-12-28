@@ -73,7 +73,7 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		// // 	command = player.AndroidCommand
 		// // player.startAndroidMPV(url)
 		mpv_android(url)
-		return
+		//return
 	}
 
 	// Append the video URL to the command for non-Android cases
