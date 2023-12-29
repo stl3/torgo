@@ -382,40 +382,40 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 
 	// start client
 	c.Start()
-	// handle exit signals
-	interruptChannel := make(chan os.Signal, 1)
-	signal.Notify(interruptChannel,
-		os.Interrupt,
-		syscall.SIGHUP,
-		syscall.SIGINT,
-		syscall.SIGTERM,
-		syscall.SIGQUIT)
-	go func(interruptChannel chan os.Signal) {
-		for range interruptChannel {
-			c.Close()
-			fmt.Print("\n")
-			infoPrint("Exiting...")
-			// Delete the directory
-			dirPath := filepath.Join(dataDir, c.Torrent.Name())
-			infoPrint("Deleting downloads...", filepath.Join(dataDir, c.Torrent.Name()))
-			if err := os.RemoveAll(dirPath); err != nil {
-				errorPrint("Error deleting directory:", err)
-			}
-			// Delete files inside subtitlesDir
-			subtitleFiles, err := filepath.Glob(filepath.Join(subtitlesDir, "*"))
-			if err != nil {
-				errorPrint("Error getting subtitle files:", err)
-			} else {
-				for _, subtitlePath := range subtitleFiles {
-					infoPrint("Deleting subtitles...", subtitlePath)
-					if err := os.Remove(subtitlePath); err != nil {
-						errorPrint("Error deleting subtitle file:", err)
-					}
-				}
-			}
-			os.Exit(0)
-		}
-	}(interruptChannel)
+	// // // handle exit signals
+	// // interruptChannel := make(chan os.Signal, 1)
+	// // signal.Notify(interruptChannel,
+	// // 	os.Interrupt,
+	// // 	syscall.SIGHUP,
+	// // 	syscall.SIGINT,
+	// // 	syscall.SIGTERM,
+	// // 	syscall.SIGQUIT)
+	// // go func(interruptChannel chan os.Signal) {
+	// // 	for range interruptChannel {
+	// // 		c.Close()
+	// // 		fmt.Print("\n")
+	// // 		infoPrint("Exiting...")
+	// // 		// Delete the directory
+	// // 		dirPath := filepath.Join(dataDir, c.Torrent.Name())
+	// // 		infoPrint("Deleting downloads...", filepath.Join(dataDir, c.Torrent.Name()))
+	// // 		if err := os.RemoveAll(dirPath); err != nil {
+	// // 			errorPrint("Error deleting directory:", err)
+	// // 		}
+	// // 		// Delete files inside subtitlesDir
+	// // 		subtitleFiles, err := filepath.Glob(filepath.Join(subtitlesDir, "*"))
+	// // 		if err != nil {
+	// // 			errorPrint("Error getting subtitle files:", err)
+	// // 		} else {
+	// // 			for _, subtitlePath := range subtitleFiles {
+	// // 				infoPrint("Deleting subtitles...", subtitlePath)
+	// // 				if err := os.Remove(subtitlePath); err != nil {
+	// // 					errorPrint("Error deleting subtitle file:", err)
+	// // 				}
+	// // 			}
+	// // 		}
+	// // 		os.Exit(0)
+	// // 	}
+	// // }(interruptChannel)
 
 	if player != nil {
 		// serve via HTTP
@@ -448,75 +448,96 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		}
 	}
 
+	// // // Dumbass temporary workaround for Android atm
+	// // if player == nil {
+	// // 	// Define the survey questions
+	// // 	var qs = []*survey.Question{
+	// // 		{
+	// // 			Name: "choice",
+	// // 			Prompt: &survey.Select{
+	// // 				Message: "Choose player:",
+	// // 				Options: []string{"Standalone Server", "mpv-android", "vlc-android"},
+	// // 			},
+	// // 		},
+	// // 	}
+
+	// // 	// Ask the user for their choice
+	// // 	answers := struct {
+	// // 		Choice string
+	// // 	}{}
+	// // 	err := survey.Ask(qs, &answers)
+	// // 	if err != nil {
+	// // 		fmt.Println("Error reading choice:", err)
+	// // 		return
+	// // 	}
+
+	// // 	// Process the user's choice
+	// // 	switch answers.Choice {
+	// // 	case "Standalone Server":
+	// // 		c.Serve()
+	// // 		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+	// // 	case "mpv-android":
+	// // 		c.Serve()
+	// // 		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+	// // 		if runtime.GOOS == "android" && subtitlePath != "" {
+	// // 			cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--esa", "args", "--sub-file=\""+subtitlePath+"\"")
+	// // 			log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
+	// // 			// c.URL, subtitlePath, c.Torrent.Name()
+	// // 			// Just for debugging:
+	// // 			// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), player.Name)
+	// // 			err := cmd.Run()
+	// // 			if err != nil {
+	// // 				fmt.Println("Error:", err)
+	// // 			}
+	// // 		} else {
+	// // 			cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
+	// // 			// fmt.Println(color.HiYellowString("[i] Launched player without subtitle"), player.Name)
+	// // 			err := cmd.Run()
+	// // 			if err != nil {
+	// // 				fmt.Println("Error:", err)
+	// // 			}
+	// // 		}
+	// // 	case "vlc-android":
+	// // 		c.Serve()
+	// // 		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+	// // 		if runtime.GOOS == "android" && subtitlePath != "" {
+	// // 			cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity", "--esa", "args", "--sub-file="+subtitlePath)
+	// // 			err := cmd.Run()
+	// // 			if err != nil {
+	// // 				fmt.Println("Error:", err)
+	// // 			}
+	// // 		} else {
+	// // 			cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
+	// // 			err := cmd.Run()
+	// // 			if err != nil {
+	// // 				fmt.Println("Error:", err)
+	// // 			}
+	// // 		}
+	// // 	default:
+	// // 		fmt.Println("Invalid choice. Please enter 1, 2, or 3.")
+	// // 	}
+
+	// // 	// Goroutine for the ticker loop used for PrintProgress
+	// // 	go func() {
+	// // 		ticker := time.NewTicker(1500 * time.Millisecond)
+	// // 		defer ticker.Stop()
+
+	// // 		for range ticker.C {
+	// // 			c.PrintProgress()
+	// // 			fmt.Print("\r")
+	// // 			os.Stdout.Sync() // Flush the output buffer to ensure immediate display
+	// // 		}
+	// // 	}()
+
+	// // 	sig := make(chan os.Signal, 1)
+	// // 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	// // 	<-sig // Wait for Ctrl+C
+	// // }
+
 	// Dumbass temporary workaround for Android atm
 	if player == nil {
-		// Define the survey questions
-		var qs = []*survey.Question{
-			{
-				Name: "choice",
-				Prompt: &survey.Select{
-					Message: "Choose player:",
-					Options: []string{"Standalone Server", "mpv-android", "vlc-android"},
-				},
-			},
-		}
-
-		// Ask the user for their choice
-		answers := struct {
-			Choice string
-		}{}
-		err := survey.Ask(qs, &answers)
-		if err != nil {
-			fmt.Println("Error reading choice:", err)
-			return
-		}
-
-		// Process the user's choice
-		switch answers.Choice {
-		case "Standalone Server":
-			c.Serve()
-			fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-		case "mpv-android":
-			c.Serve()
-			fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-			if runtime.GOOS == "android" && subtitlePath != "" {
-				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--esa", "args", "--sub-file=\""+subtitlePath+"\"")
-				log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
-				// c.URL, subtitlePath, c.Torrent.Name()
-				// Just for debugging:
-				// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), player.Name)
-				err := cmd.Run()
-				if err != nil {
-					fmt.Println("Error:", err)
-				}
-			} else {
-				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
-				// fmt.Println(color.HiYellowString("[i] Launched player without subtitle"), player.Name)
-				err := cmd.Run()
-				if err != nil {
-					fmt.Println("Error:", err)
-				}
-			}
-		case "vlc-android":
-			c.Serve()
-			fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-			if runtime.GOOS == "android" && subtitlePath != "" {
-				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity", "--esa", "args", "--sub-file="+subtitlePath)
-				err := cmd.Run()
-				if err != nil {
-					fmt.Println("Error:", err)
-				}
-			} else {
-				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
-				err := cmd.Run()
-				if err != nil {
-					fmt.Println("Error:", err)
-				}
-			}
-		default:
-			fmt.Println("Invalid choice. Please enter 1, 2, or 3.")
-		}
-
+		c.Serve()
+		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
 		// Goroutine for the ticker loop used for PrintProgress
 		go func() {
 			ticker := time.NewTicker(1500 * time.Millisecond)
@@ -735,7 +756,8 @@ func main() {
 	if playerChoice == "None" {
 		p = nil
 		// temporary to give android subtitles until can find a way to properly launch it from player.go
-		subtitlePath = getSubtitles(source.Title)
+		// Asks for subtitles when using no player
+		// subtitlePath = getSubtitles(source.Title)
 	} else {
 		// Get subtitles
 		subtitlePath = getSubtitles(source.Title)
@@ -743,7 +765,30 @@ func main() {
 	}
 
 	// Start playing video...
+
+	if runtime.GOOS == "android" && subtitlePath != "" && p == "mpv" {
+		c.Serve()
+		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+		cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--esa", "args", "--sub-file=\""+subtitlePath+"\"")
+		log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
+		// c.URL, subtitlePath, c.Torrent.Name()
+		// Just for debugging:
+		// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), player.Name)
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
+	} else {
+		cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
+		// fmt.Println(color.HiYellowString("[i] Launched player without subtitle"), player.Name)
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
+	}
+
 	startClient(p, source, subtitlePath)
+
 }
 
 func truncateMagnet(magnet string, maxLength int) string {
