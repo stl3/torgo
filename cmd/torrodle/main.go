@@ -484,7 +484,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 
 				// cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--es", "args", "--sub-file=\""+subtitlePath+"\"", "--force-media-title=\""+c.Torrent.Name()+"\"")
 				// cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--es", "--sub-file="+subtitlePath, "--force-media-title="+c.Torrent.Name())
-				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--es", "--force-media-title="+c.Torrent.Name())
+				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--es", "--sub-file="+subtitlePath)
 				log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
 				// open player with subtitle
 				// player.Start(c.URL, subtitlePath, c.Torrent.Name())
@@ -509,7 +509,13 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		case "vlc-android":
 			c.Serve()
 			fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-			if runtime.GOOS == "android" {
+			if runtime.GOOS == "android" && subtitlePath != "" {
+				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity", "--es", "--sub-file="+subtitlePath)
+				err := cmd.Run()
+				if err != nil {
+					fmt.Println("Error:", err)
+				}
+			} else {
 				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
 				err := cmd.Run()
 				if err != nil {
