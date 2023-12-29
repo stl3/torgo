@@ -163,23 +163,7 @@ func chooseResults(results []models.Source) string {
 		tablewriter.Colors{tablewriter.FgHiRedColor},
 		tablewriter.Colors{tablewriter.FgHiCyanColor},
 	)
-	// for i, result := range results {
-	// 	title := strings.TrimSpace(result.Title)
-	// 	// Check if any field is non-empty
-	// 	if result.Title != "" || result.Seeders > 0 || result.Leechers > 0 || result.FileSize > 0 {
-	// 		isEng := utf8.RuneCountInString(title) == len(title)
-	// 		if isEng {
-	// 			if len(title) > 45 {
-	// 				title = title[:42] + "..."
-	// 			}
-	// 		} else {
-	// 			if utf8.RuneCountInString(title) > 25 {
-	// 				title = string([]rune(title)[:22]) + "..."
-	// 			}
-	// 		}
-	// 		table.Append([]string{strconv.Itoa(i + 1), title, strconv.Itoa(result.Seeders), strconv.Itoa(result.Leechers), humanize.Bytes(uint64(result.FileSize))})
-	// 	}
-	// }
+
 	for i, result := range results {
 		title := strings.TrimSpace(result.Title)
 
@@ -493,8 +477,25 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		case "mpv-android":
 			c.Serve()
 			fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-			if runtime.GOOS == "android" {
+			if runtime.GOOS == "android" && subtitlePath != "" {
+				// cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
+				// cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--es", "args", "--force-media-title=\"c.Torrent.Name()\"")
+				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--es", "args", "--sub-file=\""+subtitlePath+"\"", "--force-media-title=\""+c.Torrent.Name()+"\"")
+				// open player with subtitle
+				// player.Start(c.URL, subtitlePath, c.Torrent.Name())
+				// Just for debugging:
+				// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), player.Name)
+				err := cmd.Run()
+				if err != nil {
+					fmt.Println("Error:", err)
+				}
+			} else {
+				// open player without subtitle
+				// player.Start(c.URL, "", c.Torrent.Name())
 				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
+				// Just for debugging:
+				// fmt.Println(color.HiYellowString("[i] Launched player without subtitle"), player.Name)
+
 				err := cmd.Run()
 				if err != nil {
 					fmt.Println("Error:", err)
@@ -731,6 +732,8 @@ boop~
 	var subtitlePath string
 	if playerChoice == "None" {
 		p = nil
+		// temporary to give android subtitles until can find a way to properly launch it from player.go
+		subtitlePath = getSubtitles(source.Title)
 	} else {
 		// Get subtitles
 		subtitlePath = getSubtitles(source.Title)
