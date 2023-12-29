@@ -2,13 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"os/exec"
 	"os/signal"
 	"os/user"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"syscall"
@@ -766,26 +763,26 @@ func main() {
 
 	// Start playing video...
 
-	if runtime.GOOS == "android" && subtitlePath != "" && p == "mpv" {
-		c.Serve()
-		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-		cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--esa", "args", "--sub-file=\""+subtitlePath+"\"")
-		log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
-		// c.URL, subtitlePath, c.Torrent.Name()
-		// Just for debugging:
-		// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), player.Name)
-		err := cmd.Run()
-		if err != nil {
-			fmt.Println("Error:", err)
-		}
-	} else {
-		cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
-		// fmt.Println(color.HiYellowString("[i] Launched player without subtitle"), player.Name)
-		err := cmd.Run()
-		if err != nil {
-			fmt.Println("Error:", err)
-		}
-	}
+	// if runtime.GOOS == "android" && subtitlePath != "" && p == "mpv" {
+	// 	c.Serve()
+	// 	fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+	// 	cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--esa", "args", "--sub-file=\""+subtitlePath+"\"")
+	// 	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
+	// 	// c.URL, subtitlePath, c.Torrent.Name()
+	// 	// Just for debugging:
+	// 	// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), player.Name)
+	// 	err := cmd.Run()
+	// 	if err != nil {
+	// 		fmt.Println("Error:", err)
+	// 	}
+	// } else {
+	// 	cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
+	// 	// fmt.Println(color.HiYellowString("[i] Launched player without subtitle"), player.Name)
+	// 	err := cmd.Run()
+	// 	if err != nil {
+	// 		fmt.Println("Error:", err)
+	// 	}
+	// }
 
 	startClient(p, source, subtitlePath)
 
