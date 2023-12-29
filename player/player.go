@@ -87,6 +87,7 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		// time.Sleep(3 * time.Second)
 		command = append(command, "-n", "is.xyz.mpv/.MPVActivity")
 		// } else if player.Type == vlc {
+		return
 	} else if player.Name == "vlc" && runtime.GOOS == "android" {
 		// Do something else
 		fmt.Println("Using VLC")
