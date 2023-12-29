@@ -110,7 +110,7 @@ func inputQuery() string {
 
 	// // Properly encode the search query
 	// query = url.QueryEscape(query)
-	fmt.Println(query)
+	// fmt.Println(query)
 	return query
 }
 
