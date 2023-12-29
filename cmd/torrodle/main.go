@@ -98,13 +98,13 @@ func inputQuery() string {
 	query := ""
 	// prompt := &survey.Input{Message: "Search Torrents:"}
 	prompt := &survey.Input{
-		Message: "Valid searches:\n" +
-			"- Avatar the Way of Water\n" +
-			"- (if no results use)=> Avatar.the.Way.of.Water\n" +
-			"- Do the same for TV Shows.\n" +
-			"- tv.show.s01e01\n" +
-			"- movie.name.2023\n" +
-			"Search Torrents:",
+		Message: color.HiMagentaString("Valid searches:\n") +
+			color.HiYellowString("- Avatar the Way of Water\n"+
+				"- (if no results use)=> Avatar.the.Way.of.Water\n"+
+				"- Do the same for TV Shows.\n"+
+				"- tv.show.s01e01\n"+
+				"- movie.name.2023\n") +
+			color.HiGreenString("Search Torrents:"),
 	}
 	_ = survey.AskOne(prompt, &query, nil)
 
@@ -133,7 +133,7 @@ func pickPlayer() string {
 		options = append(options, p.Name)
 	}
 	// fmt.Println("Select None for standalone/mpv-android/vlc-android options")
-	fmt.Println(color.YellowString("Select None for standalone/mpv-android/vlc-android options"))
+	fmt.Println(color.HiYellowString("Select None for standalone/mpv-android/vlc-android options"))
 	// fmt.Println(color.GreenString("Select None for standalone/mpv-android/vlc-android options"))
 
 	prompt := &survey.Select{
