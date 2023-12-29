@@ -483,7 +483,8 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 				// cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--es", "args", "--force-media-title=\"c.Torrent.Name()\"")
 
 				// cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--es", "args", "--sub-file=\""+subtitlePath+"\"", "--force-media-title=\""+c.Torrent.Name()+"\"")
-				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--es", "args", "--sub-file="+subtitlePath, "--force-media-title="+c.Torrent.Name())
+				// cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--es", "--sub-file="+subtitlePath, "--force-media-title="+c.Torrent.Name())
+				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--es", "--force-media-title="+c.Torrent.Name())
 				log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
 				// open player with subtitle
 				// player.Start(c.URL, subtitlePath, c.Torrent.Name())
