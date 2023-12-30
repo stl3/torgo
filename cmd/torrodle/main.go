@@ -578,47 +578,99 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 	// 	<-sig // Wait for Ctrl+C
 	// }
 
-	if runtime.GOOS == "android" && player.Name == "mpv" {
+	// // if runtime.GOOS == "android" && player.Name == "mpv" {
+	// // 	c.Serve()
+	// // 	fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+	// // 	// cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--esa", "args", "--sub-file=\""+subtitlePath+"\"")
+	// // 	cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
+	// // 	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
+	// // 	// c.URL, subtitlePath, c.Torrent.Name()
+	// // 	// Just for debugging:
+	// // 	// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), player.Name)
+	// // 	err_cmd := cmd.Run()
+	// // 	if err_cmd != nil {
+	// // 		fmt.Println("Error:", err)
+	// // 	}
+	// // 	// Goroutine for the ticker loop used for PrintProgress
+	// // 	go func() {
+	// // 		ticker := time.NewTicker(1500 * time.Millisecond)
+	// // 		defer ticker.Stop()
+
+	// // 		for range ticker.C {
+	// // 			c.PrintProgress()
+	// // 			fmt.Print("\r")
+	// // 			os.Stdout.Sync() // Flush the output buffer to ensure immediate display
+	// // 		}
+	// // 	}()
+
+	// // 	sig := make(chan os.Signal, 1)
+	// // 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	// // 	<-sig // Wait for Ctrl+C
+	// // } else if runtime.GOOS == "android" && player.Name == "vlc" {
+	// // 	cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "com.android.gallery3d/.app.MovieActivity")
+	// // 	log.Printf("\x1b[36mLaunching VLC player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
+	// // 	err_cmd := cmd.Run()
+	// // 	if err_cmd != nil {
+	// // 		fmt.Println("Error:", err)
+	// // 	}
+	// // 	// Goroutine for the ticker loop used for PrintProgress
+	// // 	go func() {
+	// // 		ticker := time.NewTicker(1500 * time.Millisecond)
+	// // 		defer ticker.Stop()
+
+	// // 		for range ticker.C {
+	// // 			c.PrintProgress()
+	// // 			fmt.Print("\r")
+	// // 			os.Stdout.Sync() // Flush the output buffer to ensure immediate display
+	// // 		}
+	// // 	}()
+
+	// // 	sig := make(chan os.Signal, 1)
+	// // 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	// // 	<-sig // Wait for Ctrl+C
+	// // } else if player == nil { // Adjusted the condition to check playerChoice
+	// // 	c.Serve()
+	// // 	fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+	// // 	// Goroutine for the ticker loop used for PrintProgress
+	// // 	go func() {
+	// // 		ticker := time.NewTicker(1500 * time.Millisecond)
+	// // 		defer ticker.Stop()
+
+	// // 		for range ticker.C {
+	// // 			c.PrintProgress()
+	// // 			fmt.Print("\r")
+	// // 			os.Stdout.Sync() // Flush the output buffer to ensure immediate display
+	// // 		}
+	// // 	}()
+
+	// // 	sig := make(chan os.Signal, 1)
+	// // 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	// // 	<-sig // Wait for Ctrl+C
+	// // }
+
+	if runtime.GOOS == "android" {
+		if player.Name == "mpv" {
+			cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
+			log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
+			err_cmd := cmd.Run()
+			if err_cmd != nil {
+				fmt.Println("Error:", err)
+			}
+			gofuncTicker(client.Client{})
+		} else if player.Name == "vlc" {
+			cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "com.android.gallery3d/.app.MovieActivity")
+			log.Printf("\x1b[36mLaunching VLC player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
+			err_cmd := cmd.Run()
+			if err_cmd != nil {
+				fmt.Println("Error:", err)
+			}
+			gofuncTicker(client.Client{})
+		}
+	} else if player == nil {
 		c.Serve()
 		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-		// cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--esa", "args", "--sub-file=\""+subtitlePath+"\"")
-		cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
-		log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
-		// c.URL, subtitlePath, c.Torrent.Name()
-		// Just for debugging:
-		// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), player.Name)
-		err := cmd.Run()
-		if err != nil {
-			fmt.Println("Error:", err)
-		}
-
-	} else if runtime.GOOS == "android" && player.Name == "vlc" {
-		cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "com.android.gallery3d/.app.MovieActivity")
-		log.Printf("\x1b[36mLaunching VLC player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
-		err := cmd.Run()
-		if err != nil {
-			fmt.Println("Error:", err)
-		}
-
-	} else if player == nil { // Adjusted the condition to check playerChoice
-		c.Serve()
-		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+		gofuncTicker(client.Client{}) // No player command for this case
 	}
-	// Goroutine for the ticker loop used for PrintProgress
-	go func() {
-		ticker := time.NewTicker(1500 * time.Millisecond)
-		defer ticker.Stop()
-
-		for range ticker.C {
-			c.PrintProgress()
-			fmt.Print("\r")
-			os.Stdout.Sync() // Flush the output buffer to ensure immediate display
-		}
-	}()
-
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-	<-sig // Wait for Ctrl+C
 
 	fmt.Print("\n")
 	infoPrint("Exiting...")
@@ -642,6 +694,23 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 	}
 	os.Exit(0)
 
+}
+
+func gofuncTicker(c client.Client) {
+	go func() {
+		ticker := time.NewTicker(1500 * time.Millisecond)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			c.PrintProgress()
+			fmt.Print("\r")
+			os.Stdout.Sync() // Flush the output buffer to ensure immediate display
+		}
+	}()
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	<-sig // Wait for Ctrl+C
 }
 
 func init() {
