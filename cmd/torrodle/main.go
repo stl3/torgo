@@ -416,9 +416,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			os.Exit(0)
 		}
 	}(interruptChannel)
-	// hosturl :=
-	// hosturl := c.URL
-	// hosturl == c.URL
+
 	if player != nil {
 		// serve via HTTP
 		c.Serve()
@@ -427,7 +425,8 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		if runtime.GOOS == "android" {
 			if player.Name == "mpv" {
 				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
-				log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
+				// log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
+				logCmd(cmd)
 				err_cmd := cmd.Run()
 				if err_cmd != nil {
 					fmt.Println("Error:", err)
@@ -435,7 +434,8 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 				gofuncTicker(c)
 			} else if player.Name == "vlc" {
 				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
-				log.Printf("\x1b[36mLaunching VLC player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
+				// log.Printf("\x1b[36mLaunching VLC player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
+				logCmd(cmd)
 				err_cmd := cmd.Run()
 				if err_cmd != nil {
 					fmt.Println("Error:", err)
@@ -480,6 +480,10 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		// // // Just for debugging:
 		// // // fmt.Println(color.HiYellowString("[i] Launched player without subtitle"), player.Name)
 		// // }
+	} else {
+		c.Serve()
+		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+		gofuncTicker(c) // No player command for this case
 	}
 
 	// Dumbass temporary workaround for Android atm
@@ -508,11 +512,11 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 	// // 	gofuncTicker(c) // No player command for this case
 	// }
 
-	if player == nil {
-		c.Serve()
-		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-		gofuncTicker(c) // No player command for this case
-	}
+	// if player == nil {
+	// 	c.Serve()
+	// 	fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+	// 	gofuncTicker(c) // No player command for this case
+	// }
 
 	fmt.Print("\n")
 	infoPrint("Exiting...")
@@ -536,6 +540,10 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 	}
 	os.Exit(0)
 
+}
+
+func logCmd(cmd *exec.Cmd) {
+	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
 }
 
 func gofuncTicker(c *client.Client) {
