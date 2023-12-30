@@ -14,7 +14,7 @@
     <a href="#installation">Install</a> |
     <a href="providers.md">Providers</a> |
     <a href="CLI.md">CLI</a> |
-    <a href="API.md">API</a>
+    <a href="API.md">API</a> 
     </strong>
 </div>
 
@@ -38,18 +38,22 @@ I personally do it this way because I have mapped my gpu vram as a disk so that 
   - [Build From Source](#build-from-source)
     - [Dependencies](#dependencies)
 - [Usage](#usage)
+- [Configuration File](#configurationfile)
+- [Caveats](#caveeats)
 - [Contributing](#contributing)
 - [Credit](#credit)
 
+    
 ## Features
 
 * 🔥 Blazing fast
-* 🚸 User-friendly
+* 🚸 User-friendly (debatable)
 * 🤖 Built-in torrent streaming client via HTTP (refined from [`go-peerflix`](https://github.com/Sioro-Neoku/go-peerflix))
 * 🔰 Watch the video while it is being downloaded
 * 🔎 Query multiple providers in a single search
-* 🚀 Sorted results from 9 different providers at once 
+* 🚀 Sorted results from 11 different providers at once 
 * 📄 Along with subtitles fetching for the video (using [`osdb`](https://github.com/Sioro-Neoku/go-peerflix))
+* Support for playing with mpv/vlc on Win/Linux/Mac(?)/Android (Termux) *Android does not have subtitle support yet unless embedded*
 
 ## Installation
 
@@ -92,7 +96,7 @@ For command-line (CLI) usage, see [`CLI.md`](CLI.md).
 
 For API usage, see [`API.md`](API.md).
 
-## Configuration file
+## Configurationfile
 ~/.torrodle.json
 
 ```
@@ -110,6 +114,10 @@ Change `DataDir` if you want a custom path for where it downloads files
 Change `TorrentPort` to the port you open/forwarded to use with torrents
 Change `HostPort` to the port you want to host the file from
 Change `Proxy` to whatever proxy you want to use ([anacrolic/torrent](https://pkg.go.dev/github.com/anacrolix/torrent?utm_source=godoc#ClientConfig.HTTPProxy) - seems to use this only for fetching metainfo and webtorrent seeds but not for the transport of down/up traffic itself
+
+## Caveeats
+
+In Android, when quitting the player you have to manually stop the server. On Windows this is not an issue.
 
 ## Contributing
 
