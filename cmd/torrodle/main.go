@@ -585,7 +585,7 @@ func handleCleanup(c *client.Client) {
 			}
 		}
 	}
-	os.Exit(0)
+	// os.Exit(0)
 
 }
 
