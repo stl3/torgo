@@ -416,13 +416,15 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			os.Exit(0)
 		}
 	}(interruptChannel)
-
+	// hosturl :=
+	hosturl := c.URL
+	// hosturl == c.URL
 	if player != nil {
 		// serve via HTTP
 
 		if runtime.GOOS == "android" {
 			if player.Name == "mpv" {
-				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
+				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", hosturl, "-n", "is.xyz.mpv/.MPVActivity")
 				log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
 				err_cmd := cmd.Run()
 				if err_cmd != nil {
@@ -430,7 +432,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 				}
 				gofuncTicker(c)
 			} else if player.Name == "vlc" {
-				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
+				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", hosturl, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
 				log.Printf("\x1b[36mLaunching VLC player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
 				err_cmd := cmd.Run()
 				if err_cmd != nil {
