@@ -421,7 +421,9 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 	// hosturl == c.URL
 	if player != nil {
 		// serve via HTTP
-		log.Printf("fsefesfesfesfes", c.URL)
+		c.Serve()
+		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+		// log.Printf("Hosting on: ", c.URL)
 		if runtime.GOOS == "android" {
 			if player.Name == "mpv" {
 				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
@@ -441,8 +443,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 				gofuncTicker(c)
 			}
 		} else {
-			c.Serve()
-			fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+
 			gofuncTicker(c) // No player command for this case
 			if subtitlePath != "" && runtime.GOOS != "android" {
 				// open player with subtitle
