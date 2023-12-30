@@ -134,7 +134,8 @@ func pickPlayer() string {
 		options = append(options, p.Name)
 	}
 	// fmt.Println("Select None for standalone/mpv-android/vlc-android options")
-	fmt.Println(color.HiYellowString("Select None for standalone/mpv-android/vlc-android options"))
+	// fmt.Println(color.HiYellowString("Select None for standalone/mpv-android/vlc-android options"))
+	fmt.Println(color.HiYellowString("Select None for standalone server"))
 	// fmt.Println(color.GreenString("Select None for standalone/mpv-android/vlc-android options"))
 
 	prompt := &survey.Select{
@@ -421,11 +422,9 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		// serve via HTTP
 		c.Serve()
 		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-		// log.Printf("Hosting on: ", c.URL)
 		if runtime.GOOS == "android" {
 			if player.Name == "mpv" {
 				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
-				// log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
 				logCmd(cmd)
 				err_cmd := cmd.Run()
 				if err_cmd != nil {
@@ -434,7 +433,6 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 				gofuncTicker(c)
 			} else if player.Name == "vlc" {
 				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
-				// log.Printf("\x1b[36mLaunching VLC player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
 				logCmd(cmd)
 				err_cmd := cmd.Run()
 				if err_cmd != nil {
@@ -444,42 +442,14 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			}
 		} else {
 
-			gofuncTicker(c) // No player command for this case
 			if subtitlePath != "" && runtime.GOOS != "android" {
 				// open player with subtitle
 				player.Start(c.URL, subtitlePath, c.Torrent.Name())
 			} else {
 				player.Start(c.URL, "", c.Torrent.Name())
 			}
+			gofuncTicker(c)
 		}
-
-		// c.Serve()
-
-		// fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-		// // goroutine ticker loop to update PrintProgress
-		// go func() {
-		// 	// Delay for ticker update time. Use whatever sane values you want. I use 500-1500
-		// 	ticker := time.NewTicker(1500 * time.Millisecond)
-		// 	defer ticker.Stop()
-
-		// 	for range ticker.C {
-		// 		c.PrintProgress()
-		// 		fmt.Print("\r")
-		// 		os.Stdout.Sync() // Flush the output buffer to ensure immediate display
-		// 	}
-		// }()
-
-		// // if subtitlePath != "" && runtime.GOOS != "android" {
-		// // 	// open player with subtitle
-		// // 	player.Start(c.URL, subtitlePath, c.Torrent.Name())
-		// // 	// Just for debugging:
-		// // 	// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), player.Name)
-		// // } else {
-		// // // open player without subtitle
-		// // player.Start(c.URL, "", c.Torrent.Name())
-		// // // Just for debugging:
-		// // // fmt.Println(color.HiYellowString("[i] Launched player without subtitle"), player.Name)
-		// // }
 	} else {
 		c.Serve()
 		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
