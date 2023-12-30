@@ -462,7 +462,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 					if err_cmd != nil {
 						fmt.Println("Error:", err)
 					}
-					// gofuncTicker(c)
+					gofuncTicker(c)
 				}
 			} else {
 				// open player without subtitle
@@ -548,22 +548,22 @@ func logCmd(cmd *exec.Cmd) {
 	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
 }
 
-// func gofuncTicker(c *client.Client) {
-// 	go func() {
-// 		ticker := time.NewTicker(1500 * time.Millisecond)
-// 		defer ticker.Stop()
+func gofuncTicker(c *client.Client) {
+	go func() {
+		ticker := time.NewTicker(1500 * time.Millisecond)
+		defer ticker.Stop()
 
-// 		for range ticker.C {
-// 			c.PrintProgress()
-// 			fmt.Print("\r")
-// 			os.Stdout.Sync() // Flush the output buffer to ensure immediate display
-// 		}
-// 	}()
+		for range ticker.C {
+			c.PrintProgress()
+			fmt.Print("\r")
+			os.Stdout.Sync() // Flush the output buffer to ensure immediate display
+		}
+	}()
 
-// 	sig := make(chan os.Signal, 1)
-// 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-// 	<-sig // Wait for Ctrl+C
-// }
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	<-sig // Wait for Ctrl+C
+}
 
 func init() {
 	var err error
