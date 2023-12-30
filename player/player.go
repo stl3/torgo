@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
-	"time"
 )
 
 // Players holds structs of all supported players.
@@ -63,6 +62,7 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		// prevent multiple calls
 		return
 	}
+
 	var command []string
 	switch runtime.GOOS {
 	case "darwin":
@@ -87,6 +87,7 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		// time.Sleep(3 * time.Second)
 		command = append(command, "-n", "is.xyz.mpv/.MPVActivity")
 		// } else if player.Type == vlc {
+
 	} else if player.Name == "vlc" && runtime.GOOS == "android" {
 		// Do something else
 		fmt.Println("Using VLC")
@@ -96,7 +97,7 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 
 	if subtitlePath != "" && runtime.GOOS != "android" {
 		// if subtitlePath != "" {
-		command = append(command, player.TitleCommand+title)
+		command = append(command, player.SubtitleCommand+subtitlePath)
 	}
 	if title != "" && runtime.GOOS != "android" {
 		// if title != "" {
@@ -107,7 +108,13 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	// logrus.Debugf("command: %v\n", command)
 
 	cmd := exec.Command(command[0], command[1:]...)
-	time.Sleep(3 * time.Second)
+	// var cmd *exec.Cmd // Declare cmd outside if-else block
+	// if runtime.GOOS == "android" {
+	// 	cmd = exec.Command(command[0])
+	// } else {
+	// 	cmd = exec.Command(command[0], command[1:]...)
+	// }
+	// time.Sleep(3 * time.Second)
 	player.started = true
 
 	if err := cmd.Start(); err != nil {

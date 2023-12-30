@@ -134,7 +134,8 @@ func pickPlayer() string {
 		options = append(options, p.Name)
 	}
 	// fmt.Println("Select None for standalone/mpv-android/vlc-android options")
-	fmt.Println(color.HiYellowString("Select None for standalone/mpv-android/vlc-android options"))
+	// fmt.Println(color.HiYellowString("Select None for standalone/mpv-android/vlc-android options"))
+	fmt.Println(color.HiYellowString("Select None for standalone server"))
 	// fmt.Println(color.GreenString("Select None for standalone/mpv-android/vlc-android options"))
 
 	prompt := &survey.Select{
@@ -382,6 +383,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 
 	// start client
 	c.Start()
+
 	// handle exit signals
 	interruptChannel := make(chan os.Signal, 1)
 	signal.Notify(interruptChannel,
@@ -416,7 +418,6 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			os.Exit(0)
 		}
 	}(interruptChannel)
-
 	if player != nil {
 		// serve via HTTP
 		c.Serve()
@@ -435,103 +436,62 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			}
 		}()
 
-		if subtitlePath != "" {
-			// open player with subtitle
-			player.Start(c.URL, subtitlePath, c.Torrent.Name())
-			// Just for debugging:
-			// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), player.Name)
-		} else {
-			// open player without subtitle
-			player.Start(c.URL, "", c.Torrent.Name())
-			// Just for debugging:
-			// fmt.Println(color.HiYellowString("[i] Launched player without subtitle"), player.Name)
-		}
-	}
+		if subtitlePath != "" { // With subs
+			if runtime.GOOS != "android" {
 
-	// Dumbass temporary workaround for Android atm
-	if player == nil {
-		// Define the survey questions
-		var qs = []*survey.Question{
-			{
-				Name: "choice",
-				Prompt: &survey.Select{
-					Message: "Choose player:",
-					Options: []string{"Standalone Server", "mpv-android", "vlc-android"},
-				},
-			},
-		}
-
-		// Ask the user for their choice
-		answers := struct {
-			Choice string
-		}{}
-		err := survey.Ask(qs, &answers)
-		if err != nil {
-			fmt.Println("Error reading choice:", err)
-			return
-		}
-
-		// Process the user's choice
-		switch answers.Choice {
-		case "Standalone Server":
-			c.Serve()
-			fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-		case "mpv-android":
-			c.Serve()
-			fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-			if runtime.GOOS == "android" && subtitlePath != "" {
-				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity", "--esa", "args", "--sub-file=\""+subtitlePath+"\"")
-				log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
-				// c.URL, subtitlePath, c.Torrent.Name()
+				// open player with subtitle
+				player.Start(c.URL, subtitlePath, c.Torrent.Name())
 				// Just for debugging:
-				// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), player.Name)
-				err := cmd.Run()
-				if err != nil {
-					fmt.Println("Error:", err)
-				}
-			} else {
-				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
-				// fmt.Println(color.HiYellowString("[i] Launched player without subtitle"), player.Name)
-				err := cmd.Run()
-				if err != nil {
-					fmt.Println("Error:", err)
-				}
-			}
-		case "vlc-android":
-			c.Serve()
-			fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-			if runtime.GOOS == "android" && subtitlePath != "" {
-				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity", "--esa", "args", "--sub-file="+subtitlePath)
-				err := cmd.Run()
-				if err != nil {
-					fmt.Println("Error:", err)
-				}
-			} else {
-				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
-				err := cmd.Run()
-				if err != nil {
-					fmt.Println("Error:", err)
+				// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), subtitlePath)
+			} else if runtime.GOOS == "android" {
+				if player.Name == "mpv" {
+					cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
+					logCmd(cmd)
+					err_cmd := cmd.Run()
+					if err_cmd != nil {
+						fmt.Println("Error:", err)
+					}
+					gofuncTicker(c)
+				} else if player.Name == "vlc" {
+					cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
+					logCmd(cmd)
+					err_cmd := cmd.Run()
+					if err_cmd != nil {
+						fmt.Println("Error:", err)
+					}
+					gofuncTicker(c)
 				}
 			}
-		default:
-			fmt.Println("Invalid choice. Please enter 1, 2, or 3.")
+		} else { // Without subs
+			if runtime.GOOS == "android" {
+				if player.Name == "mpv" {
+					cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
+					logCmd(cmd)
+					err_cmd := cmd.Run()
+					if err_cmd != nil {
+						fmt.Println("Error:", err)
+					}
+					gofuncTicker(c)
+				} else if player.Name == "vlc" {
+					cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
+					logCmd(cmd)
+					err_cmd := cmd.Run()
+					if err_cmd != nil {
+						fmt.Println("Error:", err)
+					}
+					gofuncTicker(c)
+				}
+			} else {
+				// open player without subtitle
+				player.Start(c.URL, "", c.Torrent.Name())
+				// Just for debugging:
+				fmt.Println(color.HiYellowString("[i] Launched player without subtitle"), player.Name)
+			}
 		}
-
-		// Goroutine for the ticker loop used for PrintProgress
-		go func() {
-			ticker := time.NewTicker(1500 * time.Millisecond)
-			defer ticker.Stop()
-
-			for range ticker.C {
-				c.PrintProgress()
-				fmt.Print("\r")
-				os.Stdout.Sync() // Flush the output buffer to ensure immediate display
-			}
-		}()
-
-		sig := make(chan os.Signal, 1)
-		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-		<-sig // Wait for Ctrl+C
+	} else {
+		c.Serve()
+		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+		// gofuncTicker(c) // No player command for this case
 	}
 
 	fmt.Print("\n")
@@ -556,6 +516,27 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 	}
 	os.Exit(0)
 
+}
+
+func logCmd(cmd *exec.Cmd) {
+	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
+}
+
+func gofuncTicker(c *client.Client) {
+	go func() {
+		ticker := time.NewTicker(1500 * time.Millisecond)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			c.PrintProgress()
+			fmt.Print("\r")
+			os.Stdout.Sync() // Flush the output buffer to ensure immediate display
+		}
+	}()
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	<-sig // Wait for Ctrl+C
 }
 
 func init() {
@@ -734,8 +715,8 @@ func main() {
 	var subtitlePath string
 	if playerChoice == "None" {
 		p = nil
-		// temporary to give android subtitles until can find a way to properly launch it from player.go
-		subtitlePath = getSubtitles(source.Title)
+		// Asks for subtitles when using no player
+		// subtitlePath = getSubtitles(source.Title)
 	} else {
 		// Get subtitles
 		subtitlePath = getSubtitles(source.Title)
@@ -744,6 +725,7 @@ func main() {
 
 	// Start playing video...
 	startClient(p, source, subtitlePath)
+
 }
 
 func truncateMagnet(magnet string, maxLength int) string {
