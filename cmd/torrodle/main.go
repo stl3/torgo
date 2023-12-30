@@ -421,7 +421,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 	// hosturl == c.URL
 	if player != nil {
 		// serve via HTTP
-		log.Print(c.URL)
+		log.Printf("fsefesfesfesfes", c.URL)
 		if runtime.GOOS == "android" {
 			if player.Name == "mpv" {
 				cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
