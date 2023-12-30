@@ -460,7 +460,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			}
 			gofuncTicker(c)
 		} else if player.Name == "vlc" {
-			cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "com.android.gallery3d/.app.MovieActivity")
+			cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
 			log.Printf("\x1b[36mLaunching VLC player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
 			err_cmd := cmd.Run()
 			if err_cmd != nil {
