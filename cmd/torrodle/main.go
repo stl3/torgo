@@ -443,6 +443,24 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 				player.Start(c.URL, subtitlePath, c.Torrent.Name())
 				// Just for debugging:
 				// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), subtitlePath)
+			} else if runtime.GOOS == "android" {
+				if player.Name == "mpv" {
+					cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
+					logCmd(cmd)
+					err_cmd := cmd.Run()
+					if err_cmd != nil {
+						fmt.Println("Error:", err)
+					}
+					gofuncTicker(c)
+				} else if player.Name == "vlc" {
+					cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
+					logCmd(cmd)
+					err_cmd := cmd.Run()
+					if err_cmd != nil {
+						fmt.Println("Error:", err)
+					}
+					gofuncTicker(c)
+				}
 			}
 		} else { // Without subs
 			if runtime.GOOS == "android" {
@@ -461,7 +479,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 					if err_cmd != nil {
 						fmt.Println("Error:", err)
 					}
-					// gofuncTicker(c)
+					gofuncTicker(c)
 				}
 			} else {
 				// open player without subtitle
