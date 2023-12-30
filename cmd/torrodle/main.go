@@ -19,6 +19,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/olekukonko/tablewriter"
 	"github.com/oz/osdb"
+	"github.com/shirou/gopsutil/process"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/AlecAivazis/survey.v1"
 
@@ -451,7 +452,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 					if err_cmd != nil {
 						fmt.Println("Error:", err)
 					}
-					gofuncTicker(c)
+					gofuncTicker(c, player.Name)
 				} else if player.Name == "vlc" {
 					cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
 					logCmd(cmd)
@@ -459,7 +460,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 					if err_cmd != nil {
 						fmt.Println("Error:", err)
 					}
-					gofuncTicker(c)
+					gofuncTicker(c, player.Name)
 				}
 			}
 		} else { // Without subs
@@ -471,7 +472,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 					if err_cmd != nil {
 						fmt.Println("Error:", err)
 					}
-					gofuncTicker(c)
+					gofuncTicker(c, player.Name)
 				} else if player.Name == "vlc" {
 					cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
 					logCmd(cmd)
@@ -479,7 +480,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 					if err_cmd != nil {
 						fmt.Println("Error:", err)
 					}
-					gofuncTicker(c)
+					gofuncTicker(c, player.Name)
 				}
 			} else {
 				// open player without subtitle
@@ -493,49 +494,6 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
 		// gofuncTicker(c) // No player command for this case
 	}
-	// serve via HTTP
-
-	// gofuncTicker(c)
-
-	// if player != nil && runtime.GOOS != "android" {
-	// fmt.Println(color.HiYellowString("[i] We have arrived"), c.URL)
-	// if player != nil {
-	// 	c.Serve()
-	// 	fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-	// 	// if subtitlePath != "" && runtime.GOOS != "android" {
-	// 	gofuncTicker(c)
-	// 	if subtitlePath != "" {
-	// 		// open player with subtitle
-	// 		player.Start(c.URL, subtitlePath, c.Torrent.Name())
-	// 	} else {
-	// 		player.Start(c.URL, "", c.Torrent.Name())
-	// 		// gofuncTicker(c)
-	// 	}
-	// } else {
-	// 	c.Serve()
-	// 	fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-	// 	gofuncTicker(c) // No player command for this case
-	// }
-
-	// // if runtime.GOOS == "android" {
-	// // 	if player.Name == "mpv" {
-	// // 		cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "is.xyz.mpv/.MPVActivity")
-	// // 		logCmd(cmd)
-	// // 		err_cmd := cmd.Run()
-	// // 		if err_cmd != nil {
-	// // 			fmt.Println("Error:", err)
-	// // 		}
-	// // 		// gofuncTicker(c)
-	// // 	} else if player.Name == "vlc" {
-	// // 		cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
-	// // 		logCmd(cmd)
-	// // 		err_cmd := cmd.Run()
-	// // 		if err_cmd != nil {
-	// // 			fmt.Println("Error:", err)
-	// // 		}
-	// // 		// gofuncTicker(c)
-	// // 	}
-	// // }
 
 	fmt.Print("\n")
 	infoPrint("Exiting...")
@@ -565,7 +523,7 @@ func logCmd(cmd *exec.Cmd) {
 	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
 }
 
-func gofuncTicker(c *client.Client) {
+func gofuncTicker(c *client.Client, playerName string) {
 	go func() {
 		ticker := time.NewTicker(1500 * time.Millisecond)
 		defer ticker.Stop()
@@ -574,12 +532,61 @@ func gofuncTicker(c *client.Client) {
 			c.PrintProgress()
 			fmt.Print("\r")
 			os.Stdout.Sync() // Flush the output buffer to ensure immediate display
+			// Check if the player process is still running
+			if !isPlayerRunning(playerName) {
+				handleCleanup(c)
+				os.Exit(0)
+			}
 		}
 	}()
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 	<-sig // Wait for Ctrl+C
+}
+
+func isPlayerRunning(playerName string) bool {
+	processes, err := process.Processes()
+	if err != nil {
+		errorPrint("Error retrieving processes:", err)
+		return false
+	}
+
+	for _, p := range processes {
+		name, err := p.Name()
+		if err == nil && strings.EqualFold(name, playerName) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func handleCleanup(c *client.Client) {
+	// Your cleanup logic here
+	// ...
+	fmt.Print("\n")
+	infoPrint("Exiting...")
+	// Delete the directory
+	dirPath := filepath.Join(dataDir, c.Torrent.Name())
+	infoPrint("Deleting downloads from: ", filepath.Join(dataDir, c.Torrent.Name()))
+	if err := os.RemoveAll(dirPath); err != nil {
+		errorPrint("Error deleting directory:", err)
+	}
+	// Delete files inside subtitlesDir
+	subtitleFiles, err := filepath.Glob(filepath.Join(subtitlesDir, "*"))
+	if err != nil {
+		errorPrint("No subtitles to delete", err)
+	} else {
+		for _, subtitlePath := range subtitleFiles {
+			infoPrint("Deleting subtitles...", subtitlePath)
+			if err := os.Remove(subtitlePath); err != nil {
+				errorPrint("Error deleting subtitle file:", err)
+			}
+		}
+	}
+	os.Exit(0)
+
 }
 
 func init() {
