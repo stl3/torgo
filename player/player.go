@@ -109,9 +109,9 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 	// logrus.Debugf("command: %v\n", command)
 
 	// var cmd *exec.Cmd // Declare cmd outside if-else block
-	cmd := exec.Command(command[0], command[1:]...)
+	// cmd := exec.Command(command[0], command[1:]...)
 	// if runtime.GOOS == "android" {
-	// 	cmd = exec.Command(command[0])
+	cmd := exec.Command(command[0])
 	// } else {
 	// 	cmd = exec.Command(command[0], command[1:]...)
 	// }
