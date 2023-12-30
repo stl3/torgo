@@ -440,11 +440,16 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 				}
 				gofuncTicker(c)
 			}
-			// } else if player == nil {
 		} else {
 			c.Serve()
 			fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
 			gofuncTicker(c) // No player command for this case
+			if subtitlePath != "" && runtime.GOOS != "android" {
+				// open player with subtitle
+				player.Start(c.URL, subtitlePath, c.Torrent.Name())
+			} else {
+				player.Start(c.URL, "", c.Torrent.Name())
+			}
 		}
 
 		// c.Serve()
@@ -463,17 +468,17 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		// 	}
 		// }()
 
-		if subtitlePath != "" && runtime.GOOS != "android" {
-			// open player with subtitle
-			player.Start(c.URL, subtitlePath, c.Torrent.Name())
-			// Just for debugging:
-			// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), player.Name)
-		} else {
-			// open player without subtitle
-			player.Start(c.URL, "", c.Torrent.Name())
-			// Just for debugging:
-			// fmt.Println(color.HiYellowString("[i] Launched player without subtitle"), player.Name)
-		}
+		// // if subtitlePath != "" && runtime.GOOS != "android" {
+		// // 	// open player with subtitle
+		// // 	player.Start(c.URL, subtitlePath, c.Torrent.Name())
+		// // 	// Just for debugging:
+		// // 	// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), player.Name)
+		// // } else {
+		// // // open player without subtitle
+		// // player.Start(c.URL, "", c.Torrent.Name())
+		// // // Just for debugging:
+		// // // fmt.Println(color.HiYellowString("[i] Launched player without subtitle"), player.Name)
+		// // }
 	}
 
 	// Dumbass temporary workaround for Android atm
