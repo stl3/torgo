@@ -113,7 +113,7 @@ For API usage, see [`API.md`](API.md).
 Change `DataDir` if you want a custom path for where it downloads files
 Change `TorrentPort` to the port you open/forwarded to use with torrents
 Change `HostPort` to the port you want to host the file from
-Change `Proxy` to whatever proxy you want to use ([anacrolic/torrent](https://pkg.go.dev/github.com/anacrolix/torrent?utm_source=godoc#ClientConfig.HTTPProxy) - seems to use this only for fetching metainfo and webtorrent seeds but not for the transport of down/up traffic itself
+Change `Proxy` to whatever proxy you want to use ([anacrolix/torrent](https://pkg.go.dev/github.com/anacrolix/torrent?utm_source=godoc#ClientConfig.HTTPProxy) - seems to use this only for fetching metainfo and webtorrent seeds but not for the transport of down/up traffic itself
 
 ## Caveeats
 
