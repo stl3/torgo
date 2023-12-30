@@ -656,7 +656,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			if err_cmd != nil {
 				fmt.Println("Error:", err)
 			}
-			gofuncTicker(client.Client{})
+			gofuncTicker(c)
 		} else if player.Name == "vlc" {
 			cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "com.android.gallery3d/.app.MovieActivity")
 			log.Printf("\x1b[36mLaunching VLC player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
@@ -664,12 +664,12 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			if err_cmd != nil {
 				fmt.Println("Error:", err)
 			}
-			gofuncTicker(client.Client{})
+			gofuncTicker(c)
 		}
 	} else if player == nil {
 		c.Serve()
 		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-		gofuncTicker(client.Client{}) // No player command for this case
+		gofuncTicker(c) // No player command for this case
 	}
 
 	fmt.Print("\n")
@@ -696,7 +696,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 
 }
 
-func gofuncTicker(c client.Client) {
+func gofuncTicker(c *client.Client) {
 	go func() {
 		ticker := time.NewTicker(1500 * time.Millisecond)
 		defer ticker.Stop()
