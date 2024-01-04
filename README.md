@@ -1,5 +1,8 @@
 <h1 align="center">torgo</h1>
-
+<p align="center">
+  <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/stl3/torrodle"/>
+  <img alt="Github Last Commit" src="https://img.shields.io/github/last-commit/stl3/torrodle"/>
+</p>
 <p align="center"><strong><i>A mighty all-in-one magnet scraper & streamer</i></strong></p>
 
 <p align="center"><img src="demo.gif" width=100%></p>
