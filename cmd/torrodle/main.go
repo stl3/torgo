@@ -33,7 +33,7 @@ const version = "0.1-beta"
 
 var u, _ = user.Current()
 var home = u.HomeDir
-var configFile = filepath.Join(home, ".torrodle.json")
+var configFile = filepath.Join(home, ".torgo.json")
 var configurations config.TorrodleConfig
 
 var dataDir string
@@ -454,6 +454,15 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 					gofuncTicker(c)
 				} else if player.Name == "vlc" {
 					cmd := exec.Command("am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d", c.URL, "-n", "org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity")
+					logCmd(cmd)
+					err_cmd := cmd.Run()
+					if err_cmd != nil {
+						fmt.Println("Error:", err)
+					}
+					gofuncTicker(c)
+				// }
+				} else if player.Name == "Chromecast" {
+					cmd := exec.Command("go-chromecast", "-a", "10.0.0.107", "load", c.URL )
 					logCmd(cmd)
 					err_cmd := cmd.Run()
 					if err_cmd != nil {
