@@ -40,6 +40,10 @@ var Players = []Player{
 		Name:           "KMPlayer",
 		WindowsCommand: []string{"KMPlayer.exe"}, // Do people use this?
 	},
+	{
+		Name:           "Chromecast",
+		WindowsCommand: []string{""},
+	},
 }
 
 // Player manages the execution of a media player.
