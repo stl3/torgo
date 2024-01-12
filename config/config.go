@@ -50,11 +50,12 @@ func InitConfig(path string) error {
 	config := TorrodleConfig{
 		DataDir:      getTempDir(),
 		ResultsLimit: 100,
-		TorrentPort:  10800,
-		HostPort:     8789,
-		ECPT:         45,
-		HOCPT:        25,
-		THOC:         50,
+		// TorrentPort:  10800,
+		TorrentPort: 36663,
+		HostPort:    8789,
+		ECPT:        45,
+		HOCPT:       25,
+		THOC:        50,
 	}
 	data, _ := json.MarshalIndent(config, "", "\t")
 	err := os.WriteFile(path, data, 0644)
