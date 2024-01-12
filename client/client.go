@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -41,11 +42,41 @@ type Client struct {
 
 var u, _ = user.Current()
 var home = u.HomeDir
-var configFile = filepath.Join(home, ".torrodle.json")
+var configFile = filepath.Join(home, ".torgo.json")
 var configurations config.TorrodleConfig
+
+// Function to find an available port starting from the given port
+func findAvailablePort(startPort int) int {
+	for port := startPort; port <= 65535; port++ {
+		// Check if the port is available
+		if isPortAvailable(port) {
+			logrus.Infof("Using port: %s", port)
+			return port
+		}
+	}
+	// Return an error value if no available port is found
+	// Chances are, there will be an available port but we
+	// save that problem for another rainy day
+	return -1
+}
+
+// Function to check if a port is available
+func isPortAvailable(port int) bool {
+	// Attempt to bind to the specified port
+	listener, err := net.Listen("tcp", ":"+strconv.Itoa(port))
+	if err != nil {
+		// Port is in use, return false
+		return false
+	}
+	// Close the listener if the port is available
+	_ = listener.Close()
+	return true
+}
 
 func NewClient(dataDir string, torrentPort int, hostPort int) (*Client, error) {
 	var client Client
+	// Attempt to find an available port starting from the specified port
+	torrentPort = findAvailablePort(torrentPort)
 
 	// Initialize Config
 	clientConfig := torrent.NewDefaultClientConfig()
