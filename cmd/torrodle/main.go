@@ -423,6 +423,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		c.Serve()
 
 		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
+		fmt.Println(color.HiYellowString("[i] Torrent Port:"), c.ClientConfig.ListenPort)
 		// goroutine ticker loop to update PrintProgress
 		go func() {
 			// Delay for ticker update time. Use whatever sane values you want. I use 500-1500
@@ -460,9 +461,9 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 						fmt.Println("Error:", err)
 					}
 					gofuncTicker(c)
-				// }
+					// }
 				} else if player.Name == "Chromecast" {
-					cmd := exec.Command("go-chromecast", "-a", "10.0.0.107", "load", c.URL )
+					cmd := exec.Command("go-chromecast", "-a", "10.0.0.107", "load", c.URL)
 					logCmd(cmd)
 					err_cmd := cmd.Run()
 					if err_cmd != nil {
