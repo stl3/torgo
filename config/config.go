@@ -13,6 +13,7 @@ type TorrodleConfig struct {
 	TorrentPort  int    `json:"TorrentPort"`
 	HostPort     int    `json:"HostPort"`
 	Proxy        string `json:"Proxy"`
+	Eztv_cookie  string `json:"eztv_cookie"`
 	ECPT         int    `json:"EstablishedConnsPerTorrent"`
 	HOCPT        int    `json:"HalfOpenConnsPerTorrent"`
 	THOC         int    `json:"TotalHalfOpenConns"`
