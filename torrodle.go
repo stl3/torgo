@@ -170,6 +170,8 @@ func GetCategoryURL(category Category, categories models.Categories) models.Cate
 		caturl = categories.Anime
 	case CategoryPorn:
 		caturl = categories.Porn
+	case CategoryDocumentaries:
+		caturl = categories.Documentaries
 	default:
 		logrus.Fatalln("Invalid category")
 	}
