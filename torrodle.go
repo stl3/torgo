@@ -17,6 +17,7 @@ import (
 	"github.com/stl3/torrodle/providers/leetx"
 	"github.com/stl3/torrodle/providers/limetorrents"
 	"github.com/stl3/torrodle/providers/magnetdl"
+	"github.com/stl3/torrodle/providers/torrentgalaxy"
 
 	// "github.com/stl3/torrodle/providers/rarbg"
 	"github.com/stl3/torrodle/providers/sukebei"
@@ -57,6 +58,7 @@ var (
 	Knaben            = knaben.New()
 	MagnetDL          = magnetdl.New()
 	EZTV              = eztv.New()
+	TorrentGalaxy     = torrentgalaxy.New()
 )
 
 var AllProviders = [...]models.ProviderInterface{
@@ -72,6 +74,7 @@ var AllProviders = [...]models.ProviderInterface{
 	Knaben,
 	MagnetDL,
 	EZTV,
+	TorrentGalaxy,
 	// RarbgProvider,
 }
 
