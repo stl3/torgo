@@ -2,22 +2,27 @@ package eztv
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/dustin/go-humanize"
+	"github.com/go-resty/resty/v2"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/html"
 
+	"github.com/stl3/torrodle/config"
 	"github.com/stl3/torrodle/models"
-	"github.com/stl3/torrodle/request"
 )
+
+var configurations config.TorrodleConfig
 
 const (
 	Name = "eztv"
 	Site = "https://eztvx.to"
+	// Site = "https://eztv.re"
 )
 
 type provider struct {
@@ -31,29 +36,54 @@ func New() models.ProviderInterface {
 	provider.Name = Name
 	provider.Site = Site
 	provider.Categories = models.Categories{
-		TV: "/search/%v",
+		TV: "/search/%v&%d",
 	}
 	return provider
 }
 
 func (provider *provider) Search(query string, count int, categoryURL models.CategoryURL) ([]models.Source, error) {
 	modifiedQuery := modifyQuery(query)
-	// logrus.Infof("Modified query before changes: %s", modifiedQuery)
-	// modifiedQuery = string(query[0]) + "/" + modifiedQuery
 	logrus.Infof("Modified query afer changes: %s", modifiedQuery)
 	results, err := provider.Query(modifiedQuery, categoryURL, count, 50, 1, extractor)
 	return results, err
 }
 
 func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGroup) {
-	// Replace "%2F" with "/"
-	surl = strings.ReplaceAll(surl, "%2F", "/")
+	surl = removeNumberedStrings(surl)
+
 	// Log or display the full URL before making the request
 	logrus.Infof("EZTV: [%d] Requesting URL: %s\n", page, surl)
-
 	logrus.Infof("EZTV: [%d] Extracting results...\n", page)
-	// _, html, err := request.Get(nil, strings.ReplaceAll(surl, "/", "%2F"), nil)
-	_, html, err := request.Get(nil, surl, nil)
+
+	client := resty.New()
+
+	// Create cookies
+	cookie1 := &http.Cookie{
+		Name: "PHPSESSID",
+		// Value: "0odhb6e5o8fuhpk5rvgmpovdhk",
+		Value: configurations.Eztv_cookie,
+	}
+
+	cookie2 := &http.Cookie{
+		Name:  "layout",
+		Value: "def_wlinks",
+	}
+
+	// Add cookies to the request
+	client.SetCookies([]*http.Cookie{cookie1, cookie2})
+
+	// Make the request
+	resp, err := client.R().
+		SetResult(&struct {
+			// Define the structure of the expected response
+			// Replace with the actual fields you expect in the response
+			// For example, if the response is JSON, define the JSON structure here.
+			Field1 string `json:"field1"`
+			Field2 int    `json:"field2"`
+			// Add more fields as needed
+		}{}).
+		Get(surl)
+
 	if err != nil {
 		logrus.Errorln(fmt.Sprintf("EZTV: [%d]", page), err)
 		wg.Done()
@@ -61,35 +91,41 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 	}
 
 	var sources []models.Source
+
+	html := resp.String()
 	doc, _ := goquery.NewDocumentFromReader(strings.NewReader(html))
-	resultsContainer := doc.Find("#content > div.fill-table > table > tbody > tr")
+	resultsContainer := doc.Find("tbody tr.forum_header_border")
 	resultsContainer.Each(func(_ int, result *goquery.Selection) {
-		// Extract information from each search result item
-		title := result.Find("td.n a").Text()
+
+		title := result.Find("td.forum_thread_post > a.epinfo").Text()
+		// logrus.Infof("Title: %s", title)
 
 		if containsHTMLEncodedEntities(title) {
 			decodedTitle, err := decodeHTMLText(title)
 			if err != nil {
-				// logrus.Errorln("Error decoding HTML text:", err)
-				// return
+				logrus.Errorf("Error decoding HTML text: %v", err)
+				// Handle error if necessary
 				decodedTitle = title
 			}
 			logrus.Infof("Decoded Title: %s", decodedTitle)
-		} else {
-			logrus.Infof("Title: %s", title)
 		}
 
-		URL, _ := result.Find("td.n a").Attr("href")
-		sizeStr := result.Find("td:nth-child(6)").Text()
+		URL, _ := result.Find("td.forum_thread_post > a.epinfo").Attr("href")
+		// logrus.Infof("URL: %s", URL)
+
+		sizeStr := result.Find("td:nth-child(4)").Text() // Assuming size is in the previous td
+		// logrus.Infof("Size: %s", sizeStr)
 		size, err := humanize.ParseBytes(sizeStr)
-		seeders, _ := strconv.Atoi(result.Find("td.s").Text())
-		leechers, _ := strconv.Atoi(result.Find("td.l").Text())
-		magnet, _ := result.Find("td.m a").Attr("href")
+
+		seeders, _ := strconv.Atoi(result.Find("td.forum_thread_post_end > font").Text())
+		// logrus.Infof("Seeders: %d", seeders)
+
+		// magnet, _ := result.Find("td.forum_thread_post > a.magnet").Attr("href")
+		magnet, _ := result.Find("td:nth-child(3) > a.magnet").Attr("href")
+		logrus.Infof("Magnet: %s", magnet)
 
 		if err != nil {
-			// log.Println("Error converting sizeStr to int:", err)
-			// log.Println("Size string:", sizeStr)
-			// logrus.Errorln("Error converting sizeStr to int:", err)
+			logrus.Errorf("Error converting sizeStr to int: %v", err)
 			logrus.Infof("Size string: %s", sizeStr)
 		}
 
@@ -98,7 +134,6 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 			Title:    title,
 			URL:      Site + URL, // Assuming 'Site' is declared somewhere
 			Seeders:  seeders,
-			Leechers: leechers,
 			FileSize: int64(size),
 			Magnet:   magnet,
 		}
@@ -137,13 +172,14 @@ func decodeHTMLText(text string) (string, error) {
 }
 
 func modifyQuery(query string) string {
-	// Take the first letter of the query
-	// firstLetter := string(query[0])
-
 	// Replace spaces with "-"
 	modifiedQuery := strings.ReplaceAll(query, " ", "-")
-	// finalQuery := firstLetter + "/" + modifiedQuery
-	// Construct the modified query
-
 	return modifiedQuery
+}
+
+func removeNumberedStrings(s string) string {
+	for i := 1; i <= 9; i++ {
+		s = strings.ReplaceAll(s, fmt.Sprintf("&%d", i), "")
+	}
+	return s
 }
