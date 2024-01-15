@@ -59,8 +59,7 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 
 	// Create cookies
 	cookie1 := &http.Cookie{
-		Name: "PHPSESSID",
-		// Value: "0odhb6e5o8fuhpk5rvgmpovdhk",
+		Name:  "PHPSESSID",
 		Value: configurations.Eztv_cookie,
 	}
 
