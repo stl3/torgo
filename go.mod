@@ -18,6 +18,7 @@ require (
 )
 
 require (
+	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/RoaringBitmap/roaring v1.7.0 // indirect
 	github.com/ajwerner/btree v0.0.0-20211221152037-f427b3e689c0 // indirect
 	github.com/alecthomas/atomic v0.1.0-alpha2 // indirect
