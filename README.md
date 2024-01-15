@@ -108,6 +108,7 @@ For API usage, see [`API.md`](API.md).
 "EstablishedConnsPerTorrent": 25,
 "HalfOpenConnsPerTorrent": 25,
 "TotalHalfOpenConns": 50,
+"eztv_cookie": "cookie_value"
 "Debug": false
 ```
 Change `DataDir` if you want a custom path for where it downloads files
