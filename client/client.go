@@ -18,6 +18,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/anacrolix/torrent"
 	"github.com/dustin/go-humanize"
 	"github.com/fatih/color"
@@ -137,40 +138,72 @@ func (client *Client) getLargestFile() *torrent.File {
 		}
 	}
 
-	// If there is only one file larger than 100MB, return it directly
+	// If there is only one file larger than 40MB, return it directly
 	if len(largeFiles) == 1 {
-		fmt.Print(largeFiles[0], "\n")
+		// fmt.Print(largeFiles[0], "\n")
 		client.LargestFile = largeFiles[0]
 		return largeFiles[0]
 	}
 
-	// If there are multiple files, prompt the user to choose
-	for {
-		fmt.Println("Multiple files larger than 40MB found. Please choose a file:")
-		for i, file := range largeFiles {
-			fmt.Printf("%d. %s\n", i+1, file.DisplayPath())
-		}
+	// // // If there are multiple files, prompt the user to choose
+	// // for {
+	// // 	fmt.Println("Multiple files larger than 40MB found. Please choose a file:")
+	// // 	for i, file := range largeFiles {
+	// // 		fmt.Printf("%d. %s\n", i+1, file.DisplayPath())
+	// // 	}
 
-		var choice int
-		fmt.Print("Enter the number corresponding to your choice: ")
-		_, err := fmt.Scan(&choice)
-		if err != nil {
-			fmt.Println("Invalid input. Please enter a number.")
-			continue
-		}
+	// // 	var choice int
+	// // 	fmt.Print("Enter the number corresponding to your choice: ")
+	// // 	_, err := fmt.Scan(&choice)
+	// // 	if err != nil {
+	// // 		fmt.Println("Invalid input. Please enter a number.")
+	// // 		continue
+	// // 	}
 
-		if choice >= 1 && choice <= len(largeFiles) {
-			fmt.Print(largeFiles[choice-1], "\n")
-			// return largeFiles[choice-1]
-			client.LargestFile = largeFiles[choice-1]
+	// // 	if choice >= 1 && choice <= len(largeFiles) {
+	// // 		fmt.Print(largeFiles[choice-1], "\n")
+	// // 		// return largeFiles[choice-1]
+	// // 		client.LargestFile = largeFiles[choice-1]
 
-			return client.LargestFile
+	// // 		return client.LargestFile
 
-		} else {
-			fmt.Println("Invalid choice. Please enter a valid number.")
+	// // 	} else {
+	// // 		fmt.Println("Invalid choice. Please enter a valid number.")
+	// // 	}
+	// // }
+
+	// // Display file names using file.DisplayPath()
+	// for i, file := range largeFiles {
+	// 	fmt.Printf("%d. %s\n", i+1, file.DisplayPath())
+	// }
+
+	choice := ""
+	prompt := &survey.Select{
+		Message: "Select file to play:",
+		Default: largeFiles[0].DisplayPath(), // Set the first file as default
+		Options: func() []string {
+			var fileNames []string
+			for _, file := range largeFiles {
+				fileNames = append(fileNames, file.DisplayPath())
+			}
+			return fileNames
+		}(),
+	}
+	_ = survey.AskOne(prompt, &choice, nil)
+
+	// Find the selected *torrent.File based on the chosen file name
+	var selectedFile *torrent.File
+	for _, file := range largeFiles {
+		if file.DisplayPath() == choice {
+			selectedFile = file
+			break
 		}
 	}
 
+	client.LargestFile = selectedFile
+	// fmt.Printf(client.LargestFile)
+	// fmt.Print(client.LargestFile, "\n")
+	return selectedFile
 	// The loop should never reach this point, but if no file is larger than 100MB or the user didn't choose, return nil
 
 }
@@ -180,41 +213,71 @@ func (client *Client) download() {
 
 	// Get the largest file before entering the download loop
 	largestFile := client.getLargestFile()
+	f := client.LargestFile
+	// fmt.Print(largestFile, "\n")
+	// ANSI escape codes for different colors
+	// redColor := "\033[31m"
+	greenColor := "\033[32m"
+	// yellowColor := "\033[33m"
+	// blueColor := "\033[34m"
+	// magentaColor := "\033[35m"
+	// cyanColor := "\033[36m"
+	resetColor := "\033[0m"
+
+	// fmt.Print(redColor, largestFile, resetColor, "\n")
+	fmt.Print(greenColor, largestFile, resetColor, "\n")
+	// fmt.Print(yellowColor, largestFile, resetColor, "\n")
+	// fmt.Print(blueColor, largestFile, resetColor, "\n")
+	// fmt.Print(magentaColor, largestFile, resetColor, "\n")
+	// fmt.Print(cyanColor, largestFile, resetColor, "\n")
 	// if largestFile == nil {
 	// 	fmt.Println("No file larger than 40MB found. Exiting.")
 	// 	return
 	// }
-
-	t.DownloadAll()
+	<-t.GotInfo()
+	// t.DownloadAll()
+	f.Download()
 	client.downloadStarted = true
 	// Set priorities of file (5% ahead)
+	// firstPieceIndex := largestFile.Offset() * int64(t.NumPieces()) / t.Length()
+	// endPieceIndex := (largestFile.Offset() + largestFile.Length()) * int64(t.NumPieces()) / t.Length()
+
+	// Calculate values outside the loop
+	// firstPieceIndex := int64(largestFile.Offset()) * int64(t.NumPieces()) / int64(t.Length())
+	// endPieceIndex := (int64(largestFile.Offset()) + int64(largestFile.Length())) * int64(t.NumPieces()) / int64(t.Length())
+	// endPercentage := 10 // Adjust the percentage as needed
+
 	for {
-		firstPieceIndex := largestFile.Offset() * int64(t.NumPieces()) / t.Length()
-		endPieceIndex := (largestFile.Offset() + largestFile.Length()) * int64(t.NumPieces()) / t.Length()
-		for idx := firstPieceIndex; idx <= endPieceIndex*10/100; idx++ {
 
-			if t.BytesCompleted() == t.Length() {
-				// Signal download completion only if the channel is still open
-				if client.downloadComplete != nil {
-					close(client.downloadComplete)
-					client.downloadComplete = nil // set to nil to avoid closing it again
-				}
-				// Print the final progress information before exiting
+		// for idx := firstPieceIndex; idx <= endPieceIndex*10/100; idx++ {
 
-				client.PrintProgress()
-				return // exit the loop if download is complete
+		// for idx := firstPieceIndex; idx <= endPieceIndex*int64(endPercentage)/100; idx++ {
+
+		// if t.BytesCompleted() == t.Length() {
+		// if t.BytesCompleted() == t.Info().TotalLength() {
+		if client.Client.WaitAll() {
+			// Signal download completion only if the channel is still open
+			if client.downloadComplete != nil {
+				close(client.downloadComplete)
+				client.downloadComplete = nil // set to nil to avoid closing it again
 			}
-			// Sleep for a short duration before checking again
-			time.Sleep(1 * time.Second)
+			// Print the final progress information before exiting
+
+			client.PrintProgress()
+			return // exit the loop if download is complete
 		}
+		// Sleep for a short duration before checking again
+		// time.Sleep(1 * time.Second)
+		time.Sleep(time.Duration(1250) * time.Millisecond) // Convert to duration and sleep
+
+		// }
 	}
 }
 
 // Start starts the client by getting the torrent information and allocating the priorities of each piece.
 func (client *Client) Start() {
 	<-client.Torrent.GotInfo() // blocks until it got the info
-
-	go client.download() // download file
+	go client.download()       // download file
 }
 
 // Stop is a new method to stop the client and associated resources
