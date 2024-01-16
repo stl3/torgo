@@ -25,9 +25,9 @@ It then streams the torrent via HTTP (along with its subtitles) and plays it wit
 Currently I am only getting this to be in a working state. 
 
 <sub>Note: The original Torrodle repo has been archived since April 2023 and has not been updated in a while, I liked the project (thanks for inspiring me tnychn!) so I just wanted to get it in a working state again.
-I have also made modifications so that it deletes the downloads from your `os.TempDir()` or the one you set as `DataDir` in `~/.torrodle.json` when quitting the program. Since I am only trying to get it in a working state, options will be added later to toggle keeping/deleting downloads.
+I have also made modifications so that it deletes the downloads from your `os.TempDir()` or the one you set as `DataDir` in `~/.torgo.json` when quitting the program. Since I am only trying to get it in a working state, options will be added later to toggle keeping/deleting downloads.
 I personally do it this way because I have mapped my gpu vram as a disk so that my mechanical drive suffers no wear and tear.
-> If you don't know what BitTorrent is, you shouldn't be using **torrodle**.
+> If you don't know what BitTorrent is, you shouldn't be using **torgo**.
 > There are some copyrighted content which might be illegal downloading them in your country.
 
 ## Table of Contents
