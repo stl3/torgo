@@ -52,7 +52,7 @@ I personally do it this way because I have mapped my gpu vram as a disk so that 
 * 🔰 Watch the video while it is being downloaded
 * 🔎 Query multiple providers in a single search
 * 🚀 Sorted results from 13 different providers at once 
-* 📄 Along with subtitles fetching for the video (using [`osdb`](https://github.com/Sioro-Neoku/go-peerflix))
+* 📄 Along with subtitles fetching for the video (using [`osdb`](https://github.com/oz/osdb))
 * Support for playing with mpv/vlc on Win/Linux/Mac(?)/Android (Termux) *Android does not have subtitle support yet unless embedded*
 
 ## Installation
