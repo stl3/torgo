@@ -20,7 +20,7 @@
 
 ---
 
-**torgo** is a command-line program which searches and gathers magnet links of movies, tv shows, animes and porn videos from a variety of [providers](providers.md).
+**torgo** is a command-line program which searches and gathers magnet links of movies, tv shows, anime, porn & documentary videos from a variety of [providers](providers.md).
 It then streams the torrent via HTTP (along with its subtitles) and plays it with a user preferred video player (such as *vlc* and *mpv*).
 Currently I am only getting this to be in a working state. 
 
@@ -49,10 +49,11 @@ I personally do it this way because I have mapped my gpu vram as a disk so that 
 * 🔥 Blazing fast
 * 🚸 User-friendly (debatable)
 * 🤖 Built-in torrent streaming client via HTTP (refined from [`go-peerflix`](https://github.com/Sioro-Neoku/go-peerflix))
-* 🔰 Watch the video while it is being downloaded
+* 🔰 Watch the video while it is being downloaded / allows going to any point in the video
 * 🔎 Query multiple providers in a single search
 * 🚀 Sorted results from 13 different providers at once 
 * 📄 Along with subtitles fetching for the video (using [`osdb`](https://github.com/oz/osdb))
+* 💥 Select individual episode from complete seasons/packs
 * Support for playing with mpv/vlc on Win/Linux/Mac(?)/Android (Termux) *Android does not have subtitle support yet unless embedded*
 
 ## Installation
