@@ -128,15 +128,11 @@ func pickSortBy() string {
 
 func pickPlayer() string {
 	options := []string{"None"}
-	// options := []string{"None", "mpv-android", "vlc-android"}
 	playerChoice := ""
 	for _, p := range player.Players {
 		options = append(options, p.Name)
 	}
-	// fmt.Println("Select None for standalone/mpv-android/vlc-android options")
-	// fmt.Println(color.HiYellowString("Select None for standalone/mpv-android/vlc-android options"))
 	fmt.Println(color.HiYellowString("Select None for standalone server"))
-	// fmt.Println(color.GreenString("Select None for standalone/mpv-android/vlc-android options"))
 
 	prompt := &survey.Select{
 		Message: "Player:",
@@ -383,6 +379,17 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 
 	// start client
 	c.Start()
+	// // // Create a channel to signal when c.Start() has completed
+	// // done := make(chan struct{})
+
+	// // // Start c.Start() in a goroutine
+	// // go func() {
+	// // 	defer close(done)
+	// // 	c.Start()
+	// // }()
+
+	// // // Wait for c.Start() to complete
+	// // <-done
 
 	// handle exit signals
 	interruptChannel := make(chan os.Signal, 1)
@@ -421,6 +428,16 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 	if player != nil {
 		// serve via HTTP
 		c.Serve()
+		// Wait until client.LargestFile has a value
+		for {
+			if c.LargestFile != nil {
+
+				break
+			}
+
+			// Introduce a short delay before checking again
+			time.Sleep(500 * time.Millisecond)
+		}
 
 		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
 		fmt.Println(color.HiYellowString("[i] Torrent Port:"), c.ClientConfig.ListenPort)
@@ -500,6 +517,16 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		}
 	} else {
 		c.Serve()
+		// Wait until client.LargestFile has a value
+		for {
+			if c.LargestFile != nil {
+
+				break
+			}
+
+			// Introduce a short delay before checking again
+			time.Sleep(500 * time.Millisecond)
+		}
 		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
 		// gofuncTicker(c) // No player command for this case
 	}
