@@ -38,6 +38,8 @@ type Client struct {
 	lastPrintTime time.Time
 	// signal to indicate download completion
 	downloadComplete chan struct{}
+	downloadStarted  bool
+	LargestFile      *torrent.File
 }
 
 var u, _ = user.Current()
@@ -126,23 +128,67 @@ func (client *Client) SetSource(source models.Source) (*Client, error) {
 }
 
 func (client *Client) getLargestFile() *torrent.File {
-	var largestFile *torrent.File
-	var lastFileSize int64
+	var largeFiles []*torrent.File
+
+	// Find all files larger than 100MB
 	for _, file := range client.Torrent.Files() {
-		if file.Length() > lastFileSize {
-			lastFileSize = file.Length()
-			largestFile = file
+		if file.Length() > 40*1024*1024 { // 40MB in bytes
+			largeFiles = append(largeFiles, file)
 		}
 	}
-	return largestFile
+
+	// If there is only one file larger than 100MB, return it directly
+	if len(largeFiles) == 1 {
+		fmt.Print(largeFiles[0], "\n")
+		client.LargestFile = largeFiles[0]
+		return largeFiles[0]
+	}
+
+	// If there are multiple files, prompt the user to choose
+	for {
+		fmt.Println("Multiple files larger than 40MB found. Please choose a file:")
+		for i, file := range largeFiles {
+			fmt.Printf("%d. %s\n", i+1, file.DisplayPath())
+		}
+
+		var choice int
+		fmt.Print("Enter the number corresponding to your choice: ")
+		_, err := fmt.Scan(&choice)
+		if err != nil {
+			fmt.Println("Invalid input. Please enter a number.")
+			continue
+		}
+
+		if choice >= 1 && choice <= len(largeFiles) {
+			fmt.Print(largeFiles[choice-1], "\n")
+			// return largeFiles[choice-1]
+			client.LargestFile = largeFiles[choice-1]
+
+			return client.LargestFile
+
+		} else {
+			fmt.Println("Invalid choice. Please enter a valid number.")
+		}
+	}
+
+	// The loop should never reach this point, but if no file is larger than 100MB or the user didn't choose, return nil
+
 }
 
 func (client *Client) download() {
 	t := client.Torrent
+
+	// Get the largest file before entering the download loop
+	largestFile := client.getLargestFile()
+	// if largestFile == nil {
+	// 	fmt.Println("No file larger than 40MB found. Exiting.")
+	// 	return
+	// }
+
 	t.DownloadAll()
+	client.downloadStarted = true
 	// Set priorities of file (5% ahead)
 	for {
-		largestFile := client.getLargestFile()
 		firstPieceIndex := largestFile.Offset() * int64(t.NumPieces()) / t.Length()
 		endPieceIndex := (largestFile.Offset() + largestFile.Length()) * int64(t.NumPieces()) / t.Length()
 		for idx := firstPieceIndex; idx <= endPieceIndex*10/100; idx++ {
@@ -154,6 +200,7 @@ func (client *Client) download() {
 					client.downloadComplete = nil // set to nil to avoid closing it again
 				}
 				// Print the final progress information before exiting
+
 				client.PrintProgress()
 				return // exit the loop if download is complete
 			}
@@ -166,7 +213,8 @@ func (client *Client) download() {
 // Start starts the client by getting the torrent information and allocating the priorities of each piece.
 func (client *Client) Start() {
 	<-client.Torrent.GotInfo() // blocks until it got the info
-	go client.download()       // download file
+
+	go client.download() // download file
 }
 
 // Stop is a new method to stop the client and associated resources
@@ -175,12 +223,21 @@ func (client *Client) Stop() {
 	// Close the client, release resources, etc.
 	client.Torrent.Drop()
 	client.Client.Close()
-
-	// Add any other cleanup steps as needed
 }
 
 func (client *Client) streamHandler(w http.ResponseWriter, r *http.Request) {
-	file := client.getLargestFile()
+	var file *torrent.File
+	// Wait until client.largestFile has a value
+	for {
+		if client.LargestFile != nil {
+			file = client.LargestFile
+			break
+		}
+
+		// Introduce a short delay before checking again
+		time.Sleep(500 * time.Millisecond)
+	}
+
 	entry, err := NewFileReader(file)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -226,7 +283,13 @@ func (client *Client) Serve() {
 var previousBytesCompleted int64
 
 func (client *Client) PrintProgress() {
+	// Check if download has started
+	if !client.downloadStarted {
+		return
+	}
+
 	t := client.Torrent
+
 	// Do not run PrintProgress anymore when download completes
 	if t.Info() == nil {
 		return
