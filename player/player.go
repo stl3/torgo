@@ -21,60 +21,10 @@ var u, _ = user.Current()
 var home = u.HomeDir
 var configFile = filepath.Join(home, ".torgo.json")
 
-// var configurations config.TorrodleConfig
-
-// func init() {
-// 	// Load the configuration during package initialization
-// 	loadConfig()
-// }
-
-// // Function to load the configuration
-// func loadConfig() {
-// 	configurations, err := config.LoadConfig(configFile)
-// 	if err != nil {
-// 		fmt.Println("Error loading config:", err)
-// 		configurations = config.TorrodleConfig{}
-// 	}
-// 	fmt.Printf("Loaded configuration: %+v\n", configurations)
-// }
-
 // Declare Mpv_params as a package-level variable
 var MpvParams string
 
-// var configurations config.TorrodleConfig
-
-// var configurations = config.TorrodleConfig{}
-
-// func init() {
-// 	// Load the configuration
-// 	u, _ := user.Current()
-// 	home := u.HomeDir
-// 	configFile := filepath.Join(home, ".torgo.json")
-
-// 	// configurations, err := config.LoadConfig(configFile)
-// 	// if err != nil {
-// 	// 	fmt.Println("Error loading config:", err)
-// 	// 	configurations = config.TorrodleConfig{}
-// 	// }
-// 	// fmt.Printf("Loaded configuration: %+v\n", configurations)
-// }
-
-// func init() {
-// 	// Load the configuration during package initialization
-// 	configurations, err := config.LoadConfig(configFile)
-// 	if err != nil {
-// 		fmt.Println("Error loading config:", err)
-// 		configurations = config.TorrodleConfig{}
-// 	}
-// 	fmt.Printf("Loaded configuration: %+v\n", configurations)
-// }
-
-// func init() {
-// 	// Load the configuration during package initialization
-// 	loadConfig()
-// }
-
-// // Function to load the configuration
+// Function to load the configuration
 func loadConfig() {
 	configurations, err := config.LoadConfig(configFile)
 	if err != nil {
@@ -87,59 +37,47 @@ func loadConfig() {
 }
 
 // Players holds structs of all supported players.
-var Players = []Player{
-	{
-		Name:          "mpv",
-		DarwinCommand: []string{"mpv"},
-		LinuxCommand:  []string{"mpv"},
-		// AndroidCommand: []string{},
-		AndroidCommand:  []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
-		SubtitleCommand: "--sub-file=",
-		TitleCommand:    "--force-media-title=", // Shows the movie folder name as title instead of http://localhost:port
-		// Check if configurations.Mpv_params is not empty, and adjust WindowsCommand accordingly
-		WindowsCommand: func() []string {
-			// Load the configuration
-			// // configurations, err := config.LoadConfig(configFile)
-			// // if err != nil {
-			// // 	fmt.Println("Error loading config:", err)
-			// // 	configurations = config.TorrodleConfig{}
-			// // }
-			loadConfig()
-			// // fmt.Println("Mpv_params:", configurations.Mpv_params)
-			fmt.Println("Mpv_params:", MpvParams)
-			// fmt.Printf(configurations.Mpv_params)
-			// logrus.Infof("Mpv_params: %s", configurations.Mpv_params)
-
-			// if configurations.Mpv_params != "" {
-			// 	return []string{"mpv", configurations.Mpv_params, "--no-resume-playback", "--no-terminal"}
-			// }
-			if MpvParams != "" {
-				return []string{"mpv", MpvParams, "--no-resume-playback", "--no-terminal"}
-			}
-			fmt.Println("Mpv_params is empty")
-			return []string{"mpv", "--no-resume-playback", "--no-terminal"}
-		}(),
-	},
-	{
-		Name:          "vlc",
-		DarwinCommand: []string{"/Applications/VLC.app/Contents/MacOS/VLC"},
-		LinuxCommand:  []string{"vlc"},
-		// AndroidCommand: []string{},
-		AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
-		// WindowsCommand:  []string{"%ProgramFiles%\\VideoLAN\\VLC\\vlc.exe"},
-		WindowsCommand:  []string{"vlc.exe"}, // vlc player should be in users env path in case installed in non-default path
-		SubtitleCommand: "--sub-file=",
-		TitleCommand:    "--meta-title=", //
-	},
-	{
-		Name:           "KMPlayer",
-		WindowsCommand: []string{"KMPlayer.exe"}, // Do people use this?
-	},
-	{
-		Name:           "Chromecast",
-		WindowsCommand: []string{""},
-	},
-}
+var Players = func() []Player {
+	// fmt.Printf("Loaded configuration: %+v\n", configurations)
+	loadConfig()
+	// Initialize the Players slice
+	return []Player{
+		{
+			Name:            "mpv",
+			DarwinCommand:   []string{"mpv"},
+			LinuxCommand:    []string{"mpv"},
+			AndroidCommand:  []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
+			SubtitleCommand: "--sub-file=",
+			TitleCommand:    "--force-media-title=", // Shows the movie folder name as title instead of http://localhost:port
+			WindowsCommand: func() []string {
+				fmt.Println("mpv params loaded:", MpvParams)
+				if MpvParams != "" {
+					return []string{"mpv", MpvParams, "--no-resume-playback", "--no-terminal"}
+				}
+				fmt.Println("Mpv_params is empty")
+				return []string{"mpv", "--no-resume-playback", "--no-terminal"}
+			}(),
+		},
+		{
+			Name:           "vlc",
+			DarwinCommand:  []string{"/Applications/VLC.app/Contents/MacOS/VLC"},
+			LinuxCommand:   []string{"vlc"},
+			AndroidCommand: []string{"am", "start", "--user", "0", "-a", "android.intent.action.VIEW", "-d"},
+			// WindowsCommand:  []string{"%ProgramFiles%\\VideoLAN\\VLC\\vlc.exe"},
+			WindowsCommand:  []string{"vlc.exe"}, // vlc player should be in users env path in case installed in non-default path
+			SubtitleCommand: "--sub-file=",
+			TitleCommand:    "--meta-title=", //
+		},
+		{
+			Name:           "KMPlayer",
+			WindowsCommand: []string{"KMPlayer.exe"}, // Do people use this?
+		},
+		{
+			Name:           "Chromecast",
+			WindowsCommand: []string{""},
+		},
+	}
+}()
 
 // Player manages the execution of a media player.
 type Player struct {
@@ -161,20 +99,6 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		// prevent multiple calls
 		return
 	}
-
-	// configurations, err := config.LoadConfig(configFile)
-	// if err != nil {
-	// 	fmt.Println("Error loading config:", err)
-	// 	configurations = config.TorrodleConfig{}
-	// }
-	// fmt.Printf("Loaded configuration: %+v\n", configurations)
-
-	// configurations, err := config.LoadConfig(configFile)
-	// if err != nil {
-	// 	fmt.Println("Error loading config:", err)
-	// 	configurations = config.TorrodleConfig{}
-	// }
-	// fmt.Printf(configurations.Mpv_params)
 
 	var command []string
 	switch runtime.GOOS {
