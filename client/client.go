@@ -262,12 +262,10 @@ func (client *Client) download() {
 				client.downloadComplete = nil // set to nil to avoid closing it again
 			}
 			// Print the final progress information before exiting
-
 			client.PrintProgress()
 			return // exit the loop if download is complete
 		}
 		// Sleep for a short duration before checking again
-		// time.Sleep(1 * time.Second)
 		time.Sleep(time.Duration(1250) * time.Millisecond) // Convert to duration and sleep
 
 		// }
@@ -343,7 +341,8 @@ func (client *Client) Serve() {
 }
 
 // Add a field to store the previous bytes completed
-var previousBytesCompleted int64
+// var previousBytesCompleted int64
+var previousFileBytesCompleted int64
 
 func (client *Client) PrintProgress() {
 	// Check if download has started
@@ -352,23 +351,97 @@ func (client *Client) PrintProgress() {
 	}
 
 	t := client.Torrent
-
+	selectedFile := client.LargestFile
 	// Do not run PrintProgress anymore when download completes
 	if t.Info() == nil {
 		return
 	}
-	total := t.Length()
-	currentProgress := t.BytesCompleted()
-	complete := humanize.Bytes(uint64(currentProgress))
-	size := humanize.Bytes(uint64(total))
-	percentage := float64(currentProgress) / float64(total) * 100
+	// // 	total := t.Length()
+	// // 	currentProgress := t.BytesCompleted()
+	// // 	complete := humanize.Bytes(uint64(currentProgress))
+	// // 	size := humanize.Bytes(uint64(total))
+	// // 	percentage := float64(currentProgress) / float64(total) * 100
 
-	// Calculate download speed
+	// // 	// Calculate download speed
+	// // 	currentTime := time.Now()
+	// // 	elapsedTime := currentTime.Sub(client.lastPrintTime)
+	// // 	downloadedBytes := currentProgress - previousBytesCompleted
+	// // 	downloadSpeed := float64(downloadedBytes) / elapsedTime.Seconds()
+	// // 	downloadSpeedFormatted := humanize.Bytes(uint64(downloadSpeed))
+
+	// // 	output := bufio.NewWriter(os.Stdout)
+
+	// // 	// Choose colors for different parts of the output
+	// // 	completeColor := color.New(color.FgGreen).SprintFunc()
+	// // 	sizeColor := color.New(color.FgBlue).SprintFunc()
+	// // 	percentageColor := color.New(color.FgYellow).SprintFunc()
+	// // 	speedColor := color.New(color.FgCyan).SprintFunc()
+
+	// // 	// used \033[K at eol because previous line may extend over the current line
+	// // 	_, _ = fmt.Fprintf(output, "Progress: %s / %s  %s%%  Download Speed: %s/s\033[K",
+	// // 		// 			os.Stdout.Sync()
+	// // 		completeColor(complete),
+	// // 		sizeColor(size),
+	// // 		percentageColor(fmt.Sprintf("%.2f", percentage)),
+	// // 		speedColor(downloadSpeedFormatted))
+	// // 	_ = output.Flush()
+
+	// // 	// Update previousBytesCompleted and lastPrintTime for the next calculation
+	// // 	previousBytesCompleted = currentProgress
+	// // 	client.lastPrintTime = currentTime
+	// // }
+
+	// // // 	// Calculate progress for the selected file
+	// // // 	total := selectedFile.Length()
+	// // // 	currentProgress := selectedFile.BytesCompleted()
+	// // // 	complete := humanize.Bytes(uint64(currentProgress))
+	// // // 	size := humanize.Bytes(uint64(total))
+	// // // 	percentage := float64(currentProgress) / float64(total) * 100
+
+	// // // 	// Calculate download speed for the selected file
+	// // // 	currentTime := time.Now()
+	// // // 	elapsedTime := currentTime.Sub(client.lastPrintTime)
+	// // // 	downloadedBytes := currentProgress - previousFileBytesCompleted
+	// // // 	downloadSpeed := float64(downloadedBytes) / elapsedTime.Seconds()
+	// // // 	downloadSpeedFormatted := humanize.Bytes(uint64(downloadSpeed))
+
+	// // // 	output := bufio.NewWriter(os.Stdout)
+
+	// // // 	// Choose colors for different parts of the output
+	// // // 	completeColor := color.New(color.FgGreen).SprintFunc()
+	// // // 	sizeColor := color.New(color.FgBlue).SprintFunc()
+	// // // 	percentageColor := color.New(color.FgYellow).SprintFunc()
+	// // // 	speedColor := color.New(color.FgCyan).SprintFunc()
+
+	// // // 	// used \033[K at eol because previous line may extend over the current line
+	// // // 	_, _ = fmt.Fprintf(output, "Progress: %s / %s  %s%%  Download Speed: %s/s\033[K",
+	// // // 		completeColor(complete),
+	// // // 		sizeColor(size),
+	// // // 		percentageColor(fmt.Sprintf("%.2f", percentage)),
+	// // // 		speedColor(downloadSpeedFormatted))
+	// // // 	_ = output.Flush()
+
+	// // // 	// Update previousFileBytesCompleted and lastPrintTime for the next calculation
+	// // // 	previousFileBytesCompleted = currentProgress
+	// // // 	client.lastPrintTime = currentTime
+	// // // }
+
+	// Calculate progress for the selected file
+	currentProgress := selectedFile.BytesCompleted()
+	totalFile := selectedFile.Length()
+	complete := humanize.Bytes(uint64(currentProgress))
+	size := humanize.Bytes(uint64(totalFile))
+	percentage := float64(currentProgress) / float64(totalFile) * 100
+
+	// Calculate download speed for the selected file
 	currentTime := time.Now()
 	elapsedTime := currentTime.Sub(client.lastPrintTime)
-	downloadedBytes := currentProgress - previousBytesCompleted
+	downloadedBytes := currentProgress - previousFileBytesCompleted
 	downloadSpeed := float64(downloadedBytes) / elapsedTime.Seconds()
 	downloadSpeedFormatted := humanize.Bytes(uint64(downloadSpeed))
+
+	// Calculate total torrent size
+	totalTorrentSize := humanize.Bytes(uint64(t.Info().TotalLength()))
 
 	output := bufio.NewWriter(os.Stdout)
 
@@ -379,16 +452,16 @@ func (client *Client) PrintProgress() {
 	speedColor := color.New(color.FgCyan).SprintFunc()
 
 	// used \033[K at eol because previous line may extend over the current line
-	_, _ = fmt.Fprintf(output, "Progress: %s / %s  %s%%  Download Speed: %s/s\033[K",
-		// 			os.Stdout.Sync()
+	_, _ = fmt.Fprintf(output, "Progress: %s / %s [ %s ] %s%%  Download Speed: %s/s\033[K",
 		completeColor(complete),
 		sizeColor(size),
+		sizeColor(totalTorrentSize),
 		percentageColor(fmt.Sprintf("%.2f", percentage)),
 		speedColor(downloadSpeedFormatted))
 	_ = output.Flush()
 
-	// Update previousBytesCompleted and lastPrintTime for the next calculation
-	previousBytesCompleted = currentProgress
+	// Update previousFileBytesCompleted and lastPrintTime for the next calculation
+	previousFileBytesCompleted = currentProgress
 	client.lastPrintTime = currentTime
 }
 
