@@ -18,6 +18,12 @@ require (
 )
 
 require (
+	github.com/chzyer/readline v1.5.1 // indirect
+	github.com/google/pprof v0.0.0-20231229205709-960ae82b1e42 // indirect
+	github.com/ianlancetaylor/demangle v0.0.0-20231023195312-e2daf7ba7156 // indirect
+)
+
+require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/RoaringBitmap/roaring v1.7.0 // indirect
 	github.com/ajwerner/btree v0.0.0-20211221152037-f427b3e689c0 // indirect
@@ -90,7 +96,7 @@ require (
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848 // indirect
 	golang.org/x/sync v0.5.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/term v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

@@ -135,7 +135,8 @@ func ListResults(providers []interface{}, query string, count int, category Cate
 	for _, provider := range argProviders {
 		if showSpinner {
 			c := color.New(color.FgYellow, color.Bold)
-			s = spinner.New(spinner.CharSets[33], 100*time.Millisecond)
+			// s = spinner.New(spinner.CharSets[33], 100*time.Millisecond)
+			s = spinner.New(spinner.CharSets[36], 100*time.Millisecond)
 			_ = s.Color("fgBlue")
 			s.Suffix = c.Sprint(" Waiting for ") + color.GreenString(provider.GetName()) + c.Sprint(" ...")
 			s.Start()
