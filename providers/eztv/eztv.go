@@ -3,6 +3,8 @@ package eztv
 import (
 	"fmt"
 	"net/http"
+	"os/user"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -17,7 +19,27 @@ import (
 	"github.com/stl3/torrodle/models"
 )
 
+// var u, _ = user.Current()
+// var home = u.HomeDir
+
+// var configFile = filepath.Join(home, ".torgo.json")
+
 var configurations config.TorrodleConfig
+
+func init() {
+	// Load the configuration
+	u, _ := user.Current()
+	home := u.HomeDir
+	configFile := filepath.Join(home, ".torgo.json")
+
+	configurations, err := config.LoadConfig(configFile)
+	if err != nil {
+		fmt.Println("Error loading config:", err)
+		configurations = config.TorrodleConfig{}
+	}
+	// fmt.Printf("Loaded configuration: %+v\n", configurations)
+	logrus.Debugf("Loaded configuration: %+v\n", configurations)
+}
 
 const (
 	Name = "eztv"
@@ -116,7 +138,9 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 		// logrus.Infof("Size: %s", sizeStr)
 		size, err := humanize.ParseBytes(sizeStr)
 
-		seeders, _ := strconv.Atoi(result.Find("td.forum_thread_post_end > font").Text())
+		// seeders, _ := strconv.Atoi(result.Find("td.forum_thread_post_end > font").Text())
+		// Remove commas from string, eg "1,201" -> "1201"
+		seeders, _ := strconv.Atoi(strings.ReplaceAll(result.Find("td.forum_thread_post_end > font").Text(), ",", ""))
 		// logrus.Infof("Seeders: %d", seeders)
 
 		// magnet, _ := result.Find("td.forum_thread_post > a.magnet").Attr("href")
