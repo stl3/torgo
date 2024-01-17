@@ -22,7 +22,7 @@ type TorrodleConfig struct {
 }
 
 // This function is for debug purposes
-// It shows config parameters used in ~/.torrodle.json
+// It shows config parameters used in ~/.torgo.json
 func (t TorrodleConfig) String() string {
 	return fmt.Sprintf(
 		`TorrentDir: %v | ResultsLimit: %d | TorrentPort: %d | HostPort: %d | Debug: %v`,
