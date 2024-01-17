@@ -20,7 +20,9 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/oz/osdb"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/AlecAivazis/survey.v1"
+
+	// "gopkg.in/AlecAivazis/survey.v1"
+	"github.com/AlecAivazis/survey/v2"
 
 	"github.com/stl3/torrodle"
 	"github.com/stl3/torrodle/client"
@@ -377,8 +379,11 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		os.Exit(1)
 	}
 
+	// Get the filename using DisplayPath
+	// selectedTitle := selectedFile
 	// start client
 	c.Start()
+
 	// // // Create a channel to signal when c.Start() has completed
 	// // done := make(chan struct{})
 
@@ -407,6 +412,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			// Delete the directory
 			dirPath := filepath.Join(dataDir, c.Torrent.Name())
 			infoPrint("Deleting downloads...", filepath.Join(dataDir, c.Torrent.Name()))
+			time.Sleep(3500 * time.Millisecond)
 			if err := os.RemoveAll(dirPath); err != nil {
 				errorPrint("Error deleting directory:", err)
 			}
@@ -438,7 +444,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			// Introduce a short delay before checking again
 			time.Sleep(500 * time.Millisecond)
 		}
-
+		selectedTitle := c.LargestFile.DisplayPath()
 		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
 		fmt.Println(color.HiYellowString("[i] Torrent Port:"), c.ClientConfig.ListenPort)
 		// goroutine ticker loop to update PrintProgress
@@ -458,7 +464,8 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			if runtime.GOOS != "android" {
 
 				// open player with subtitle
-				player.Start(c.URL, subtitlePath, c.Torrent.Name())
+				// player.Start(c.URL, subtitlePath, c.Torrent.Name())
+				player.Start(c.URL, subtitlePath, selectedTitle)
 				// Just for debugging:
 				// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), subtitlePath)
 			} else if runtime.GOOS == "android" {
@@ -510,7 +517,8 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 				}
 			} else {
 				// open player without subtitle
-				player.Start(c.URL, "", c.Torrent.Name())
+				// player.Start(c.URL, "", c.Torrent.Name())
+				player.Start(c.URL, "", selectedTitle)
 				// Just for debugging:
 				fmt.Println(color.HiYellowString("[i] Launched player without subtitle"), player.Name)
 			}
