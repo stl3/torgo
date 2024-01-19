@@ -364,6 +364,8 @@ func getSubtitles(query string) (subtitlePath string) {
 }
 
 func startClient(player *player.Player, source models.Source, subtitlePath string) {
+	var printProgressEnabled = true
+
 	// Play the video
 	infoPrint("Streaming torrent...")
 	// create client
@@ -379,22 +381,19 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		os.Exit(1)
 	}
 
-	// Get the filename using DisplayPath
-	// selectedTitle := selectedFile
-	// start client
-	c.Start()
+	// Create a channel to signal when c.Start() has completed
+	done := make(chan struct{})
 
-	// // // Create a channel to signal when c.Start() has completed
-	// // done := make(chan struct{})
+	// Start c.Start() in a goroutine
+	go func() {
+		defer close(done)
+		c.Start()
+	}()
 
-	// // // Start c.Start() in a goroutine
-	// // go func() {
-	// // 	defer close(done)
-	// // 	c.Start()
-	// // }()
-
-	// // // Wait for c.Start() to complete
-	// // <-done
+	// Wait for c.Start() to complete
+	<-done
+	tn := c.Torrent.Name()
+	// Introduce a flag to control whether c.PrintProgress() should be executed
 
 	// handle exit signals
 	interruptChannel := make(chan os.Signal, 1)
@@ -404,33 +403,75 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		syscall.SIGINT,
 		syscall.SIGTERM,
 		syscall.SIGQUIT)
-	go func(interruptChannel chan os.Signal) {
-		for range interruptChannel {
-			c.Close()
-			fmt.Print("\n")
-			infoPrint("Exiting...")
-			// Delete the directory
-			dirPath := filepath.Join(dataDir, c.Torrent.Name())
-			infoPrint("Deleting downloads...", filepath.Join(dataDir, c.Torrent.Name()))
-			time.Sleep(3500 * time.Millisecond)
-			if err := os.RemoveAll(dirPath); err != nil {
-				errorPrint("Error deleting directory:", err)
-			}
-			// Delete files inside subtitlesDir
-			subtitleFiles, err := filepath.Glob(filepath.Join(subtitlesDir, "*"))
-			if err != nil {
-				errorPrint("Error getting subtitle files:", err)
-			} else {
-				for _, subtitlePath := range subtitleFiles {
-					infoPrint("Deleting subtitles...", subtitlePath)
-					if err := os.Remove(subtitlePath); err != nil {
-						errorPrint("Error deleting subtitle file:", err)
+
+	// Channels to control goroutines
+	exitChan := make(chan struct{})
+	progressStopChan := make(chan struct{})
+
+	go func(interruptChannel chan os.Signal, exitChan chan struct{}, progressStopChan chan struct{}) {
+		for {
+			select {
+			case <-interruptChannel:
+				close(progressStopChan)
+				// infoPrint("Stopping processes...")
+				// Set the flag to disable PrintProgress
+				printProgressEnabled = false
+				// c.Stop()
+				// c.Close()
+				// fmt.Print("\n")
+				// infoPrint("Exiting...")
+				dirPath := filepath.Join(dataDir, tn)
+				fmt.Print("\n")
+				// infoPrint("Deleting downloads...", filepath.Join(dataDir, tn))
+
+				// Define the maximum number of retries
+				maxRetries := 5
+				retryCount := 0
+
+				for {
+					time.Sleep(2500 * time.Millisecond)
+
+					if err := os.RemoveAll(dirPath); err != nil {
+						errorPrint("Error deleting directory:", err)
+
+						// Check if maximum retries reached
+						if retryCount >= maxRetries {
+							errorPrint("Maximum retries reached. Exiting...")
+							os.Exit(1)
+						}
+
+						// Increment the retry count
+						retryCount++
+						infoPrint("Retrying...", retryCount)
+						continue // Retry the deletion
+					}
+					// Deletion successful, break out of the loop
+					break
+				}
+				// Delete files inside subtitlesDir
+				subtitleFiles, err := filepath.Glob(filepath.Join(subtitlesDir, "*"))
+				if err != nil {
+					errorPrint("No subtitles to delete", err)
+				} else {
+					for _, subtitlePath := range subtitleFiles {
+						infoPrint("Deleting subtitles...", subtitlePath)
+						if err := os.Remove(subtitlePath); err != nil {
+							errorPrint("Error deleting subtitle file:", err)
+						}
 					}
 				}
+				os.Exit(0)
+
+			case <-exitChan:
+
+				close(progressStopChan) // Signal to stop the progress goroutine
+				// Set the flag to disable PrintProgress
+				printProgressEnabled = false
+				return // Exit the goroutine
+				// }
 			}
-			os.Exit(0)
 		}
-	}(interruptChannel)
+	}(interruptChannel, exitChan, progressStopChan)
 	if player != nil {
 		// serve via HTTP
 		c.Serve()
@@ -453,18 +494,27 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			ticker := time.NewTicker(1500 * time.Millisecond)
 			defer ticker.Stop()
 
-			for range ticker.C {
-				c.PrintProgress()
-				fmt.Print("\r")
-				os.Stdout.Sync() // Flush the output buffer to ensure immediate display
+			// for range ticker.C {
+			for {
+				select {
+				// // case <-ticker.C:
+				// // 	c.PrintProgress()
+				// // 	fmt.Print("\r")
+				// // 	os.Stdout.Sync() // Flush the output buffer to ensure immediate display
+				case <-ticker.C:
+					if printProgressEnabled {
+						c.PrintProgress()
+						fmt.Print("\r")
+						os.Stdout.Sync() // Flush the output buffer to ensure immediate display
+					}
+				case <-progressStopChan:
+					return // Exit the goroutine when signaled
+				}
 			}
 		}()
 
 		if subtitlePath != "" { // With subs
 			if runtime.GOOS != "android" {
-
-				// open player with subtitle
-				// player.Start(c.URL, subtitlePath, c.Torrent.Name())
 				player.Start(c.URL, subtitlePath, selectedTitle)
 				// Just for debugging:
 				// fmt.Println(color.HiYellowString("[i] Launched player with subtitle"), subtitlePath)
@@ -485,16 +535,21 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 						fmt.Println("Error:", err)
 					}
 					gofuncTicker(c)
-					// }
-				} else if player.Name == "Chromecast" {
-					cmd := exec.Command("go-chromecast", "-a", "10.0.0.107", "load", c.URL)
-					logCmd(cmd)
-					err_cmd := cmd.Run()
-					if err_cmd != nil {
-						fmt.Println("Error:", err)
-					}
-					gofuncTicker(c)
 				}
+				// } else if player.Name == "Chromecast" {
+				// 	// In this section I want to discover chromecasts on the network
+				// 	// and then choose which one to cast to. Upon user making a choice, it will
+				// 	// then load c.URL to the chromecast
+
+				// 	// newURL := strings.Replace(c.URL, "localhost", "10.0.0.10", -1)
+				// 	cmd := exec.Command("go-chromecast.exe", "-a", "10.0.0.107", "load", "https://10.0.0.10:35355")
+				// 	logCmd(cmd)
+				// 	err_cmd := cmd.Run()
+				// 	if err_cmd != nil {
+				// 		fmt.Println("Error:", err)
+				// 	}
+				// 	gofuncTicker(c)
+				// }
 			}
 		} else { // Without subs
 			if runtime.GOOS == "android" {
@@ -515,9 +570,21 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 					}
 					gofuncTicker(c)
 				}
+				// } else if player.Name == "Chromecast" {
+				// 	// In this section I want to discover chromecasts on the network
+				// 	// and then choose which one to cast to. Upon user making a choice, it will
+				// 	// then load c.URL to the chromecast
+				// 	// newURL := strings.Replace(c.URL, "localhost", "10.0.0.10", -1)
+				// 	cmd := exec.Command("go-chromecast.exe", "-a", "10.0.0.107", "load", "https://10.0.0.10:35355")
+				// 	logCmd(cmd)
+				// 	err_cmd := cmd.Run()
+				// 	if err_cmd != nil {
+				// 		fmt.Println("Error:", err)
+				// 	}
+				// 	gofuncTicker(c)
+				// }
 			} else {
 				// open player without subtitle
-				// player.Start(c.URL, "", c.Torrent.Name())
 				player.Start(c.URL, "", selectedTitle)
 				// Just for debugging:
 				fmt.Println(color.HiYellowString("[i] Launched player without subtitle"), player.Name)
@@ -536,16 +603,44 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			time.Sleep(500 * time.Millisecond)
 		}
 		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
-		// gofuncTicker(c) // No player command for this case
+		gofuncTicker(c)
 	}
-
+	// tn := c.Torrent.Name()
+	// c.Stop()
+	infoPrint("Stopping processes...")
+	// Set the flag to disable PrintProgress
+	printProgressEnabled = false
+	close(exitChan)
+	c.Close()
 	fmt.Print("\n")
 	infoPrint("Exiting...")
-	// Delete the directory
-	dirPath := filepath.Join(dataDir, c.Torrent.Name())
-	infoPrint("Deleting downloads from: ", filepath.Join(dataDir, c.Torrent.Name()))
-	if err := os.RemoveAll(dirPath); err != nil {
-		errorPrint("Error deleting directory:", err)
+	dirPath := filepath.Join(dataDir, tn)
+	fmt.Print("\n")
+	infoPrint("Deleting downloads...", filepath.Join(dataDir, tn))
+
+	// Define the maximum number of retries
+	maxRetries := 5
+	retryCount := 0
+
+	for {
+		time.Sleep(2500 * time.Millisecond)
+
+		if err := os.RemoveAll(dirPath); err != nil {
+			errorPrint("Error deleting directory:", err)
+
+			// Check if maximum retries reached
+			if retryCount >= maxRetries {
+				errorPrint("Maximum retries reached. Exiting...")
+				os.Exit(1)
+			}
+
+			// Increment the retry count
+			retryCount++
+			infoPrint("Retrying...", retryCount)
+			continue // Retry the deletion
+		}
+		// Deletion successful, break out of the loop
+		break
 	}
 	// Delete files inside subtitlesDir
 	subtitleFiles, err := filepath.Glob(filepath.Join(subtitlesDir, "*"))
@@ -560,7 +655,6 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 		}
 	}
 	os.Exit(0)
-
 }
 
 func logCmd(cmd *exec.Cmd) {
