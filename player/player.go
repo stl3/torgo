@@ -73,8 +73,8 @@ var Players = func() []Player {
 			WindowsCommand: []string{"KMPlayer.exe"}, // Do people use this?
 		},
 		{
-			Name:           "Chromecast",
-			WindowsCommand: []string{""},
+			Name:              "Chromecast",
+			ChromecastCommand: []string{"go-chromecast.exe", "-a", "10.0.0.107", "load"},
 		},
 	}
 }()
@@ -83,13 +83,14 @@ var Players = func() []Player {
 type Player struct {
 	Name string
 	// Type            PlayerType // New field to indicate the player type
-	DarwinCommand   []string
-	LinuxCommand    []string
-	WindowsCommand  []string
-	AndroidCommand  []string
-	SubtitleCommand string
-	TitleCommand    string
-	started         bool
+	DarwinCommand     []string
+	LinuxCommand      []string
+	WindowsCommand    []string
+	AndroidCommand    []string
+	ChromecastCommand []string
+	SubtitleCommand   string
+	TitleCommand      string
+	started           bool
 }
 
 // Start launches the Player with the given command and arguments in subprocess.
@@ -110,6 +111,15 @@ func (player *Player) Start(url string, subtitlePath string, title string) {
 		command = player.WindowsCommand
 	case "android":
 		command = player.AndroidCommand
+	// }
+	case "chromecast":
+		command = player.ChromecastCommand
+	}
+
+	if player.Name == "Chromecast" {
+		fmt.Println("Using Chromecast")
+		url = strings.Replace(url, "localhost", "10.0.0.10", -1)
+		// 	cmd := exec.Command("go-chromecast.exe", "-a", "10.0.0.107", "load", "https://10.0.0.10:35355")
 	}
 
 	// Append the video URL to the command for non-Android cases
