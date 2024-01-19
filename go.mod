@@ -18,9 +18,15 @@ require (
 )
 
 require (
+	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/google/pprof v0.0.0-20231229205709-960ae82b1e42 // indirect
+	github.com/grandcat/zeroconf v1.0.0 // indirect
 	github.com/ianlancetaylor/demangle v0.0.0-20231023195312-e2daf7ba7156 // indirect
+	github.com/miekg/dns v1.1.46 // indirect
+	github.com/vishen/go-chromecast v0.3.1 // indirect
+	golang.org/x/mod v0.14.0 // indirect
+	golang.org/x/tools v0.16.0 // indirect
 )
 
 require (
