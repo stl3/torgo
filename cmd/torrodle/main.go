@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -40,6 +41,7 @@ var configurations config.TorrodleConfig
 
 var dataDir string
 var subtitlesDir string
+var tmagnet string
 
 func errorPrint(arg ...interface{}) {
 	c := color.New(color.FgHiRed).Add(color.Bold)
@@ -354,8 +356,19 @@ func getSubtitles(query string) (subtitlePath string) {
 	subtitlePath = filepath.Join(subtitlesDir, subtitle.SubFileName)
 	err = c.DownloadTo(&subtitle, subtitlePath)
 	if err != nil {
-		errorPrint(err)
-		os.Exit(1)
+		// errorPrint(err)
+		// os.Exit(1)
+		fmt.Println(color.HiRedString("Error downloading subtitle:"), err)
+		// Ask the user if they want to try again
+		tryAgain := false
+		prompt := &survey.Confirm{
+			Message: "Do you want to try again?",
+		}
+		_ = survey.AskOne(prompt, &tryAgain, nil)
+		if tryAgain {
+			// Recursively call the function again
+			return getSubtitles(query)
+		}
 	}
 	// cleanup
 	_ = c.LogOut()
@@ -394,6 +407,29 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 	<-done
 	tn := c.Torrent.Name()
 	// Introduce a flag to control whether c.PrintProgress() should be executed
+
+	// WatchedDatabase-torgo.db code
+	// Check if "WatchedDatabase-torgo.db" exists
+	watchedDBPath := "WatchedDatabase-torgo.db"
+	if _, err := os.Stat(watchedDBPath); os.IsNotExist(err) {
+		// Create the file if it doesn't exist
+		createWatchedDB(watchedDBPath)
+	} else {
+		// File exists, check number of lines
+		numLines, err := countLines(watchedDBPath)
+		if err != nil {
+			errorPrint("Error counting lines in WatchedDatabase:", err)
+			os.Exit(1)
+		}
+
+		if numLines > 500 {
+			// Rename the file to "WatchedDatabase-torgo-{datetime}.db"
+			renameWatchedDB(watchedDBPath)
+
+			// Create a new "WatchedDatabase-torgo.db"
+			createWatchedDB(watchedDBPath)
+		}
+	}
 
 	// handle exit signals
 	interruptChannel := make(chan os.Signal, 1)
@@ -486,6 +522,27 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			time.Sleep(500 * time.Millisecond)
 		}
 		selectedTitle := c.LargestFile.DisplayPath()
+
+		// We write watch data to file
+		file, err := os.OpenFile(watchedDBPath, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			errorPrint("Error opening WatchedDatabase for append:", err)
+			os.Exit(1)
+		}
+		defer file.Close()
+
+		// Get current date and time in the desired format
+		currentDate := time.Now().Format("2006-01-02 15:04:05")
+
+		// Prepare the data to append
+		data := fmt.Sprintf("[%s] Torrent: %s Title: %s Magnet: %s\n", currentDate, tn, selectedTitle, tmagnet)
+
+		// Append the data to the file
+		if _, err := file.WriteString(data); err != nil {
+			errorPrint("Error appending data to WatchedDatabase:", err)
+			// os.Exit(1)
+		}
+
 		fmt.Println(color.HiYellowString("[i] Serving on"), c.URL)
 		fmt.Println(color.HiYellowString("[i] Torrent Port:"), c.ClientConfig.ListenPort)
 		// goroutine ticker loop to update PrintProgress
@@ -536,20 +593,6 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 					}
 					gofuncTicker(c)
 				}
-				// } else if player.Name == "Chromecast" {
-				// 	// In this section I want to discover chromecasts on the network
-				// 	// and then choose which one to cast to. Upon user making a choice, it will
-				// 	// then load c.URL to the chromecast
-
-				// 	// newURL := strings.Replace(c.URL, "localhost", "10.0.0.10", -1)
-				// 	cmd := exec.Command("go-chromecast.exe", "-a", "10.0.0.107", "load", "https://10.0.0.10:35355")
-				// 	logCmd(cmd)
-				// 	err_cmd := cmd.Run()
-				// 	if err_cmd != nil {
-				// 		fmt.Println("Error:", err)
-				// 	}
-				// 	gofuncTicker(c)
-				// }
 			}
 		} else { // Without subs
 			if runtime.GOOS == "android" {
@@ -570,19 +613,6 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 					}
 					gofuncTicker(c)
 				}
-				// } else if player.Name == "Chromecast" {
-				// 	// In this section I want to discover chromecasts on the network
-				// 	// and then choose which one to cast to. Upon user making a choice, it will
-				// 	// then load c.URL to the chromecast
-				// 	// newURL := strings.Replace(c.URL, "localhost", "10.0.0.10", -1)
-				// 	cmd := exec.Command("go-chromecast.exe", "-a", "10.0.0.107", "load", "https://10.0.0.10:35355")
-				// 	logCmd(cmd)
-				// 	err_cmd := cmd.Run()
-				// 	if err_cmd != nil {
-				// 		fmt.Println("Error:", err)
-				// 	}
-				// 	gofuncTicker(c)
-				// }
 			} else {
 				// open player without subtitle
 				player.Start(c.URL, "", selectedTitle)
@@ -591,6 +621,7 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 			}
 		}
 	} else {
+		// Just host server
 		c.Serve()
 		// Wait until client.LargestFile has a value
 		for {
@@ -656,6 +687,70 @@ func startClient(player *player.Player, source models.Source, subtitlePath strin
 	}
 	os.Exit(0)
 }
+
+func createWatchedDB(filePath string) {
+	file, err := os.Create(filePath)
+	if err != nil {
+		errorPrint("Error creating WatchedDatabase:", err)
+		os.Exit(1)
+	}
+	defer file.Close()
+}
+
+func countLines(filePath string) (int, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	lineCount := 0
+	for scanner.Scan() {
+		lineCount++
+	}
+
+	if err := scanner.Err(); err != nil {
+		return 0, err
+	}
+
+	return lineCount, nil
+}
+
+func renameWatchedDB(filePath string) {
+	// Get current date and time in the desired format
+	datetime := time.Now().Format("02-1-2006-150PM")
+	newFilePath := fmt.Sprintf("WatchedDatabase-torgo-%s.db", datetime)
+
+	// Rename the file
+	err := os.Rename(filePath, newFilePath)
+	if err != nil {
+		errorPrint("Error renaming WatchedDatabase:", err)
+		os.Exit(1)
+	}
+}
+
+// func appendWatchedData(filePath string) {
+// 	// Open the file in append mode
+// 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0644)
+// 	if err != nil {
+// 		errorPrint("Error opening WatchedDatabase for append:", err)
+// 		os.Exit(1)
+// 	}
+// 	defer file.Close()
+
+// 	// Get current date and time in the desired format
+// 	currentDate := time.Now().Format("2006-01-02 15:04:05")
+
+// 	// Prepare the data to append
+// 	data := fmt.Sprintf("[%s] Torrent: %s Title: %s Magnet: %s\n", currentDate,  c.client.Torrent.Name(), client.Client.LargestFile.DisplayPath(), tmagnet)
+
+// 	// Append the data to the file
+// 	if _, err := file.WriteString(data); err != nil {
+// 		errorPrint("Error appending data to WatchedDatabase:", err)
+// 		os.Exit(1)
+// 	}
+// }
 
 func logCmd(cmd *exec.Cmd) {
 	log.Printf("\x1b[36mLaunching player:\x1b[0m \x1b[33m%v\x1b[0m\n", cmd)
@@ -843,6 +938,7 @@ func main() {
 	_, _ = boldYellow.Print("Magnet: ")
 	truncatedMagnet := truncateMagnet(source.Magnet, 60) // Adjust the length as needed
 	fmt.Println(truncatedMagnet)
+	tmagnet = truncatedMagnet
 
 	// Player
 	playerChoice := pickPlayer()
