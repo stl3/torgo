@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime"
 	"net"
 	"net/http"
 	"net/url"
@@ -304,7 +305,17 @@ func (client *Client) streamHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Disposition", "attachment; filename=\""+file.DisplayPath()+"\"")
+	// w.Header().Set("Content-Disposition", "attachment; filename=\""+file.DisplayPath()+"\"")
+	// http.ServeContent(w, r, file.DisplayPath(), time.Now(), entry)
+
+	// Set the appropriate Content-Type header based on the file type
+	contentType := mime.TypeByExtension(filepath.Ext(file.Path()))
+	if contentType == "" {
+		// Default to application/octet-stream if content type is unknown
+		contentType = "application/octet-stream"
+	}
+	w.Header().Set("Content-Type", contentType)
+
 	http.ServeContent(w, r, file.DisplayPath(), time.Now(), entry)
 }
 
