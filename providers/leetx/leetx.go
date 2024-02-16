@@ -22,7 +22,10 @@ import (
 
 const (
 	Name = "1337x"
-	Site = "https://1337x.to"
+	// Site = "https://1337x.to"
+	// Site = "https://1377x.to"
+	// Site = "https://1337xto.to/"
+	Site = "https://www.1337xx.to"
 )
 
 type provider struct {
