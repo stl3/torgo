@@ -98,6 +98,7 @@ type Categories struct {
 	Movie         CategoryURL
 	TV            CategoryURL
 	Anime         CategoryURL
+	Audiobook     CategoryURL
 	Porn          CategoryURL
 	Documentaries CategoryURL
 }
