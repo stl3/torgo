@@ -1,14 +1,18 @@
 package main
 
 import (
+	"archive/zip"
 	"bufio"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"os/signal"
 	"os/user"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -19,8 +23,11 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/fatih/color"
 	"github.com/olekukonko/tablewriter"
+
 	"github.com/oz/osdb"
 	"github.com/sirupsen/logrus"
+
+	// "github.com/stl3/osdb"
 
 	// "gopkg.in/AlecAivazis/survey.v1"
 	"github.com/AlecAivazis/survey/v2"
@@ -59,7 +66,7 @@ func pickCategory() string {
 	category := ""
 	prompt := &survey.Select{
 		Message: "Choose a category:",
-		Options: []string{"All", "Movie", "TV", "Anime", "Porn"},
+		Options: []string{"All", "Movie", "TV", "Anime", "Porn", "Audiobook", "Documentaries"},
 	}
 	err := survey.AskOne(prompt, &category, nil)
 	if err != nil {
@@ -351,10 +358,28 @@ func getSubtitles(query string) (subtitlePath string) {
 	choice := chooseSubtitles(subtitles)
 	index, _ := strconv.Atoi(choice)
 	subtitle := subtitles[index-1]
+	// Define a regular expression pattern for matching URLs
+	urlPattern := regexp.MustCompile(`https://[^\s]+`)
+
+	// Find all matches in the SubDownloadLink field
+	matches := urlPattern.FindAllString(subtitle.ZipDownloadLink, -1)
+
+	// Get the last URL
+	var lastURL string
+	if len(matches) > 0 {
+		lastURL = matches[len(matches)-1]
+	}
+	// Print the result
+	fmt.Println("Last URL:", lastURL)
+
 	// download
 	fmt.Println(color.HiYellowString("[i] Downloading subtitle to"), subtitlesDir)
 	subtitlePath = filepath.Join(subtitlesDir, subtitle.SubFileName)
-	err = c.DownloadTo(&subtitle, subtitlePath)
+	// err = c.DownloadTo(&subtitle, subtitlePath)
+	err = downloadAndExtractSubtitle(subtitle, subtitlePath)
+	// err = parseAndDownloadSubtitle(subtitle, subtitlesDir)
+	fmt.Println(color.HiYellowString("[i] SubtitlePath: "), subtitlePath)
+	// fmt.Println(color.HiYellowString("[i] Subtitle: "), &subtitle)
 	if err != nil {
 		// errorPrint(err)
 		// os.Exit(1)
@@ -374,6 +399,104 @@ func getSubtitles(query string) (subtitlePath string) {
 	_ = c.LogOut()
 	_ = c.Close()
 	return
+}
+
+func downloadAndExtractSubtitle(subtitle osdb.Subtitle, outputPath string) error {
+	// Get the download URL from the last URL in the struct
+	// downloadURL := subtitle.SubDownloadLink
+	downloadURL := subtitle.ZipDownloadLink
+	fmt.Println("Downloading subtitle from:", downloadURL)
+
+	err := downloadWithWget(downloadURL, subtitlesDir)
+	if err != nil {
+		fmt.Printf("Error downloading file: %s\n", err)
+		return err
+	}
+
+	// fmt.Printf("File downloaded to: %s\n", outputPath)
+	// fmt.Printf("File downloaded to: %s\n", subtitlesDir)
+
+	return nil
+}
+
+func downloadWithWget(url, outputPath string) error {
+	// // // cmd := exec.Command("wget", "-O", outputPath+"/subtitle.zip", url)
+	// // // cmd.Stdout = os.Stdout
+	// // // cmd.Stderr = os.Stderr
+
+	// // // err := cmd.Run()
+	// // // if err != nil {
+	// // // 	return fmt.Errorf("error running wget: %s", err)
+	// // // }
+	// // // fmt.Printf("File downloaded to: %s\n", subtitlesDir)
+
+	// Create the output file
+	outputFile, err := os.Create(filepath.Join(outputPath, "subtitle.zip"))
+	if err != nil {
+		return err
+	}
+	defer outputFile.Close()
+
+	// Make the HTTP request
+	response, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	// Check if the response status is OK
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to download: %s", response.Status)
+	}
+
+	// Copy the response body to the output file
+	_, err = io.Copy(outputFile, response.Body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("File downloaded to: %s\n", filepath.Join(outputPath, "subtitle.zip"))
+
+	// Open the zip file
+	reader, err := zip.OpenReader(outputPath + "/subtitle.zip")
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
+	// Extract files from the zip archive
+	for _, file := range reader.File {
+		filePath := filepath.Join(outputPath, file.Name)
+		if strings.HasSuffix(filePath, string(filepath.Separator)) {
+			// Skip directory entries
+			continue
+		}
+
+		// Create the file
+		fileWriter, err := os.Create(filePath)
+		if err != nil {
+			return err
+		}
+
+		// Read from the zip file and write to the destination file
+		fileReader, err := file.Open()
+		if err != nil {
+			fileWriter.Close()
+			return err
+		}
+		_, err = io.Copy(fileWriter, fileReader)
+
+		fileReader.Close()
+		fileWriter.Close()
+
+		if err != nil {
+			return err
+		}
+	}
+
+	fmt.Println("Subtitle extracted to:", outputPath)
+
+	return nil
 }
 
 func startClient(player *player.Player, source models.Source, subtitlePath string) {
