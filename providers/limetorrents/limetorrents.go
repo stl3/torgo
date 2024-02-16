@@ -2,12 +2,10 @@ package limetorrents
 
 import (
 	"fmt"
-	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/dustin/go-humanize"
@@ -21,42 +19,42 @@ import (
 const (
 	Name = "LimeTorrents"
 	// Site = "https://www.limetorrents.info"
-	// Site = "https://www.limetorrents.lol"
+	Site = "https://www.limetorrents.lol"
 	// DefaultSite is the default LimeTorrents site URL
-	DefaultSite     = "https://www.limetorrents.lol"
-	AlternativeSite = "https://www.limetorrents.info"
+	// // DefaultSite     = "https://www.limetorrents.lol"
+	// // AlternativeSite = "https://www.limetorrents.info"
 )
 
-var Site string // Package-level variable
+// // var Site string // Package-level variable
 
 type provider struct {
 	models.Provider
 }
 
-func checkSiteAvailability(siteURL string) bool {
-	client := http.Client{
-		Timeout: 5 * time.Second,
-	}
+// // func checkSiteAvailability(siteURL string) bool {
+// // 	client := http.Client{
+// // 		Timeout: 5 * time.Second,
+// // 	}
 
-	_, err := client.Get(siteURL)
-	return err == nil
-}
+// // 	_, err := client.Get(siteURL)
+// // 	return err == nil
+// // }
 
 func New() models.ProviderInterface {
 	// var Site string
 
-	if checkSiteAvailability(DefaultSite) {
-		Site = DefaultSite
-		// log.Printf("Using site: %s\n", Site)
-	} else if checkSiteAvailability(AlternativeSite) {
-		Site = AlternativeSite
-		// log.Printf("Using site: %s\n", Site)
-	} else {
-		// Both sites are down, you can handle this case accordingly
-		// panic("Both LimeTorrents sites are down")
-		// log.Fatal("Both LimeTorrents sites are down")
-		Site = DefaultSite
-	}
+	// // if checkSiteAvailability(DefaultSite) {
+	// // 	Site = DefaultSite
+	// // 	// log.Printf("Using site: %s\n", Site)
+	// // } else if checkSiteAvailability(AlternativeSite) {
+	// // 	Site = AlternativeSite
+	// // 	// log.Printf("Using site: %s\n", Site)
+	// // } else {
+	// // 	// Both sites are down, you can handle this case accordingly
+	// // 	// panic("Both LimeTorrents sites are down")
+	// // 	// log.Fatal("Both LimeTorrents sites are down")
+	// // 	Site = DefaultSite
+	// // }
 
 	provider := &provider{}
 	provider.Name = Name
