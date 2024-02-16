@@ -54,7 +54,7 @@ func findAvailablePort(startPort int) int {
 	for port := startPort; port <= 65535; port++ {
 		// Check if the port is available
 		if isPortAvailable(port) {
-			logrus.Infof("Using port: %s", port)
+			logrus.Infof("Using port: %d", port)
 			return port
 		}
 	}
@@ -134,7 +134,8 @@ func (client *Client) getLargestFile() *torrent.File {
 
 	// Find all files larger than 100MB
 	for _, file := range client.Torrent.Files() {
-		if file.Length() > 40*1024*1024 { // 40MB in bytes
+		if file.Length() > 15*1024*1024 { // 15MB to accomodate audiobooks
+			// in future, will detect by filetype
 			largeFiles = append(largeFiles, file)
 		}
 	}
