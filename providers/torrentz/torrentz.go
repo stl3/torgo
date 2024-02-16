@@ -85,9 +85,10 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 		magnet, _ := result.Find("dd a i.fa-magnet").Parent().Attr("href")
 
 		source := models.Source{
-			From:     "Bitsearch",
-			Title:    title,
-			URL:      Site + URL,
+			From:  "Bitsearch",
+			Title: title,
+			// URL:      Site + URL,
+			URL:      URL,
 			Seeders:  seeders,
 			Leechers: leechers,
 			FileSize: int64(filesize),
