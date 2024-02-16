@@ -14,6 +14,7 @@ type TorrodleConfig struct {
 	HostPort     int    `json:"HostPort"`
 	Proxy        string `json:"Proxy"`
 	Eztv_cookie  string `json:"eztv_cookie"`
+	Ext_cookie   string `json:"ext_cookie"`
 	Mpv_params   string `json:"mpv_params"`
 	ECPT         int    `json:"EstablishedConnsPerTorrent"`
 	HOCPT        int    `json:"HalfOpenConnsPerTorrent"`
