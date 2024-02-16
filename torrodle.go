@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/stl3/torrodle/models"
+	"github.com/stl3/torrodle/providers/audiobookbay"
 	"github.com/stl3/torrodle/providers/bitsearch"
 	"github.com/stl3/torrodle/providers/bt4g"
 	"github.com/stl3/torrodle/providers/btdigg"
@@ -35,6 +36,7 @@ const (
 	CategoryMovie         Category = "MOVIE"
 	CategoryTV            Category = "TV"
 	CategoryAnime         Category = "ANIME"
+	CategoryAudiobook     Category = "AUDIOBOOK"
 	CategoryPorn          Category = "PORN"
 	CategoryDocumentaries Category = "DOCUMENTARIES"
 
@@ -61,6 +63,7 @@ var (
 	EZTV              = eztv.New()
 	Ext               = ext.New()
 	TorrentGalaxy     = torrentgalaxy.New()
+	Audiobookbay      = audiobookbay.New()
 )
 
 var AllProviders = [...]models.ProviderInterface{
@@ -78,6 +81,7 @@ var AllProviders = [...]models.ProviderInterface{
 	EZTV,
 	Ext,
 	TorrentGalaxy,
+	Audiobookbay,
 	// RarbgProvider,
 }
 
@@ -172,6 +176,8 @@ func GetCategoryURL(category Category, categories models.Categories) models.Cate
 		caturl = categories.TV
 	case CategoryAnime:
 		caturl = categories.Anime
+	case CategoryAudiobook:
+		caturl = categories.Audiobook
 	case CategoryPorn:
 		caturl = categories.Porn
 	case CategoryDocumentaries:

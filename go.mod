@@ -1,6 +1,6 @@
 module github.com/stl3/torrodle
 
-go 1.21.6
+go 1.22
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
@@ -14,19 +14,6 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/net v0.19.0
 	golang.org/x/time v0.5.0
-	gopkg.in/AlecAivazis/survey.v1 v1.8.8
-)
-
-require (
-	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
-	github.com/chzyer/readline v1.5.1 // indirect
-	github.com/google/pprof v0.0.0-20231229205709-960ae82b1e42 // indirect
-	github.com/grandcat/zeroconf v1.0.0 // indirect
-	github.com/ianlancetaylor/demangle v0.0.0-20231023195312-e2daf7ba7156 // indirect
-	github.com/miekg/dns v1.1.46 // indirect
-	github.com/vishen/go-chromecast v0.3.1 // indirect
-	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/tools v0.16.0 // indirect
 )
 
 require (
