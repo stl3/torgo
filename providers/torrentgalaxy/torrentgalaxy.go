@@ -2,6 +2,7 @@ package torrentgalaxy
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -31,12 +32,12 @@ func New() models.ProviderInterface {
 	provider.Name = Name
 	provider.Site = Site
 	provider.Categories = models.Categories{
-		All:           "/torrents.php?search=%v&sort=id&order=desc&page=%d#results",
-		Movie:         "/torrents.php?c42=1&search=%v&sort=id&order=desc&page=%d#results",
-		TV:            "/torrents.php?c41=1&search=%v&sort=id&order=desc&page=%d#results",
-		Anime:         "/torrents.php?c28=1&search=%v&sort=id&order=desc&page=%d#results",
-		Documentaries: "/torrents.php?genres[]=5&search=%v&sort=id&order=desc&page=%d#results",
-		Porn:          "/torrents.php?c35=1&search=%v&sort=id&order=desc&page=%d#results",
+		All:           "/torrents.php?search=%v#results%d",
+		Movie:         "/torrents.php?c42=1&search=%v#results%d",
+		TV:            "/torrents.php?c41=1&search=%v#results%d",
+		Anime:         "/torrents.php?c28=1&search=%v#results%d",
+		Documentaries: "/torrents.php?genres[]=5&search=%v#results%d",
+		Porn:          "/torrents.php?c35=1&search=%v#results%d",
 	}
 	return provider
 }
@@ -50,6 +51,8 @@ func (provider *provider) Search(query string, count int, categoryURL models.Cat
 
 func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGroup) {
 	// Log or display the full URL before making the request
+	surl = regexp.MustCompile(`\d+$`).ReplaceAllString(surl, "")
+
 	logrus.Infof("TorrentGalaxy: [%d] Requesting URL: %s\n", page, surl)
 	logrus.Infof("TorrentGalaxy: [%d] Extracting results...\n", page)
 	_, html, err := request.Get(nil, surl, nil)
