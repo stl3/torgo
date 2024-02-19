@@ -2,6 +2,8 @@ package bt4g
 
 import (
 	"fmt"
+	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -20,15 +22,11 @@ const (
 	Site = "https://bt4gprx.com"
 )
 
-// var Site string // Package-level variable
-
 type provider struct {
 	models.Provider
 }
 
 func New() models.ProviderInterface {
-	// var Site string
-
 	provider := &provider{}
 	provider.Name = Name
 	provider.Site = Site
@@ -44,8 +42,8 @@ func (provider *provider) Search(query string, count int, categoryURL models.Cat
 }
 
 func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGroup) {
-
 	logrus.Infof("Bt4g: [%d] Extracting results...\n", page)
+
 	_, html, err := request.Get(nil, surl, nil)
 	if err != nil {
 		logrus.Errorln(fmt.Sprintf("Bt4g: [%d]", page), err)
@@ -58,7 +56,6 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 	resultsContainer := doc.Find("div.col.s12 > div")
 
 	resultsContainer.Each(func(_ int, result *goquery.Selection) {
-		// Extract information from each search result item
 		title := result.Find("h5 a").Text()
 		if containsHTMLEncodedEntities(title) {
 			decodedTitle, err := decodeHTMLText(title)
@@ -72,8 +69,20 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 			logrus.Infof("Title: %s", title)
 		}
 		URL, _ := result.Find("h5 a").Attr("href")
+		logrus.Infof("URL: %s", URL)
 
-		// Extract other relevant information
+		newURL := "https://bt4gprx.com" + URL
+		logrus.Infof("newURL: %s", newURL)
+
+		hash, err := getHashFromURL(newURL)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+
+		// Construct the magnet URI
+		magnet := fmt.Sprintf("magnet:?xt=urn:btih:%s", hash)
+
 		filesizeStr := result.Find("b.cpill").Text()
 		filesize, _ := humanize.ParseBytes(strings.TrimSpace(filesizeStr))
 
@@ -82,8 +91,6 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 
 		leechersStr := result.Find("b#leechers").Text()
 		leechers, _ := strconv.Atoi(leechersStr)
-
-		magnet, _ := result.Find("h5 a").Attr("href")
 
 		source := models.Source{
 			From:     "Bt4g",
@@ -126,4 +133,45 @@ func decodeHTMLText(text string) (string, error) {
 			decodedText += token.Data
 		}
 	}
+}
+
+func getHashFromURL(url string) (string, error) {
+	// Make a GET request to the URL
+	response, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer response.Body.Close()
+
+	// Parse the HTML response
+	document, err := goquery.NewDocumentFromReader(response.Body)
+	if err != nil {
+		return "", err
+	}
+
+	// Extract the href attribute value from the specified selector
+	href := document.Find(".s12 > table:nth-child(3) > tbody:nth-child(2) > tr:nth-child(1) > th:nth-child(1) > a:nth-child(1)").AttrOr("href", "")
+	if href == "" {
+		return "", fmt.Errorf("href attribute not found")
+	}
+	href1, err := ExtractMagnetHash(href)
+	if err != nil {
+		return "", err
+	}
+	return href1, nil
+}
+
+func ExtractMagnetHash(href string) (string, error) {
+	// Regular expression to match the magnet hash
+	re := regexp.MustCompile(`\/hash\/([a-fA-F0-9]+)`)
+
+	// Find submatches
+	matches := re.FindStringSubmatch(href)
+	if len(matches) < 2 {
+		return "", fmt.Errorf("unable to extract magnet hash from href")
+	}
+
+	// Extract and return the magnet hash
+	magnetHash := matches[1]
+	return magnetHash, nil
 }
