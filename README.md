@@ -1,7 +1,7 @@
 <h1 align="center">torgo</h1>
 <p align="center">
-  <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/stl3/torrodle"/>
-  <img alt="Github Last Commit" src="https://img.shields.io/github/last-commit/stl3/torrodle"/>
+  <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/stl3/torgo"/>
+  <img alt="Github Last Commit" src="https://img.shields.io/github/last-commit/stl3/torgo"/>
 </p>
 <p align="center"><strong><i>A mighty all-in-one magnet scraper & streamer</i></strong></p>
 
@@ -63,22 +63,22 @@ I personally do it this way because I have mapped my gpu vram as a disk so that 
 
 ### Binary
 
-Download the latest stable release of the binary at [releases](https://github.com/stl3/torrodle/releases).
+Download the latest stable release of the binary at [releases](https://github.com/stl3/torgo/releases).
 
 ### Go Get
 
 Make sure you have **Go 1.12+** installed on your machine.
 
-`$ go get github.com/stl3/torrodle/cmd/...`
+`$ go get github.com/stl3/torgo/cmd/...`
 
 ### Build From Source
 
 Make sure you have **Go 1.12+** installed on your machine.
 
 ```shell script
-$ git clone github.com/stl3/torrodle.git
-$ cd torrodle
-$ go build cmd/torrodle/main.go
+$ git clone github.com/stl3/torgo.git
+$ cd torgo
+$ go build cmd/torgo/main.go
 ```
 
 #### Dependencies
@@ -101,7 +101,7 @@ For command-line (CLI) usage, see [`CLI.md`](CLI.md).
 For API usage, see [`API.md`](API.md).
 
 ## Configurationfile
-~/.torrodle.json
+~/.torgo.json
 
 ```
 "DataDir": "E:/exampledir",
