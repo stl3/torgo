@@ -14,12 +14,12 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/html"
 
-	"github.com/stl3/torrodle/config"
-	"github.com/stl3/torrodle/models"
-	// "github.com/stl3/torrodle/request"
+	"github.com/stl3/torgo/config"
+	"github.com/stl3/torgo/models"
+	// "github.com/stl3/torgo/request"
 )
 
-// var configurations config.TorrodleConfig
+// var configurations config.torgoConfig
 
 func init() {
 	// Load the configuration
@@ -30,7 +30,7 @@ func init() {
 	configurations, err := config.LoadConfig(configFile)
 	if err != nil {
 		fmt.Println("Error loading config:", err)
-		configurations = config.TorrodleConfig{}
+		configurations = config.torgoConfig{}
 	}
 	// fmt.Printf("Loaded configuration: %+v\n", configurations)
 	logrus.Debugf("Loaded configuration: %+v\n", configurations)
