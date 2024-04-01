@@ -31,7 +31,7 @@ func loadConfig() {
 	configurations, err := config.LoadConfig(configFile)
 	if err != nil {
 		fmt.Println("Error loading config:", err)
-		configurations = config.torgoConfig{}
+		configurations = config.TorgoConfig{}
 	}
 	// Shows used config options from json
 	// fmt.Printf("Loaded configuration: %+v\n", configurations)
