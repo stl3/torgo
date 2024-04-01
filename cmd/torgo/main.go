@@ -44,7 +44,7 @@ const version = "0.1-beta"
 var u, _ = user.Current()
 var home = u.HomeDir
 var configFile = filepath.Join(home, ".torgo.json")
-var configurations config.torgoConfig
+var configurations config.TorgoConfig
 
 var dataDir string
 var subtitlesDir string
