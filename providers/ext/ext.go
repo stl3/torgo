@@ -30,7 +30,7 @@ func init() {
 	configurations, err := config.LoadConfig(configFile)
 	if err != nil {
 		fmt.Println("Error loading config:", err)
-		configurations = config.torgoConfig{}
+		configurations = config.TorgoConfig{}
 	}
 	// fmt.Printf("Loaded configuration: %+v\n", configurations)
 	logrus.Debugf("Loaded configuration: %+v\n", configurations)
