@@ -7,12 +7,15 @@ import (
 	"path/filepath"
 )
 
-type TorrodleConfig struct {
+type torgoConfig struct {
 	DataDir      string `json:"DataDir"`
 	ResultsLimit int    `json:"ResultsLimit"`
 	TorrentPort  int    `json:"TorrentPort"`
 	HostPort     int    `json:"HostPort"`
 	Proxy        string `json:"Proxy"`
+	Eztv_cookie  string `json:"eztv_cookie"`
+	Ext_cookie   string `json:"ext_cookie"`
+	Mpv_params   string `json:"mpv_params"`
 	ECPT         int    `json:"EstablishedConnsPerTorrent"`
 	HOCPT        int    `json:"HalfOpenConnsPerTorrent"`
 	THOC         int    `json:"TotalHalfOpenConns"`
@@ -20,8 +23,8 @@ type TorrodleConfig struct {
 }
 
 // This function is for debug purposes
-// It shows config parameters used in ~/.torrodle.json
-func (t TorrodleConfig) String() string {
+// It shows config parameters used in ~/.torgo.json
+func (t torgoConfig) String() string {
 	return fmt.Sprintf(
 		`TorrentDir: %v | ResultsLimit: %d | TorrentPort: %d | HostPort: %d | Debug: %v`,
 		t.DataDir, t.ResultsLimit, t.TorrentPort, t.HostPort, t.Debug,
@@ -47,22 +50,23 @@ func (t TorrodleConfig) String() string {
 // Windows - %TEMP%/torgo
 
 func InitConfig(path string) error {
-	config := TorrodleConfig{
+	config := torgoConfig{
 		DataDir:      getTempDir(),
 		ResultsLimit: 100,
-		TorrentPort:  10800,
-		HostPort:     8789,
-		ECPT:         45,
-		HOCPT:        25,
-		THOC:         50,
+		// TorrentPort:  10800,
+		TorrentPort: 36663,
+		HostPort:    8789,
+		ECPT:        45,
+		HOCPT:       25,
+		THOC:        50,
 	}
 	data, _ := json.MarshalIndent(config, "", "\t")
 	err := os.WriteFile(path, data, 0644)
 	return err
 }
 
-func LoadConfig(path string) (TorrodleConfig, error) {
-	var config TorrodleConfig
+func LoadConfig(path string) (torgoConfig, error) {
+	var config torgoConfig
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return config, err

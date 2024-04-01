@@ -11,8 +11,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/html"
 
-	"github.com/stl3/torrodle/models"
-	"github.com/stl3/torrodle/request"
+	"github.com/stl3/torgo/models"
+	"github.com/stl3/torgo/request"
 )
 
 const (
@@ -85,9 +85,10 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 		magnet, _ := result.Find("dd a i.fa-magnet").Parent().Attr("href")
 
 		source := models.Source{
-			From:     "Bitsearch",
-			Title:    title,
-			URL:      Site + URL,
+			From:  "Torrentz2",
+			Title: title,
+			// URL:      Site + URL,
+			URL:      URL,
 			Seeders:  seeders,
 			Leechers: leechers,
 			FileSize: int64(filesize),

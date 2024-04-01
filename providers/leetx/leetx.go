@@ -16,13 +16,16 @@ import (
 	"golang.org/x/net/html"
 	"golang.org/x/time/rate"
 
-	"github.com/stl3/torrodle/models"
-	"github.com/stl3/torrodle/request"
+	"github.com/stl3/torgo/models"
+	"github.com/stl3/torgo/request"
 )
 
 const (
 	Name = "1337x"
-	Site = "https://1337x.to"
+	// Site = "https://1337x.to"
+	// Site = "https://1377x.to"
+	// Site = "https://1337xto.to/"
+	Site = "https://www.1337xx.to"
 )
 
 type provider struct {

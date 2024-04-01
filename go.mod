@@ -1,6 +1,6 @@
-module github.com/stl3/torrodle
+module github.com/stl3/torgo
 
-go 1.21.5
+go 1.22
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
@@ -14,10 +14,16 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/net v0.19.0
 	golang.org/x/time v0.5.0
-	gopkg.in/AlecAivazis/survey.v1 v1.8.8
 )
 
 require (
+	github.com/asticode/go-astikit v0.20.0 // indirect
+	github.com/asticode/go-astisub v0.26.2 // indirect
+	github.com/asticode/go-astits v1.8.0 // indirect
+)
+
+require (
+	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/RoaringBitmap/roaring v1.7.0 // indirect
 	github.com/ajwerner/btree v0.0.0-20211221152037-f427b3e689c0 // indirect
 	github.com/alecthomas/atomic v0.1.0-alpha2 // indirect
@@ -47,6 +53,7 @@ require (
 	github.com/go-llsqlite/crawshaw v0.5.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/go-resty/resty/v2 v2.11.0
 	github.com/google/btree v1.1.2 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
@@ -88,7 +95,7 @@ require (
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848 // indirect
 	golang.org/x/sync v0.5.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/term v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

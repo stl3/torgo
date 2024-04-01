@@ -1,4 +1,4 @@
-package torrodle
+package torgo
 
 import (
 	"sort"
@@ -8,20 +8,24 @@ import (
 	"github.com/fatih/color"
 	"github.com/sirupsen/logrus"
 
-	"github.com/stl3/torrodle/models"
-	"github.com/stl3/torrodle/providers/bitsearch"
-	"github.com/stl3/torrodle/providers/bt4g"
-	"github.com/stl3/torrodle/providers/btdigg"
-	"github.com/stl3/torrodle/providers/knaben"
-	"github.com/stl3/torrodle/providers/leetx"
-	"github.com/stl3/torrodle/providers/limetorrents"
-	"github.com/stl3/torrodle/providers/magnetdl"
+	"github.com/stl3/torgo/models"
+	"github.com/stl3/torgo/providers/audiobookbay"
+	"github.com/stl3/torgo/providers/bitsearch"
+	"github.com/stl3/torgo/providers/bt4g"
+	"github.com/stl3/torgo/providers/btdigg"
+	"github.com/stl3/torgo/providers/ext"
+	"github.com/stl3/torgo/providers/eztv"
+	"github.com/stl3/torgo/providers/knaben"
+	"github.com/stl3/torgo/providers/leetx"
+	"github.com/stl3/torgo/providers/limetorrents"
+	"github.com/stl3/torgo/providers/magnetdl"
+	"github.com/stl3/torgo/providers/torrentgalaxy"
 
-	// "github.com/stl3/torrodle/providers/rarbg"
-	"github.com/stl3/torrodle/providers/sukebei"
-	"github.com/stl3/torrodle/providers/thepiratebay"
-	"github.com/stl3/torrodle/providers/torrentz"
-	"github.com/stl3/torrodle/providers/yify"
+	// "github.com/stl3/torgo/providers/rarbg"
+	"github.com/stl3/torgo/providers/sukebei"
+	"github.com/stl3/torgo/providers/thepiratebay"
+	"github.com/stl3/torgo/providers/torrentz"
+	"github.com/stl3/torgo/providers/yify"
 )
 
 type Category string
@@ -32,6 +36,7 @@ const (
 	CategoryMovie         Category = "MOVIE"
 	CategoryTV            Category = "TV"
 	CategoryAnime         Category = "ANIME"
+	CategoryAudiobook     Category = "AUDIOBOOK"
 	CategoryPorn          Category = "PORN"
 	CategoryDocumentaries Category = "DOCUMENTARIES"
 
@@ -55,6 +60,10 @@ var (
 	BTDigg            = btdigg.New()
 	Knaben            = knaben.New()
 	MagnetDL          = magnetdl.New()
+	EZTV              = eztv.New()
+	Ext               = ext.New()
+	TorrentGalaxy     = torrentgalaxy.New()
+	Audiobookbay      = audiobookbay.New()
 )
 
 var AllProviders = [...]models.ProviderInterface{
@@ -69,6 +78,10 @@ var AllProviders = [...]models.ProviderInterface{
 	BTDigg,
 	Knaben,
 	MagnetDL,
+	EZTV,
+	Ext,
+	TorrentGalaxy,
+	Audiobookbay,
 	// RarbgProvider,
 }
 
@@ -129,7 +142,8 @@ func ListResults(providers []interface{}, query string, count int, category Cate
 	for _, provider := range argProviders {
 		if showSpinner {
 			c := color.New(color.FgYellow, color.Bold)
-			s = spinner.New(spinner.CharSets[33], 100*time.Millisecond)
+			// s = spinner.New(spinner.CharSets[33], 100*time.Millisecond)
+			s = spinner.New(spinner.CharSets[36], 100*time.Millisecond)
 			_ = s.Color("fgBlue")
 			s.Suffix = c.Sprint(" Waiting for ") + color.GreenString(provider.GetName()) + c.Sprint(" ...")
 			s.Start()
@@ -162,8 +176,12 @@ func GetCategoryURL(category Category, categories models.Categories) models.Cate
 		caturl = categories.TV
 	case CategoryAnime:
 		caturl = categories.Anime
+	case CategoryAudiobook:
+		caturl = categories.Audiobook
 	case CategoryPorn:
 		caturl = categories.Porn
+	case CategoryDocumentaries:
+		caturl = categories.Documentaries
 	default:
 		logrus.Fatalln("Invalid category")
 	}

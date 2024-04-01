@@ -1,7 +1,8 @@
-package knaben
+package torrentgalaxy
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -16,8 +17,8 @@ import (
 )
 
 const (
-	Name = "knaben"
-	Site = "https://knaben.eu"
+	Name = "torrentgalaxy"
+	Site = "https://torrentgalaxy.to"
 )
 
 type provider struct {
@@ -31,38 +32,46 @@ func New() models.ProviderInterface {
 	provider.Name = Name
 	provider.Site = Site
 	provider.Categories = models.Categories{
-		All:   "/search/%v/0/%d/seeders",
-		Movie: "/search/%v/3000000/%d/seeders",
-		TV:    "/search/%v/2000000/%d/seeders",
-		Porn:  "/search/%v/5000000/%d/seeders",
+		All:           "/torrents.php?search=%v#results%d",
+		Movie:         "/torrents.php?c42=1&search=%v#results%d",
+		TV:            "/torrents.php?c41=1&search=%v#results%d",
+		Anime:         "/torrents.php?c28=1&search=%v#results%d",
+		Documentaries: "/torrents.php?genres[]=5&search=%v#results%d",
+		Porn:          "/torrents.php?c35=1&search=%v#results%d",
 	}
 	return provider
 }
 
 func (provider *provider) Search(query string, count int, categoryURL models.CategoryURL) ([]models.Source, error) {
-	results, err := provider.Query(query, categoryURL, count, 50, 1, extractor)
+	modifiedQuery := modifyQuery(query)
+	// logrus.Infof("Query: %s", modifiedQuery)
+	results, err := provider.Query(modifiedQuery, categoryURL, count, 50, 1, extractor)
 	return results, err
 }
 
 func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGroup) {
+	// Log or display the full URL before making the request
+	surl = regexp.MustCompile(`\d+$`).ReplaceAllString(surl, "")
 
-	logrus.Infof("knaben: [%d] Extracting results...\n", page)
+	logrus.Infof("TorrentGalaxy: [%d] Requesting URL: %s\n", page, surl)
+	logrus.Infof("TorrentGalaxy: [%d] Extracting results...\n", page)
 	_, html, err := request.Get(nil, surl, nil)
 	if err != nil {
-		logrus.Errorln(fmt.Sprintf("knaben: [%d]", page), err)
+		logrus.Errorln(fmt.Sprintf("TorrentGalaxy: [%d]", page), err)
 		wg.Done()
 		return
 	}
 
 	var sources []models.Source
 	doc, _ := goquery.NewDocumentFromReader(strings.NewReader(html))
-	resultsContainer := doc.Find("tbody > tr")
+	resultsContainer := doc.Find("div.tgxtablerow.txlight")
 	resultsContainer.Each(func(_ int, result *goquery.Selection) {
-		title := result.Find("td.text-wrap a").Text()
+		title := result.Find("div:nth-child(4) > div > a.txlight > span > b").Text()
+		// logrus.Infof("Title: %s", title)
 		if containsHTMLEncodedEntities(title) {
 			decodedTitle, err := decodeHTMLText(title)
 			if err != nil {
-				logrus.Errorln("Error decoding HTML text:", err)
+				// logrus.Errorln("Error decoding HTML text:", err)
 				// return
 				decodedTitle = title
 			}
@@ -70,33 +79,31 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 		} else {
 			logrus.Infof("Title: %s", title)
 		}
-		
-		filesizeStr := result.Find("td:nth-child(3)").Text()
-		filesize, _ := humanize.ParseBytes(strings.TrimSpace(filesizeStr))
-		// date := result.Find("td[title^='20']").Text()
-		seeders, _ := strconv.Atoi(result.Find("td:nth-last-child(3)").Text())
-		leechers, _ := strconv.Atoi(result.Find("td:nth-last-child(2)").Text())
-		magnet, _ := result.Find("td.text-wrap a").Attr("href")
 
-		// if err != nil {
-		// 	// log.Println("Error converting sizeStr to int:", err)
-		// 	log.Println("Size string:", filesizeStr)
-		// }
+		URL, _ := result.Find("div:nth-child(2) > div > a.txlight").Attr("href")
+		sizeStr := result.Find("div:nth-child(8) > span").Text()
+		size, err := humanize.ParseBytes(sizeStr)
+		if err != nil {
+			logrus.Infof("Size string: %s", sizeStr)
+		}
+
+		seeders, _ := strconv.Atoi(result.Find("div:nth-child(11) > span > font:nth-child(1) > b").Text())
+		leechers, _ := strconv.Atoi(result.Find("div:nth-child(11) > span > font:nth-child(2) > b").Text())
+		magnet, _ := result.Find("div:nth-child(5) > a:nth-child(2)").Attr("href")
 
 		source := models.Source{
-			From:     "knaben",
+			From:     "TorrentGalaxy",
 			Title:    title,
-			URL:      surl,
+			URL:      Site + URL, // Assuming 'Site' is declared somewhere
 			Seeders:  seeders,
 			Leechers: leechers,
-			FileSize: int64(filesize),
+			FileSize: int64(size),
 			Magnet:   magnet,
-			// You may add other fields like category, subcategory, date as needed
 		}
 		sources = append(sources, source)
 	})
 
-	logrus.Debugf("knaben: [%d] Amount of results: %d", page, len(sources))
+	logrus.Debugf("TorrentGalaxy: [%d] Amount of results: %d", page, len(sources))
 	*results = append(*results, sources...)
 	wg.Done()
 }
@@ -125,4 +132,9 @@ func decodeHTMLText(text string) (string, error) {
 			decodedText += token.Data
 		}
 	}
+}
+
+func modifyQuery(query string) string {
+	modifiedQuery := strings.ReplaceAll(query, " ", "+")
+	return modifiedQuery
 }

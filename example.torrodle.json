@@ -1,9 +1,0 @@
-{
-	"ResultsLimit": 100,
-	"TorrentPort": 34343,
-	"HostPort": 35355,
-	"EstablishedConnsPerTorrent": 35,
-	"HalfOpenConnsPerTorrent": 25,
-	"TotalHalfOpenConns": 50,
-	"Debug": false
-}

@@ -23,14 +23,14 @@
 
 ---
 
-**torgo** is a command-line program which searches and gathers magnet links of movies, tv shows, animes and porn videos from a variety of [providers](providers.md).
+**torgo** is a command-line program which searches and gathers magnet links of movies, tv shows, anime, porn & documentary videos from a variety of [providers](providers.md).
 It then streams the torrent via HTTP (along with its subtitles) and plays it with a user preferred video player (such as *vlc* and *mpv*).
 Currently I am only getting this to be in a working state. 
 
 <sub>Note: The original Torrodle repo has been archived since April 2023 and has not been updated in a while, I liked the project (thanks for inspiring me tnychn!) so I just wanted to get it in a working state again.
-I have also made modifications so that it deletes the downloads from your `os.TempDir()` or the one you set as `DataDir` in `~/.torrodle.json` when quitting the program. Since I am only trying to get it in a working state, options will be added later to toggle keeping/deleting downloads.
+I have also made modifications so that it deletes the downloads from your `os.TempDir()` or the one you set as `DataDir` in `~/.torgo.json` when quitting the program. Since I am only trying to get it in a working state, options will be added later to toggle keeping/deleting downloads.
 I personally do it this way because I have mapped my gpu vram as a disk so that my mechanical drive suffers no wear and tear.
-> If you don't know what BitTorrent is, you shouldn't be using **torrodle**.
+> If you don't know what BitTorrent is, you shouldn't be using **torgo**.
 > There are some copyrighted content which might be illegal downloading them in your country.
 
 ## Table of Contents
@@ -52,10 +52,11 @@ I personally do it this way because I have mapped my gpu vram as a disk so that 
 * 🔥 Blazing fast
 * 🚸 User-friendly (debatable)
 * 🤖 Built-in torrent streaming client via HTTP (refined from [`go-peerflix`](https://github.com/Sioro-Neoku/go-peerflix))
-* 🔰 Watch the video while it is being downloaded
+* 🔰 Watch the video while it is being downloaded / allows going to any point in the video
 * 🔎 Query multiple providers in a single search
-* 🚀 Sorted results from 11 different providers at once 
-* 📄 Along with subtitles fetching for the video (using [`osdb`](https://github.com/Sioro-Neoku/go-peerflix))
+* 🚀 Sorted results from 13 different providers at once 
+* 📄 Along with subtitles fetching for the video (using [`osdb`](https://github.com/oz/osdb))
+* 💥 Select individual episode from complete seasons/packs
 * Support for playing with mpv/vlc on Win/Linux/Mac(?)/Android (Termux) *Android does not have subtitle support yet unless embedded*
 
 ## Installation
@@ -111,6 +112,7 @@ For API usage, see [`API.md`](API.md).
 "EstablishedConnsPerTorrent": 25,
 "HalfOpenConnsPerTorrent": 25,
 "TotalHalfOpenConns": 50,
+"eztv_cookie": "cookie_value"
 "Debug": false
 ```
 Change `DataDir` if you want a custom path for where it downloads files

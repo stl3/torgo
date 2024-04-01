@@ -13,7 +13,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/stl3/torrodle/utils"
+	"github.com/stl3/torgo/utils"
 )
 
 // ProviderInterface is an interface that exposes all the methods a `Provider` struct type has.
@@ -98,6 +98,7 @@ type Categories struct {
 	Movie         CategoryURL
 	TV            CategoryURL
 	Anime         CategoryURL
+	Audiobook     CategoryURL
 	Porn          CategoryURL
 	Documentaries CategoryURL
 }
