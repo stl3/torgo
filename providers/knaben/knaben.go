@@ -11,8 +11,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/html"
 
-	"github.com/stl3/torrodle/models"
-	"github.com/stl3/torrodle/request"
+	"github.com/stl3/torgo/models"
+	"github.com/stl3/torgo/request"
 )
 
 const (
