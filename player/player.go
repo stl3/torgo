@@ -1,6 +1,6 @@
 /*
 This package is the embeded version of 'github.com/Sioro-Neoku/go-peerflix/'.
-We did some modifications on it in order to let it fit into 'torrodle'
+We did some modifications on it in order to let it fit into 'torgo'
 */
 package player
 
@@ -16,7 +16,7 @@ import (
 	"time"
 
 	// "github.com/sirupsen/logrus"
-	"github.com/stl3/torrodle/config"
+	"github.com/stl3/torgo/config"
 )
 
 var u, _ = user.Current()
@@ -31,7 +31,7 @@ func loadConfig() {
 	configurations, err := config.LoadConfig(configFile)
 	if err != nil {
 		fmt.Println("Error loading config:", err)
-		configurations = config.TorrodleConfig{}
+		configurations = config.torgoConfig{}
 	}
 	// Shows used config options from json
 	// fmt.Printf("Loaded configuration: %+v\n", configurations)
