@@ -8,9 +8,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/stl3/torrodle/models"
-	"github.com/stl3/torrodle/request"
-	"github.com/stl3/torrodle/utils"
+	"github.com/stl3/torgo/models"
+	"github.com/stl3/torgo/request"
+	"github.com/stl3/torgo/utils"
 )
 
 const (
