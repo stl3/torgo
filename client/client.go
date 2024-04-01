@@ -47,7 +47,7 @@ type Client struct {
 var u, _ = user.Current()
 var home = u.HomeDir
 var configFile = filepath.Join(home, ".torgo.json")
-var configurations config.torgoConfig
+var configurations config.TorgoConfig
 
 // Function to find an available port starting from the given port
 func findAvailablePort(startPort int) int {
