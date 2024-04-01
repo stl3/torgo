@@ -1,6 +1,6 @@
 /*
 This package is the embeded version of 'github.com/Sioro-Neoku/go-peerflix/'.
-We did some modifications on it in order to let it fit into 'Torrodle'
+We did some modifications on it in order to let it fit into 'torgo'
 */
 package client
 
@@ -25,8 +25,8 @@ import (
 	"github.com/fatih/color"
 	"github.com/sirupsen/logrus"
 
-	"github.com/stl3/torrodle/config"
-	"github.com/stl3/torrodle/models"
+	"github.com/stl3/torgo/config"
+	"github.com/stl3/torgo/models"
 )
 
 // Client manages the torrent downloading.
@@ -47,7 +47,7 @@ type Client struct {
 var u, _ = user.Current()
 var home = u.HomeDir
 var configFile = filepath.Join(home, ".torgo.json")
-var configurations config.TorrodleConfig
+var configurations config.torgoConfig
 
 // Function to find an available port starting from the given port
 func findAvailablePort(startPort int) int {
