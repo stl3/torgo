@@ -2,7 +2,6 @@ package ext
 
 import (
 	"fmt"
-	"net/http"
 	"os/user"
 	"path/filepath"
 	"strconv"
@@ -20,7 +19,7 @@ import (
 	// "github.com/stl3/torrodle/request"
 )
 
-var configurations config.TorrodleConfig
+// var configurations config.TorrodleConfig
 
 func init() {
 	// Load the configuration
@@ -87,37 +86,48 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 
 	client := resty.New()
 
-	// Create cookies
-	cookie1 := &http.Cookie{
-		Name:  "PHPSESSID",
-		Value: configurations.Ext_cookie,
-		// Value: "cfadf97973e6b01",
-	}
+	// // Create cookies
+	// cookie1 := &http.Cookie{
+	// 	Name:  "PHPSESSID",
+	// 	Value: configurations.Ext_cookie,
+	// 	// Value: "cfadf97973e6b01",
+	// }
 
-	cookie2 := &http.Cookie{
-		Name:  "cf_chl_rc_m",
-		Value: "2",
-	}
-	// Add cookies to the request
-	client.SetCookies([]*http.Cookie{cookie1, cookie2})
+	// cookie2 := &http.Cookie{
+	// 	Name:  "cf_chl_rc_m",
+	// 	Value: "2",
+	// }
+	// // Add cookies to the request
+	// client.SetCookies([]*http.Cookie{cookie1, cookie2})
 
+	// Set the cookie
+	client.SetHeader("Cookie", "cf_chl_3=e69362e454d9cfe")
 	// Make the request
-	resp, err := client.R().
-		SetResult(&struct {
-			// Define the structure of the expected response
-			// Replace with the actual fields you expect in the response
-			// For example, if the response is JSON, define the JSON structure here.
-			Field1 string `json:"field1"`
-			Field2 int    `json:"field2"`
-			// Add more fields as needed
-		}{}).
-		Get(surl)
+	resp, err := client.R().Get(surl)
 
 	if err != nil {
 		logrus.Errorln(fmt.Sprintf("Ext: [%d]", page), err)
 		wg.Done()
 		return
 	}
+
+	// // Make the request
+	// resp, err := client.R().
+	// 	SetResult(&struct {
+	// 		// Define the structure of the expected response
+	// 		// Replace with the actual fields you expect in the response
+	// 		// For example, if the response is JSON, define the JSON structure here.
+	// 		Field1 string `json:"field1"`
+	// 		Field2 int    `json:"field2"`
+	// 		// Add more fields as needed
+	// 	}{}).
+	// 	Get(surl)
+
+	// if err != nil {
+	// 	logrus.Errorln(fmt.Sprintf("Ext: [%d]", page), err)
+	// 	wg.Done()
+	// 	return
+	// }
 
 	var sources []models.Source
 	html := resp.String()
