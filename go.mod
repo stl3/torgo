@@ -1,4 +1,4 @@
-module github.com/stl3/torrodle
+module github.com/stl3/torgo
 
 go 1.22
 
