@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-type TorrodleConfig struct {
+type torgoConfig struct {
 	DataDir      string `json:"DataDir"`
 	ResultsLimit int    `json:"ResultsLimit"`
 	TorrentPort  int    `json:"TorrentPort"`
@@ -24,7 +24,7 @@ type TorrodleConfig struct {
 
 // This function is for debug purposes
 // It shows config parameters used in ~/.torgo.json
-func (t TorrodleConfig) String() string {
+func (t torgoConfig) String() string {
 	return fmt.Sprintf(
 		`TorrentDir: %v | ResultsLimit: %d | TorrentPort: %d | HostPort: %d | Debug: %v`,
 		t.DataDir, t.ResultsLimit, t.TorrentPort, t.HostPort, t.Debug,
@@ -50,7 +50,7 @@ func (t TorrodleConfig) String() string {
 // Windows - %TEMP%/torgo
 
 func InitConfig(path string) error {
-	config := TorrodleConfig{
+	config := torgoConfig{
 		DataDir:      getTempDir(),
 		ResultsLimit: 100,
 		// TorrentPort:  10800,
@@ -65,8 +65,8 @@ func InitConfig(path string) error {
 	return err
 }
 
-func LoadConfig(path string) (TorrodleConfig, error) {
-	var config TorrodleConfig
+func LoadConfig(path string) (torgoConfig, error) {
+	var config torgoConfig
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return config, err
