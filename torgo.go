@@ -1,4 +1,4 @@
-package torrodle
+package torgo
 
 import (
 	"sort"
@@ -8,24 +8,24 @@ import (
 	"github.com/fatih/color"
 	"github.com/sirupsen/logrus"
 
-	"github.com/stl3/torrodle/models"
-	"github.com/stl3/torrodle/providers/audiobookbay"
-	"github.com/stl3/torrodle/providers/bitsearch"
-	"github.com/stl3/torrodle/providers/bt4g"
-	"github.com/stl3/torrodle/providers/btdigg"
-	"github.com/stl3/torrodle/providers/ext"
-	"github.com/stl3/torrodle/providers/eztv"
-	"github.com/stl3/torrodle/providers/knaben"
-	"github.com/stl3/torrodle/providers/leetx"
-	"github.com/stl3/torrodle/providers/limetorrents"
-	"github.com/stl3/torrodle/providers/magnetdl"
-	"github.com/stl3/torrodle/providers/torrentgalaxy"
+	"github.com/stl3/torgo/models"
+	"github.com/stl3/torgo/providers/audiobookbay"
+	"github.com/stl3/torgo/providers/bitsearch"
+	"github.com/stl3/torgo/providers/bt4g"
+	"github.com/stl3/torgo/providers/btdigg"
+	"github.com/stl3/torgo/providers/ext"
+	"github.com/stl3/torgo/providers/eztv"
+	"github.com/stl3/torgo/providers/knaben"
+	"github.com/stl3/torgo/providers/leetx"
+	"github.com/stl3/torgo/providers/limetorrents"
+	"github.com/stl3/torgo/providers/magnetdl"
+	"github.com/stl3/torgo/providers/torrentgalaxy"
 
-	// "github.com/stl3/torrodle/providers/rarbg"
-	"github.com/stl3/torrodle/providers/sukebei"
-	"github.com/stl3/torrodle/providers/thepiratebay"
-	"github.com/stl3/torrodle/providers/torrentz"
-	"github.com/stl3/torrodle/providers/yify"
+	// "github.com/stl3/torgo/providers/rarbg"
+	"github.com/stl3/torgo/providers/sukebei"
+	"github.com/stl3/torgo/providers/thepiratebay"
+	"github.com/stl3/torgo/providers/torrentz"
+	"github.com/stl3/torgo/providers/yify"
 )
 
 type Category string
