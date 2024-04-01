@@ -32,11 +32,11 @@ import (
 	// "gopkg.in/AlecAivazis/survey.v1"
 	"github.com/AlecAivazis/survey/v2"
 
-	"github.com/stl3/torrodle"
-	"github.com/stl3/torrodle/client"
-	"github.com/stl3/torrodle/config"
-	"github.com/stl3/torrodle/models"
-	"github.com/stl3/torrodle/player"
+	"github.com/stl3/torgo"
+	"github.com/stl3/torgo/client"
+	"github.com/stl3/torgo/config"
+	"github.com/stl3/torgo/models"
+	"github.com/stl3/torgo/player"
 )
 
 const version = "0.1-beta"
@@ -44,7 +44,7 @@ const version = "0.1-beta"
 var u, _ = user.Current()
 var home = u.HomeDir
 var configFile = filepath.Join(home, ".torgo.json")
-var configurations config.TorrodleConfig
+var configurations config.torgoConfig
 
 var dataDir string
 var subtitlesDir string
@@ -91,7 +91,7 @@ func pickProviders(options []string) []interface{} {
 
 		if len(chosen) > 0 {
 			for _, choice := range chosen {
-				for _, provider := range torrodle.AllProviders {
+				for _, provider := range torgo.AllProviders {
 					if provider.GetName() == choice {
 						providers = append(providers, provider)
 					}
@@ -915,7 +915,7 @@ func init() {
 
 	dataDir = configurations.DataDir
 	if dataDir == "" {
-		dataDir = filepath.Join(os.TempDir(), "torrodle")
+		dataDir = filepath.Join(os.TempDir(), "torgo")
 	} else if strings.HasPrefix(dataDir, "~/") {
 		dataDir = filepath.Join(home, dataDir[2:]) // expand user home directoy for path in configurations file
 	}
@@ -963,7 +963,7 @@ func main() {
 	_, _ = bold.Print("    Made with ")
 	fmt.Print(heart)
 	_, _ = bold.Print(" by someone ")
-	fmt.Print("(https://github.com/stl3/torrodle)\n\n")
+	fmt.Print("(https://github.com/stl3/torgo)\n\n")
 	logrus.Debug(configurations)
 
 	// Stream torrent from magnet provided in command-line
@@ -996,11 +996,11 @@ func main() {
 		errorPrint("Operation aborted")
 		return
 	}
-	cat := torrodle.Category(strings.ToUpper(category))
+	cat := torgo.Category(strings.ToUpper(category))
 	var options []string
 	// check for availibility of each category for each provider
-	for _, provider := range torrodle.AllProviders {
-		if torrodle.GetCategoryURL(cat, provider.GetCategories()) != "" {
+	for _, provider := range torgo.AllProviders {
+		if torgo.GetCategoryURL(cat, provider.GetCategories()) != "" {
 			options = append(options, provider.GetName())
 		}
 	}
@@ -1023,11 +1023,11 @@ func main() {
 		errorPrint("Operation aborted")
 		return
 	}
-	sb := torrodle.SortBy(strings.ToLower(sortBy))
+	sb := torgo.SortBy(strings.ToLower(sortBy))
 
-	// Call torrodle API to search for torrents
+	// Call torgo API to search for torrents
 	limit := configurations.ResultsLimit
-	results := torrodle.ListResults(providers, query, limit, cat, sb)
+	results := torgo.ListResults(providers, query, limit, cat, sb)
 	if len(results) == 0 {
 		errorPrint("No torrents found")
 		return
