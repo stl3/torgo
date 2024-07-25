@@ -20,6 +20,7 @@ import (
 	"github.com/stl3/torgo/providers/limetorrents"
 	"github.com/stl3/torgo/providers/magnetdl"
 	"github.com/stl3/torgo/providers/torrentgalaxy"
+	"github.com/stl3/torgo/providers/torrentquest"
 
 	// "github.com/stl3/torgo/providers/rarbg"
 	"github.com/stl3/torgo/providers/sukebei"
@@ -60,6 +61,7 @@ var (
 	BTDigg            = btdigg.New()
 	Knaben            = knaben.New()
 	MagnetDL          = magnetdl.New()
+	Torrentquest      = torrentquest.New()
 	EZTV              = eztv.New()
 	Ext               = ext.New()
 	TorrentGalaxy     = torrentgalaxy.New()
@@ -78,6 +80,7 @@ var AllProviders = [...]models.ProviderInterface{
 	BTDigg,
 	Knaben,
 	MagnetDL,
+	Torrentquest,
 	EZTV,
 	Ext,
 	TorrentGalaxy,
