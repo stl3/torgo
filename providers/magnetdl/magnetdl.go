@@ -18,6 +18,7 @@ import (
 const (
 	Name = "magnetdl"
 	Site = "https://www.magnetdl.com"
+	// Site = "https://magnetdl.skin"
 )
 
 type provider struct {
