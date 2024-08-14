@@ -2,6 +2,7 @@ package ext
 
 import (
 	"fmt"
+	"net/http"
 	"os/user"
 	"path/filepath"
 	"strconv"
@@ -19,7 +20,7 @@ import (
 	// "github.com/stl3/torgo/request"
 )
 
-// var configurations config.torgoConfig
+// var configurations config.TorgoConfig
 
 func init() {
 	// Load the configuration
@@ -30,7 +31,7 @@ func init() {
 	configurations, err := config.LoadConfig(configFile)
 	if err != nil {
 		fmt.Println("Error loading config:", err)
-		configurations = config.torgoConfig{}
+		configurations = config.TorgoConfig{}
 	}
 	// fmt.Printf("Loaded configuration: %+v\n", configurations)
 	logrus.Debugf("Loaded configuration: %+v\n", configurations)
@@ -84,7 +85,7 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 	logrus.Infof("Ext: [%d] Requesting URL: %s\n", page, surl)
 	logrus.Infof("Ext: [%d] Extracting results...\n", page)
 
-	client := resty.New()
+	// client := resty.New()
 
 	// // Create cookies
 	// cookie1 := &http.Cookie{
@@ -101,10 +102,29 @@ func extractor(surl string, page int, results *[]models.Source, wg *sync.WaitGro
 	// client.SetCookies([]*http.Cookie{cookie1, cookie2})
 
 	// Set the cookie
-	client.SetHeader("Cookie", "cf_chl_3=e69362e454d9cfe")
-	// Make the request
-	resp, err := client.R().Get(surl)
+	// client.SetHeader("Cookie", "cf_chl_3=e69362e454d9cfe")
+	// client.SetHeader("Cookie", configurations.Ext_cookie)
+	// // // client.SetHeader("PHPSESSID=", "amnsps87vcfdc0iolb6ec0hvjc")
+	// // // // Make the request
+	// // // resp, err := client.R().Get(surl)
 
+	// // // if err != nil {
+	// // // 	logrus.Errorln(fmt.Sprintf("Ext: [%d]", page), err)
+	// // // 	wg.Done()
+	// // // 	return
+	// // // }
+	client := resty.New()
+	// Create a cookie
+	cookie := &http.Cookie{
+		Name:  "PHPSESSID",
+		Value: "amnsps87vcfdc0iolb6ec0hvjc",
+	}
+
+	// Set the cookie for the request
+	client.SetCookie(cookie)
+
+	// Make the HTTP GET request
+	resp, err := client.R().Get(surl)
 	if err != nil {
 		logrus.Errorln(fmt.Sprintf("Ext: [%d]", page), err)
 		wg.Done()
