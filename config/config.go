@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-type torgoConfig struct {
+type TorgoConfig struct {
 	DataDir      string `json:"DataDir"`
 	ResultsLimit int    `json:"ResultsLimit"`
 	TorrentPort  int    `json:"TorrentPort"`
@@ -24,7 +24,7 @@ type torgoConfig struct {
 
 // This function is for debug purposes
 // It shows config parameters used in ~/.torgo.json
-func (t torgoConfig) String() string {
+func (t TorgoConfig) String() string {
 	return fmt.Sprintf(
 		`TorrentDir: %v | ResultsLimit: %d | TorrentPort: %d | HostPort: %d | Debug: %v`,
 		t.DataDir, t.ResultsLimit, t.TorrentPort, t.HostPort, t.Debug,
@@ -50,8 +50,9 @@ func (t torgoConfig) String() string {
 // Windows - %TEMP%/torgo
 
 func InitConfig(path string) error {
-	config := torgoConfig{
-		DataDir:      getTempDir(),
+	config := TorgoConfig{
+		DataDir: getTempDir(),
+		// DataDir:      getCurrentDir(),
 		ResultsLimit: 100,
 		// TorrentPort:  10800,
 		TorrentPort: 36663,
@@ -65,8 +66,8 @@ func InitConfig(path string) error {
 	return err
 }
 
-func LoadConfig(path string) (torgoConfig, error) {
-	var config torgoConfig
+func LoadConfig(path string) (TorgoConfig, error) {
+	var config TorgoConfig
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return config, err
@@ -79,3 +80,12 @@ func getTempDir() string {
 	tempDir := os.TempDir()
 	return filepath.Join(tempDir, "torgo")
 }
+
+// func getCurrentDir() string {
+// 	currentDir, err := os.Getwd()
+// 	if err != nil {
+// 		fmt.Println("Error getting current directory:", err)
+// 		return ""
+// 	}
+// 	return currentDir
+// }
