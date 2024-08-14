@@ -47,7 +47,7 @@ type Client struct {
 var u, _ = user.Current()
 var home = u.HomeDir
 var configFile = filepath.Join(home, ".torgo.json")
-var configurations config.torgoConfig
+var configurations config.TorgoConfig
 
 // Function to find an available port starting from the given port
 func findAvailablePort(startPort int) int {
@@ -210,67 +210,163 @@ func (client *Client) getLargestFile() *torrent.File {
 
 }
 
+// // // func (client *Client) download() {
+// // // 	t := client.Torrent
+
+// // // 	// Get the largest file before entering the download loop
+// // // 	largestFile := client.getLargestFile()
+// // // 	f := client.LargestFile
+// // // 	// fmt.Print(largestFile, "\n")
+// // // 	// ANSI escape codes for different colors
+// // // 	// redColor := "\033[31m"
+// // // 	greenColor := "\033[32m"
+// // // 	// yellowColor := "\033[33m"
+// // // 	// blueColor := "\033[34m"
+// // // 	// magentaColor := "\033[35m"
+// // // 	// cyanColor := "\033[36m"
+// // // 	resetColor := "\033[0m"
+
+// // // 	// fmt.Print(redColor, largestFile, resetColor, "\n")
+// // // 	fmt.Print(greenColor, largestFile, resetColor, "\n")
+// // // 	// fmt.Print(yellowColor, largestFile, resetColor, "\n")
+// // // 	// fmt.Print(blueColor, largestFile, resetColor, "\n")
+// // // 	// fmt.Print(magentaColor, largestFile, resetColor, "\n")
+// // // 	// fmt.Print(cyanColor, largestFile, resetColor, "\n")
+// // // 	// if largestFile == nil {
+// // // 	// 	fmt.Println("No file larger than 40MB found. Exiting.")
+// // // 	// 	return
+// // // 	// }
+// // // 	<-t.GotInfo()
+// // // 	// t.DownloadAll()
+// // // 	f.Download()
+// // // 	client.downloadStarted = true
+// // // 	// Set priorities of file (5% ahead)
+// // // 	// firstPieceIndex := largestFile.Offset() * int64(t.NumPieces()) / t.Length()
+// // // 	// endPieceIndex := (largestFile.Offset() + largestFile.Length()) * int64(t.NumPieces()) / t.Length()
+
+// // // 	// Calculate values outside the loop
+// // // 	// firstPieceIndex := int64(largestFile.Offset()) * int64(t.NumPieces()) / int64(t.Length())
+// // // 	// endPieceIndex := (int64(largestFile.Offset()) + int64(largestFile.Length())) * int64(t.NumPieces()) / int64(t.Length())
+// // // 	// endPercentage := 10 // Adjust the percentage as needed
+
+// // // 	for {
+
+// // // 		// for idx := firstPieceIndex; idx <= endPieceIndex*10/100; idx++ {
+
+// // // 		// for idx := firstPieceIndex; idx <= endPieceIndex*int64(endPercentage)/100; idx++ {
+
+// // // 		// if t.BytesCompleted() == t.Length() {
+// // // 		// if t.BytesCompleted() == t.Info().TotalLength() {
+// // // 		if client.Client.WaitAll() {
+// // // 			// Signal download completion only if the channel is still open
+// // // 			if client.downloadComplete != nil {
+// // // 				close(client.downloadComplete)
+// // // 				client.downloadComplete = nil // set to nil to avoid closing it again
+// // // 			}
+// // // 			// Print the final progress information before exiting
+// // // 			client.PrintProgress()
+// // // 			return // exit the loop if download is complete
+// // // 		}
+// // // 		// Sleep for a short duration before checking again
+// // // 		time.Sleep(time.Duration(1250) * time.Millisecond) // Convert to duration and sleep
+
+// // // 		// }
+// // // 	}
+// // // }
+
 func (client *Client) download() {
 	t := client.Torrent
 
+	// Wait until the torrent metadata is available
+	<-t.GotInfo()
+
 	// Get the largest file before entering the download loop
 	largestFile := client.getLargestFile()
-	f := client.LargestFile
-	// fmt.Print(largestFile, "\n")
-	// ANSI escape codes for different colors
-	// redColor := "\033[31m"
-	greenColor := "\033[32m"
-	// yellowColor := "\033[33m"
-	// blueColor := "\033[34m"
-	// magentaColor := "\033[35m"
-	// cyanColor := "\033[36m"
-	resetColor := "\033[0m"
 
-	// fmt.Print(redColor, largestFile, resetColor, "\n")
-	fmt.Print(greenColor, largestFile, resetColor, "\n")
-	// fmt.Print(yellowColor, largestFile, resetColor, "\n")
-	// fmt.Print(blueColor, largestFile, resetColor, "\n")
-	// fmt.Print(magentaColor, largestFile, resetColor, "\n")
-	// fmt.Print(cyanColor, largestFile, resetColor, "\n")
-	// if largestFile == nil {
-	// 	fmt.Println("No file larger than 40MB found. Exiting.")
-	// 	return
-	// }
-	<-t.GotInfo()
-	// t.DownloadAll()
-	f.Download()
+	// Immediately deselect all files except the selected (largest) one
+	for _, file := range t.Files() {
+		if file != largestFile {
+			file.SetPriority(torrent.PiecePriorityNone) // Deselect other files
+		} else {
+			file.SetPriority(torrent.PiecePriorityNormal) // Ensure the selected file is prioritized
+		}
+	}
+
+	// Start the download for the selected file
+	largestFile.Download()
+	client.LargestFile = largestFile
 	client.downloadStarted = true
-	// Set priorities of file (5% ahead)
-	// firstPieceIndex := largestFile.Offset() * int64(t.NumPieces()) / t.Length()
-	// endPieceIndex := (largestFile.Offset() + largestFile.Length()) * int64(t.NumPieces()) / t.Length()
 
-	// Calculate values outside the loop
-	// firstPieceIndex := int64(largestFile.Offset()) * int64(t.NumPieces()) / int64(t.Length())
-	// endPieceIndex := (int64(largestFile.Offset()) + int64(largestFile.Length())) * int64(t.NumPieces()) / int64(t.Length())
-	// endPercentage := 10 // Adjust the percentage as needed
+	// Print the selected file information
+	greenColor := "\033[32m"
+	resetColor := "\033[0m"
+	fmt.Print(greenColor, largestFile, resetColor, "\n")
 
+	go func() {
+		f := client.LargestFile
+		// Wait for the specified delay
+		// time.Sleep(35 * time.Second) // Delay to ensure other files have been created
+
+		// Check if approximately 8% of the file has been downloaded
+		for {
+			// Ensure 'f' is not nil before accessing its methods
+			if f == nil {
+				log.Println("File pointer is nil while checking download progress")
+				break
+			}
+
+			// Calculate the percentage of the file downloaded
+			currentProgress := f.BytesCompleted()
+			totalFile := f.Length()
+			var downloadProgress float64
+			if totalFile > 0 {
+				downloadProgress = float64(currentProgress) / float64(totalFile) * 100
+			}
+
+			// If approximately 8% of the file is downloaded, proceed with deletion
+			if downloadProgress >= 5 {
+				client.deleteUnselectedFiles(largestFile)
+				break
+			}
+
+			// Sleep before checking again
+			time.Sleep(2 * time.Second) // Adjust the interval as needed
+		}
+	}()
+
+	// Monitor the download process
 	for {
-
-		// for idx := firstPieceIndex; idx <= endPieceIndex*10/100; idx++ {
-
-		// for idx := firstPieceIndex; idx <= endPieceIndex*int64(endPercentage)/100; idx++ {
-
-		// if t.BytesCompleted() == t.Length() {
-		// if t.BytesCompleted() == t.Info().TotalLength() {
 		if client.Client.WaitAll() {
 			// Signal download completion only if the channel is still open
 			if client.downloadComplete != nil {
 				close(client.downloadComplete)
-				client.downloadComplete = nil // set to nil to avoid closing it again
+				client.downloadComplete = nil // Set to nil to avoid closing it again
 			}
 			// Print the final progress information before exiting
 			client.PrintProgress()
-			return // exit the loop if download is complete
+			return // Exit the loop if download is complete
 		}
 		// Sleep for a short duration before checking again
 		time.Sleep(time.Duration(1250) * time.Millisecond) // Convert to duration and sleep
+	}
+}
 
-		// }
+// deleteUnselectedFiles removes all files in the torrent directory except the selected file.
+func (client *Client) deleteUnselectedFiles(selectedFile *torrent.File) {
+	for _, file := range client.Torrent.Files() {
+		if file != selectedFile {
+			// Construct the full path to the file to be deleted
+			filePath := filepath.Join(client.ClientConfig.DataDir, file.Path())
+
+			// Attempt to delete the file
+			_ = os.Remove(filePath)
+			// err := os.Remove(filePath)
+			// if err != nil {
+			// 	fmt.Printf("Error deleting file %s: %v\n", filePath, err)
+			// } else {
+			// 	fmt.Printf("Deleted file: %s\n", filePath)
+			// }
+		}
 	}
 }
 
