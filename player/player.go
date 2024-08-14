@@ -19,6 +19,16 @@ import (
 	"github.com/stl3/torgo/config"
 )
 
+// // Get the current working directory
+// currentDir, err := os.Getwd()
+// if err != nil {
+//     fmt.Println("Error getting current directory:", err)
+//     return
+// }
+
+// // Construct the path to the .torgo.json file in the current directory
+// var configFile = filepath.Join(currentDir, ".torgo.json")
+
 var u, _ = user.Current()
 var home = u.HomeDir
 var configFile = filepath.Join(home, ".torgo.json")
@@ -31,7 +41,7 @@ func loadConfig() {
 	configurations, err := config.LoadConfig(configFile)
 	if err != nil {
 		fmt.Println("Error loading config:", err)
-		configurations = config.torgoConfig{}
+		configurations = config.TorgoConfig{}
 	}
 	// Shows used config options from json
 	// fmt.Printf("Loaded configuration: %+v\n", configurations)
