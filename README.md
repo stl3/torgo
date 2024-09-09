@@ -85,7 +85,7 @@ If you have upx you can make a smaller executable:
 $ go build -o torgo.exe -ldflags="-s -w" .\cmd\torgo\main.go ; upx -9 -k torgo.exe
 ```
 
-#### Dependencies
+### Dependencies
 
 See [`go.mod`](./go.mod).
 
@@ -98,14 +98,25 @@ See [`go.mod`](./go.mod).
 7. [tablewriter](https://github.com/olekukonko/tablewriter) -- table rendering
 8. [survey](https://github.com/AlecAivazis/survey) -- pretty prompting
 
-### Usage
+## Usage
 
 For command-line (CLI) usage, see [`CLI.md`](CLI.md).
 
 For API usage, see [`API.md`](API.md).
 
-### Configuration file
+## Configuration file
 Please check [`example.torgo.json`](example.torgo.json)
+##### OS PATHS
+##### Config Paths
+###### Linux
+// ${XDG_CONFIG_HOME:-${HOME}/.config}/torgo/config
+###### MacOS
+// ${HOME}/Library/Application Support/torgo/config
+###### Termux
+$HOME/.config/torgo/config
+###### Windows
+%APPDATA%\torgo\config
+%APPDATA%\.config\torgo\config
 ~/.torgo.json
 
 ```
