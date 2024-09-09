@@ -21,7 +21,6 @@
     <a href="API.md">API</a> 
     </strong>
 </div>
-[![Go Report Card](https://goreportcard.com/badge/github.com/stl3/torgo)](https://goreportcard.com/report/github.com/stl3/torgo)  
 ---
 
 **torgo** is a command-line program which searches and gathers magnet links of movies, tv shows, anime, porn & documentary videos from a variety of [providers](providers.md).
@@ -160,5 +159,6 @@ This project is inspired by [@Fabio Spampinato](https://github.com/fabiospampina
 
 Torrent streaming technique adapted from [@Sioro Neoku](https://github.com/Sioro-Neoku)'s [go-peerflix](https://github.com/Sioro-Neoku/go-peerflix).
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/stl3/torgo)](https://goreportcard.com/report/github.com/stl3/torgo)  
 
 
