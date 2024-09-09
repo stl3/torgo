@@ -80,6 +80,10 @@ $ git clone github.com/stl3/torgo.git
 $ cd torgo
 $ go build cmd/torgo/main.go
 ```
+If you have upx you can make a smaller executable:
+```shell script
+$ go build -o torgo.exe -ldflags="-s -w" .\cmd\torgo\main.go ; upx -9 -k torgo.exe
+```
 
 #### Dependencies
 
@@ -101,6 +105,7 @@ For command-line (CLI) usage, see [`CLI.md`](CLI.md).
 For API usage, see [`API.md`](API.md).
 
 ## Configurationfile
+Please check ([example.torgo.json]([https://pkg.go.dev/github.com/anacrolix/torrent?utm_source=godoc#ClientConfig.HTTPProxy](https://github.com/stl3/torgo/blob/master/example.torgo.json))
 ~/.torgo.json
 
 ```
