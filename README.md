@@ -108,9 +108,9 @@ For API usage, see [`API.md`](API.md).
 Please check [`example.torgo.json`](example.torgo.json)
 ##### OS PATHS for configuration file
 ###### Linux
-// ${XDG_CONFIG_HOME:-${HOME}/.config}/torgo/config
+${XDG_CONFIG_HOME:-${HOME}/.config}/torgo/config
 ###### MacOS
-// ${HOME}/Library/Application Support/torgo/config
+${HOME}/Library/Application Support/torgo/config
 ###### Termux
 $HOME/.config/torgo/config
 ###### Windows
