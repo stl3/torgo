@@ -161,4 +161,5 @@ This project is inspired by [@Fabio Spampinato](https://github.com/fabiospampina
 
 Torrent streaming technique adapted from [@Sioro Neoku](https://github.com/Sioro-Neoku)'s [go-peerflix](https://github.com/Sioro-Neoku/go-peerflix).
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/stl3/torgo)](https://goreportcard.com/report/github.com/stl3/torgo)
 
