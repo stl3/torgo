@@ -917,7 +917,7 @@ func init() {
 	if dataDir == "" {
 		dataDir = filepath.Join(os.TempDir(), "torgo")
 	} else if strings.HasPrefix(dataDir, "~/") {
-		dataDir = filepath.Join(home, dataDir[2:]) // expand user home directoy for path in configurations file
+		dataDir = filepath.Join(home, dataDir[2:]) // expand user home directory for path in configurations file
 	}
 	configurations.DataDir = dataDir
 	subtitlesDir = filepath.Join(dataDir, "subtitles")
