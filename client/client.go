@@ -1,5 +1,5 @@
 /*
-This package is the embeded version of 'github.com/Sioro-Neoku/go-peerflix/'.
+This package is the embedded version of 'github.com/Sioro-Neoku/go-peerflix/'.
 We did some modifications on it in order to let it fit into 'torgo'
 */
 package client
