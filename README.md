@@ -2,7 +2,7 @@
 <p align="center">
   <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/stl3/torgo"/>
   <img alt="Github Last Commit" src="https://img.shields.io/github/last-commit/stl3/torgo"/>  
-  <img alt="Go dependencies" src="https://img.shields.io/github/last-commit/stl3/torgo"/>  
+  <img alt="Go dependencies" src="https://img.shields.io/github/go-mod/direct/stl3/torgo"/>  
 </p>
 <p align="center"><strong><i>A mighty all-in-one magnet scraper & streamer</i></strong></p>
 
