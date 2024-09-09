@@ -106,8 +106,7 @@ For API usage, see [`API.md`](API.md).
 
 ## Configuration file
 Please check [`example.torgo.json`](example.torgo.json)
-##### OS PATHS
-##### Config Paths
+##### OS PATHS for configuration file
 ###### Linux
 // ${XDG_CONFIG_HOME:-${HOME}/.config}/torgo/config
 ###### MacOS
@@ -117,7 +116,6 @@ $HOME/.config/torgo/config
 ###### Windows
 %APPDATA%\torgo\config
 %APPDATA%\.config\torgo\config
-~/.torgo.json
 
 ```
 "DataDir": "E:/exampledir",
