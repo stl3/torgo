@@ -3,7 +3,6 @@
   <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/stl3/torgo"/>
   <img alt="Github Last Commit" src="https://img.shields.io/github/last-commit/stl3/torgo"/>  
   <img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/stl3/torgo"/>  
-[![Go Report Card](https://goreportcard.com/badge/github.com/stl3/torgo)](https://goreportcard.com/report/github.com/stl3/torgo)  
 </p>
 <p align="center"><strong><i>A mighty all-in-one magnet scraper & streamer</i></strong></p>
 
@@ -22,7 +21,7 @@
     <a href="API.md">API</a> 
     </strong>
 </div>
-
+[![Go Report Card](https://goreportcard.com/badge/github.com/stl3/torgo)](https://goreportcard.com/report/github.com/stl3/torgo)  
 ---
 
 **torgo** is a command-line program which searches and gathers magnet links of movies, tv shows, anime, porn & documentary videos from a variety of [providers](providers.md).
