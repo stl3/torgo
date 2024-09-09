@@ -41,7 +41,7 @@ I personally do it this way because I have mapped my gpu vram as a disk so that 
   - [Build From Source](#build-from-source)
     - [Dependencies](#dependencies)
 - [Usage](#usage)
-- [Configuration File](#configurationfile)
+- [Configuration File](#configuration-file)
 - [Caveats](#caveeats)
 - [Contributing](#contributing)
 - [Credit](#credit)
@@ -98,14 +98,14 @@ See [`go.mod`](./go.mod).
 7. [tablewriter](https://github.com/olekukonko/tablewriter) -- table rendering
 8. [survey](https://github.com/AlecAivazis/survey) -- pretty prompting
 
-## Usage
+### Usage
 
 For command-line (CLI) usage, see [`CLI.md`](CLI.md).
 
 For API usage, see [`API.md`](API.md).
 
-## Configurationfile
-Please check ([example.torgo.json]([https://pkg.go.dev/github.com/anacrolix/torrent?utm_source=godoc#ClientConfig.HTTPProxy](https://github.com/stl3/torgo/blob/master/example.torgo.json))
+### Configuration file
+Please check [`example.torgo.json`](example.torgo.json)
 ~/.torgo.json
 
 ```
