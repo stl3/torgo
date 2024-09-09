@@ -2,6 +2,7 @@
 <p align="center">
   <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/stl3/torgo"/>
   <img alt="Github Last Commit" src="https://img.shields.io/github/last-commit/stl3/torgo"/>
+  [![Go Dependencies](https://img.shields.io/github/go-mod/direct/stl3/torgo?style=flat-square)](https://go.mod/github.com/stl3/torgo)
 </p>
 <p align="center"><strong><i>A mighty all-in-one magnet scraper & streamer</i></strong></p>
 
@@ -89,15 +90,22 @@ $ go build -o torgo.exe -ldflags="-s -w" .\cmd\torgo\main.go ; upx -9 -k torgo.e
 
 See [`go.mod`](./go.mod).
 
-1. [logrus](https://github.com/sirupsen/logrus) -- better logging
-2. [goquery](https://github.com/PuerkitoBio/goquery) -- HTML parsing
-3. [torrent](https://github.com/anacrolix/torrent) -- torrent streaming
-4. [osdb](https://github.com/oz/osdb) -- subtitles fetching from OpenSubtitles
-5. [go-humanize](https://github.com/dustin/go-humanize) -- humanizing file size words
-6. [color](https://github.com/fatih/color) -- colorized output
-7. [tablewriter](https://github.com/olekukonko/tablewriter) -- table rendering
-8. [survey](https://github.com/AlecAivazis/survey) -- pretty prompting
+This project depends on the following Go libraries:
 
+Direct Dependencies:
+
+    github.com/PuerkitoBio/goquery - v1.8.1 (Web scraping)
+    github.com/anacrolix/torrent - v1.53.2 (BitTorrent client)
+    github.com/avast/retry-go - v3.0.0+incompatible (Retrying operations with backoff)
+    github.com/briandowns/spinner - v1.23.0 (Terminal spinner for visual feedback)
+    github.com/dustin/go-humanize - v1.0.1 (Formats numbers as human-readable strings)
+    github.com/fatih/color - v1.16.0 (Terminal color manipulation)
+    github.com/olekukonko/tablewriter - v0.0.5 (Pretty table printing)
+    github.com/oz/osdb - v0.0.0-20221214175751-f169057712ec (OS database information)
+    github.com/sirupsen/logrus - v1.9.3 (Structured logging library)
+    golang.org/x/net - v0.19.0 (Standard library network extensions)
+    golang.org/x/time - v0.5.0 (Time manipulation extensions)
+    
 ## Usage
 
 For command-line (CLI) usage, see [`CLI.md`](CLI.md).
